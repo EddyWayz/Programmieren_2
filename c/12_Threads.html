@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 12: Parallele Programmierung</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 12: Einführung in die Parallele Programmierung mit Threads</h1>
+        <p>Die Leistung von Multi-Core-Prozessoren nutzen und typische Fallstricke meistern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Am Ende dieser Lerneinheit verstehst du das Grundprinzip von Threads als parallele Ausführungspfade innerhalb eines Programms. Du kannst mithilfe der Windows-API neue Threads erstellen, ihnen Parameter übergeben und auf ihr Ende warten (Synchronisation). Das wichtigste Lernziel ist das Erkennen der Gefahr von <strong>Race Conditions</strong> beim Zugriff auf geteilte Daten und die Anwendung von <strong>Mutexen</strong>, um kritische Code-Abschnitte zu schützen und so die Korrektheit deiner parallelen Programme sicherzustellen.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Moderne Computer haben Prozessoren mit mehreren Kernen. Ein traditionelles, sequenzielles Programm kann immer nur einen Kern nutzen – die restliche Rechenleistung bleibt ungenutzt. Threads ermöglichen es, ein Programm in mehrere Teile zu zerlegen, die das Betriebssystem auf verschiedene Kerne verteilen kann.  Dies führt zu zwei Hauptvorteilen:
+            </p>
+            <ul>
+                <li><strong>Performance:</strong> Rechenintensive Aufgaben (z.B. Bildbearbeitung, Simulationen) können durch Aufteilung auf mehrere Threads drastisch beschleunigt werden. </li>
+                <li><strong>Reaktionsfähigkeit:</strong> Langwierige Operationen (wie ein Dateidownload) können in einem Hintergrund-Thread laufen, während der Haupt-Thread für die Benutzeroberfläche frei bleibt und auf Eingaben reagieren kann. </li>
+            </ul>
+            <p>
+                Die Programmierung mit Threads ist allerdings eine Kunst, denn die Parallelität bringt neue Herausforderungen mit sich, insbesondere bei der Koordination von Zugriffen auf gemeinsame Daten.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Thread</h4>
+                <p>Ein "Ausführungsstrang" innerhalb eines Prozesses.  Alle Threads eines Prozesses teilen sich denselben Speicherbereich für globale Variablen (Datensegment) und dynamischen Speicher (Heap).  Jeder Thread besitzt jedoch seinen eigenen Stack für lokale Variablen und Funktionsaufrufe. </p>
+            </div>
+            <div class="definition">
+                <h4>Race Condition (Wettlaufsituation)</h4>
+                <p>Ein Fehlerzustand, der auftritt, wenn mehrere Threads auf eine gemeinsame Ressource (z.B. eine globale Variable) zugreifen und mindestens einer davon schreibend ist.  Das Endergebnis hängt dann vom unvorhersehbaren Timing des Betriebssystem-Schedulers ab und ist meistens falsch. </p>
+            </div>
+            <div class="definition">
+                <h4>Kritischer Abschnitt (Critical Section)</h4>
+                <p>Ein Code-Abschnitt, der auf eine geteilte Ressource zugreift und zu einem beliebigen Zeitpunkt nur von einem einzigen Thread ausgeführt werden darf, um Race Conditions zu vermeiden.</p>
+            </div>
+            <div class="definition">
+                <h4>Mutex (Mutual Exclusion)</h4>
+                <p>Ein Synchronisationsobjekt, das man sich als "Schloss" für einen kritischen Abschnitt vorstellen kann. Ein Thread muss das Schloss (den Mutex) anfordern, bevor er den kritischen Abschnitt betritt. Versucht ein anderer Thread, das bereits vergebene Schloss zu bekommen, wird er vom Betriebssystem blockiert, bis der erste Thread das Schloss wieder freigibt.</p>
+            </div>
+             <div class="definition">
+                <h4>Threadsicherheit (Thread Safety)</h4>
+                <p>Die Eigenschaft einer Funktion oder eines Code-Abschnitts, bei gleichzeitigem Aufruf durch mehrere Threads korrekt zu funktionieren, ohne Race Conditions oder andere Fehler zu verursachen. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Der Lebenszyklus eines Threads (Windows-API)</h3>
+            <p>Die Arbeit mit Threads unter Windows folgt einem klaren Muster. Wir nutzen hierfür die native Windows API, die durch <code>#include &lt;windows.h&gt;</code> verfügbar wird. </p>
+            <ol>
+                <li><strong>Thread-Funktion definieren:</strong> Jeder Thread benötigt einen Einsprungpunkt. Dies ist eine Funktion mit einer festen Signatur. </li>
+                <li><strong>Thread erstellen:</strong> Mit `CreateThread` wird ein neuer Thread gestartet, der die definierte Funktion ausführt. Wir erhalten ein `HANDLE` (eine Art ID) zurück. </li>
+                <li><strong>Auf den Thread warten:</strong> Der Hauptthread kann mit `WaitForSingleObject` pausieren, bis der andere Thread seine Arbeit beendet hat. </li>
+                <li><strong>Handle schließen:</strong> Wenn der Thread nicht mehr benötigt wird, sollte sein Handle mit `CloseHandle` freigegeben werden.</li>
+            </ol>
+            
+            <h3>2. Das Problem: Eine Race Condition im Detail</h3>
+            <p>Warum ist <code>g_counter++;</code> ein Problem, wenn zwei Threads es gleichzeitig tun?  Weil diese eine Zeile C-Code in mehrere, nicht-atomare Maschinenbefehle übersetzt wird:</p>
+            <ol>
+                <li><strong>Laden:</strong> Lade den aktuellen Wert von `g_counter` aus dem Speicher in ein Prozessor-Register. </li>
+                <li><strong>Modifizieren:</strong> Erhöhe den Wert im Register um 1. </li>
+                <li><strong>Speichern:</strong> Schreibe den neuen Wert aus dem Register zurück in den Speicher an die Adresse von `g_counter`. </li>
+            </ol>
+            <p>Stell dir vor, `g_counter` ist 10. Thread A liest 10. Das Betriebssystem pausiert Thread A und startet Thread B. Thread B liest auch 10, erhöht es auf 11 und schreibt 11 zurück. Später wird Thread A fortgesetzt. Er erinnert sich, 10 gelesen zu haben, erhöht es auf 11 und schreibt ebenfalls 11 zurück. Obwohl die Anweisung zweimal ausgeführt wurde, ist das Ergebnis 11 statt 12. Ein Update ging verloren!</p>
+
+            <h3>3. Die Lösung: Kritische Abschnitte mit Mutex schützen</h3>
+            <p>Ein Mutex stellt sicher, dass der Load-Modify-Store-Zyklus nicht unterbrochen werden kann.</p>
+            <pre><code>HANDLE hMutex; // Globaler Handle für den Mutex
+
+// In der Thread-Funktion:
+// ...
+WaitForSingleObject(hMutex, INFINITE); // Warte auf das "Schloss"
+g_counter++;                           // <-- KRITISCHER ABSCHNITT
+ReleaseMutex(hMutex);                  // Gib das "Schloss" wieder frei
+// ...
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Race Condition demonstrieren & lösen</h2>
+            <p>Dieses Programm implementiert Aufgabe 2 des Übungsblatts. Es zeigt erst den Fehler durch die Race Condition und dann die korrekte Lösung mit einem Mutex. </p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;windows.h&gt;
+
+#define INCREMENTS 1000000
+
+// Globale, geteilte Variable
+long long g_counter = 0;
+HANDLE g_hMutex;
+
+DWORD WINAPI ThreadFunction(void* pParam) {
+    for (int i = 0; i < INCREMENTS; i++) {
+        // --- Schütze den kritischen Abschnitt ---
+        WaitForSingleObject(g_hMutex, INFINITE);
+        g_counter++;
+        ReleaseMutex(g_hMutex);
+    }
+    return 0;
+}
+
+int main(void) {
+    HANDLE hThreads[2];
+
+    // Erstelle den Mutex, bevor die Threads starten
+    g_hMutex = CreateMutex(NULL, FALSE, NULL);
+
+    printf("Starte 2 Threads, jeder inkrementiert %d mal.\n", INCREMENTS);
+    
+    hThreads[0] = CreateThread(NULL, 0, ThreadFunction, NULL, 0, NULL);
+    hThreads[1] = CreateThread(NULL, 0, ThreadFunction, NULL, 0, NULL);
+
+    // Warte, bis beide Threads fertig sind
+    WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+
+    printf("Erwartetes Ergebnis: %lld\n", (long long)2 * INCREMENTS);
+    printf("Tatsaechliches Ergebnis: %lld\n", g_counter);
+    
+    CloseHandle(hThreads[0]);
+    CloseHandle(hThreads[1]);
+    CloseHandle(g_hMutex);
+
+    return 0;
+}
+</code></pre>
+            <p class="warning">Kommentiere die Zeilen mit `WaitForSingleObject` und `ReleaseMutex` aus und kompiliere im "Debug"-Modus. Du wirst sehen, dass das Ergebnis falsch ist! </p>
+
+            <h2>Beispielprogramm 2: Parallele Berechnung</h2>
+            <p>Dieses Programm teilt die rechenintensive Aufgabe, die Wurzel aus vielen Zahlen zu ziehen, auf zwei Threads auf. [vgl. 6301, 6304]</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;windows.h&gt;
+#include &lt;math.h&gt;
+
+#define ARRAY_SIZE 1000000
+
+double g_array[ARRAY_SIZE];
+
+// Struct, um jedem Thread seinen Arbeitsbereich mitzuteilen
+typedef struct {
+    int start_index;
+    int end_index;
+} WorkPackage;
+
+DWORD WINAPI SqrtWorker(void* pParam) {
+    WorkPackage* wp = (WorkPackage*)pParam;
+    for (int i = wp->start_index; i < wp->end_index; i++) {
+        g_array[i] = sqrt((double)i);
+    }
+    return 0;
+}
+
+int main(void) {
+    HANDLE hThreads[2];
+    WorkPackage packages[2];
+
+    // Paket für Thread 0: erste Hälfte des Arrays
+    packages[0].start_index = 0;
+    packages[0].end_index = ARRAY_SIZE / 2;
+    
+    // Paket für Thread 1: zweite Hälfte des Arrays
+    packages[1].start_index = ARRAY_SIZE / 2;
+    packages[1].end_index = ARRAY_SIZE;
+
+    printf("Starte Berechnung mit 2 Threads...\n");
+    hThreads[0] = CreateThread(NULL, 0, SqrtWorker, &packages[0], 0, NULL);
+    hThreads[1] = CreateThread(NULL, 0, SqrtWorker, &packages[1], 0, NULL);
+    
+    WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+    printf("Berechnung abgeschlossen.\n");
+    
+    CloseHandle(hThreads[0]);
+    CloseHandle(hThreads[1]);
+    
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Hallo aus dem Thread!</strong><br>
+                    Schreibe ein Programm, das einen Thread startet. Die Thread-Funktion soll 10-mal hintereinander "Hallo aus dem Worker-Thread!" ausgeben und zwischen jeder Ausgabe 500 Millisekunden mit `Sleep(500);` pausieren. Der Hauptthread in `main` soll mit `WaitForSingleObject` auf das Ende des Worker-Threads warten.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Thread-Funktion benötigt eine einfache `for`-Schleife. In `main` wird der Thread mit `CreateThread` gestartet, das zurückgegebene Handle wird dann an `WaitForSingleObject` übergeben.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Parameterübergabe an einen Thread</strong><br>
+                    Definiere eine `struct Message { char text[100]; int count; };`. Schreibe eine Thread-Funktion, die einen Zeiger auf so eine Struktur als `void*` erhält. Die Funktion soll den `text` `count`-mal ausgeben. Starte in `main` zwei Threads mit unterschiedlichen `Message`-Strukturen.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>In der Thread-Funktion musst du den `void*`-Parameter zurück auf `struct Message*` casten: `struct Message* msg = (struct Message*)pParam;`. Greife dann mit `msg->text` und `msg->count` auf die Daten zu.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Thread-sicheres `strtok`</strong><br>
+                    Implementiere Aufgabe 3 des Übungsblattes. Nimm zwei verschiedene Zeichenketten (z.B. "A;B;C" und "X;Y;Z"). Lasse zwei Threads gleichzeitig versuchen, diese mit der <i>nicht</i>-threadsicheren `strtok`-Variante zu zerlegen. Gib die Tokens aus und beobachte das fehlerhafte Ergebnis. Behebe das Problem, indem du die threadsichere Funktion `strtok_s` verwendest. 
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Bei der nicht-sicheren Variante werden sich die Threads gegenseitig den internen Zustand von `strtok` überschreiben. Bei `strtok_s` übergibt jeder Thread seinen eigenen `context`-Zeiger, wodurch sie sich nicht mehr stören.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Mehrere Threads synchronisieren</strong><br>
+                    Erstelle ein Array von 3 `HANDLE`s. Starte drei Threads. Jeder Thread soll seine ID ausgeben und dann eine zufällige Zeit zwischen 1 und 3 Sekunden schlafen (`Sleep(1000 + rand() % 2000);`). Der `main`-Thread soll `WaitForMultipleObjects` nutzen, um zu warten, bis <strong>alle drei</strong> Threads beendet sind, und dann "Alle Aufgaben erledigt" ausgeben.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Fülle das `HANDLE`-Array mit den Rückgabewerten von `CreateThread`. Übergib dieses Array und die Anzahl 3 an `WaitForMultipleObjects`. Setze den `bWaitAll`-Parameter auf `TRUE`.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Konzeptfrage: Kritischer Abschnitt</strong><br>
+                    Du hast eine globale Variable `double g_balance;`. Zwei Threads führen Geldbeträge auf dieses Konto ein. Die Codezeile lautet `g_balance += amount;`. Ist diese Zeile threadsicher? Begründe deine Antwort in einem Kommentar und zeige, wie du sie mit einem Mutex schützen würdest.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Nein, sie ist nicht threadsicher, da `+=` wie `++` eine nicht-atomare Load-Modify-Store-Operation ist. Schutz: `WaitForSingleObject(hMutex, INFINITE); g_balance += amount; ReleaseMutex(hMutex);`.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>#include &lt;windows.h&gt;
+
+// --- THREAD-FUNKTION SIGNATUR ---
+DWORD WINAPI MyThreadFunction(void* pParameter);
+
+// --- LEBENSZYKLUS ---
+// Handle deklarieren
+HANDLE hThread;
+// Mutex-Handle deklarieren
+HANDLE hMutex;
+
+// In main:
+// Mutex erstellen
+hMutex = CreateMutex(NULL, FALSE, NULL);
+
+// Thread erstellen & Parameter übergeben
+MyData data = { ... };
+hThread = CreateThread(NULL, 0, MyThreadFunction, &data, 0, NULL);
+
+// Auf Thread-Ende warten
+if (hThread != NULL) {
+    WaitForSingleObject(hThread, INFINITE); // INFINITE = unendlich warten
+    CloseHandle(hThread); // Handle freigeben
+}
+CloseHandle(hMutex); // Mutex-Handle am Ende freigeben
+
+
+// --- IN DER THREAD-FUNKTION ---
+// Parameter zurück-casten
+MyData* pData = (MyData*)pParameter;
+
+// Kritischen Abschnitt schützen
+WaitForSingleObject(hMutex, INFINITE);
+// ... zugriff auf globale, geteilte Daten ...
+ReleaseMutex(hMutex);
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

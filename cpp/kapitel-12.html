@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 12: Sonstiges (Odds & Ends)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 12: Sonstiges (Odds & Ends)</h1>
+        <p>Runden Sie Ihr C++-Wissen mit wichtigen Konzepten wie Fehlerbehandlung, expliziter Typumwandlung und Namensräumen ab.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser letzten Einheit können Sie mit Laufzeitfehlern elegant umgehen, indem Sie die <strong>Ausnahmebehandlung (Exception Handling)</strong> mit <code>try</code>, <code>catch</code> und <code>throw</code> anwenden. Sie verstehen den Zweck der verschiedenen C++-<strong>Cast-Operatoren</strong> (<code>static_cast</code>, <code>dynamic_cast</code>, <code>reinterpret_cast</code>, <code>const_cast</code>) und wissen, wann deren Einsatz sinnvoll und sicher ist. Zusätzlich können Sie Ihren Code mithilfe von <strong>Namensräumen (<code>namespace</code>)</strong> organisieren, um Namenskonflikte in größeren Projekten zu vermeiden.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Was passiert, wenn eine Funktion eine Datei nicht öffnen kann oder der Speicher voll ist? Ein Programmabsturz ist selten eine gute Lösung. Die <strong>Ausnahmebehandlung</strong> bietet einen strukturierten Weg, um auf solche außergewöhnlichen Laufzeitfehler zu reagieren, ohne den normalen Programmfluss mit Fehlercodes zu überfrachten.
+            </p>
+            <p>
+                Manchmal müssen wir den Compiler explizit anweisen, einen Datentyp in einen anderen umzuwandeln. Während der C-Style-Cast (<code>(neuer_typ)wert</code>) ein mächtiges, aber unsicheres Werkzeug ist, bietet C++ spezifische <strong>Cast-Operatoren</strong>, die ihre Absicht klarer ausdrücken und mehr Sicherheit zur Compile-Zeit bieten. Schließlich, wenn Projekte wachsen und mehrere Bibliotheken verwendet werden, steigt die Gefahr von Namenskollisionen (z.B. wenn zwei Bibliotheken eine Klasse `Logger` definieren). <strong>Namespaces</strong> lösen dieses Problem, indem sie einen eigenen "Raum" für Bezeichner schaffen.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Ausnahmebehandlung (Exception Handling)</h4>
+                <p>Ein Mechanismus zur Behandlung von Laufzeitfehlern. Er besteht aus drei Schlüsselwörtern:</p>
+                <ul>
+                    <li><strong><code>throw</code>:</strong> Löst eine Ausnahme (ein Objekt) aus, um einen Fehler zu signalisieren.</li>
+                    <li><strong><code>try</code>:</strong> Markiert einen Codeblock, in dem Ausnahmen auftreten können.</li>
+                    <li><strong><code>catch</code>:</strong> Fängt eine ausgelöste Ausnahme eines bestimmten Typs auf und behandelt sie.</li>
+                </ul>
+            </div>
+            <div class="definition">
+                <h4><code>static_cast</code></h4>
+                <p>Ein Cast-Operator für "vernünftige" oder statisch prüfbare Konvertierungen, z.B. zwischen numerischen Typen (<code>int</code> zu <code>double</code>) oder in einer Klassenhierarchie (Up- und Downcasts). Er prüft nicht zur Laufzeit.</p>
+            </div>
+            <div class="definition">
+                <h4><code>dynamic_cast</code></h4>
+                <p>Ein Cast-Operator, der zur Laufzeit sicher prüft, ob eine Umwandlung innerhalb einer polymorphen Klassenhierarchie (mit virtuellen Funktionen) gültig ist. Bei einem Zeiger gibt er im Fehlerfall <code>nullptr</code> zurück, bei einer Referenz löst er eine Ausnahme aus.</p>
+            </div>
+            <div class="definition">
+                <h4><code>reinterpret_cast</code></h4>
+                <p>Der mächtigste und gefährlichste Cast. Er interpretiert die Bits eines Typs einfach als einen anderen Typ. Nützlich für Low-Level-Programmierung, aber selten sicher.</p>
+            </div>
+            <div class="definition">
+                <h4>Namensraum (<code>namespace</code>)</h4>
+                <p>Ein deklarativer Bereich, der einen Gültigkeitsbereich für Bezeichner (Variablen, Funktionen, Klassen) schafft, um Namenskollisionen zu vermeiden. Der Zugriff erfolgt über den <code>::</code>-Operator (z.B. <code>MyLib::MyClass</code>) oder eine <code>using</code>-Deklaration.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Implementierungsbeispiele</h2>
+            
+            <h3>1. Ausnahmebehandlung</h3>
+            <p>Eine Funktion `divide` wirft eine Ausnahme vom Typ `std::runtime_error`, wenn durch null geteilt wird. Der Aufrufer fängt diese im `catch`-Block ab.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;stdexcept&gt; // Für Standard-Ausnahmeklassen
+
+double divide(double numerator, double denominator) {
+    if (denominator == 0) {
+        // Fehler signalisieren, indem eine Ausnahme geworfen wird
+        throw std::runtime_error("Fehler: Division durch Null!");
+    }
+    return numerator / denominator;
+}
+
+int main() {
+    try {
+        // Kritischer Codeblock
+        double result = divide(10.0, 0.0);
+        std::cout << "Ergebnis: " << result << std::endl;
+    }
+    catch (const std::runtime_error& e) {
+        // Ausnahme auffangen und behandeln
+        std::cerr << "Eine Ausnahme wurde abgefangen: " << e.what() << std::endl;
+    }
+    std::cout << "Programm wird normal fortgesetzt." << std::endl;
+}
+</code></pre>
+
+            <h3>2. Sicheres Downcasting mit `dynamic_cast`</h3>
+            <p>Wir haben einen Zeiger auf die Basisklasse `Shape` und wollen sicher prüfen, ob er *tatsächlich* auf ein `Circle`-Objekt zeigt, um eine `Circle`-spezifische Methode aufzurufen.</p>
+            <pre><code class="language-cpp">class Shape { public: virtual ~Shape() = default; /* ... */ };
+class Circle : public Shape { public: void roll() { /* ... */ } };
+class Rectangle : public Shape { /* ... */ };
+
+void processShape(Shape* shape) {
+    // Sicher prüfen, ob shape auf ein Circle-Objekt zeigt
+    Circle* circle = dynamic_cast&lt;Circle*&gt;(shape);
+
+    if (circle != nullptr) {
+        // Es IST ein Kreis
+        circle->roll();
+    } else {
+        // Es ist kein Kreis
+        std::cout << "Dies ist kein Kreis und kann nicht rollen." << std::endl;
+    }
+}
+</code></pre>
+            
+            <h3>3. Namensräume zur Strukturierung</h3>
+            <p>Wir definieren eigene Bibliotheken in getrennten Namensräumen, um Kollisionen zu vermeiden.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+namespace MathLib {
+    double PI = 3.14159;
+    double add(double a, double b) { return a + b; }
+}
+
+namespace GraphicsLib {
+    const int VERSION = 2;
+    // Hätte auch eine 'add'-Funktion, ohne mit MathLib zu kollidieren
+    void drawCircle() { /* ... */ }
+}
+
+int main() {
+    // Voll qualifizierter Zugriff
+    double sum = MathLib::add(5.0, 3.0);
+    std::cout << "PI: " << MathLib::PI << std::endl;
+    std::cout << "Graphics Version: " << GraphicsLib::VERSION << std::endl;
+
+    // Alternative mit 'using'
+    using namespace MathLib;
+    std::cout << "PI mit using: " << PI << std::endl;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Übungsaufgaben aus KE12</h2>
+            <ol>
+                <li>
+                    <strong>Eigene Ausnahmeklasse:</strong> Erstellen Sie eine eigene Ausnahmeklasse, die von `std::exception` erbt. Schreiben Sie eine Funktion (z.B. zum Berechnen einer Quadratwurzel), die diese Ausnahme wirft, wenn sie mit einer negativen Zahl aufgerufen wird. Fangen Sie die Ausnahme in `main` ab.
+                </li>
+                <li>
+                    <strong>Cast-Operatoren anwenden:</strong> Erstellen Sie eine Klassenhierarchie. Demonstrieren Sie in einem Beispielprogramm den sinnvollen Einsatz von `static_cast` für einen Upcast und `dynamic_cast` für einen sicheren Downcast. Versuchen Sie auch einen `dynamic_cast` auf einen Typ, der nicht zum tatsächlichen Objekt passt, und werten Sie das `nullptr`-Ergebnis aus.
+                </li>
+                 <li>
+                    <strong>Bibliothek in Namensraum:</strong> Fassen Sie eine Ihrer früher erstellten Klassen (z.B. eine `Vector2D`-Klasse mit überladenen Operatoren) in einem eigenen Namensraum namens `MyGeometry` zusammen. Verwenden Sie die Klasse dann aus der `main`-Funktion heraus mit voll qualifizierten Namen (z.B. <code>MyGeometry::Vector2D v;</code>).
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

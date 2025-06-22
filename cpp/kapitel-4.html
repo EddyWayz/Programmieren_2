@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 4: Klassen - Fortgeschrittene Konzepte</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 4: Klassen - Fortgeschrittene Konzepte</h1>
+        <p>Meistern Sie <code>const</code>-Korrektheit, statische Member und das <code>friend</code>-Konzept für robustere und klarere Klassenstrukturen.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                In dieser Kurseinheit vertiefen Sie Ihr Verständnis von C++-Klassen. Nach der Bearbeitung können Sie <strong><code>const</code>-korrekten</strong> Code schreiben, der zwischen veränderlichen und nicht-veränderlichen Objekten unterscheidet. Sie verstehen den Zweck und die Anwendung von <strong>statischen Attributen und Methoden</strong> (<code>static</code>), die an die Klasse selbst statt an einzelne Objekte gebunden sind. Zusätzlich lernen Sie, wie Sie mit dem <strong><code>friend</code></strong>-Schlüsselwort gezielt den Zugriff auf private Member für externe Funktionen oder andere Klassen erlauben können.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Bisher waren unsere Klassen relativ einfach. Doch was passiert, wenn wir sicherstellen wollen, dass eine Methode ein Objekt garantiert nicht verändert? Oder wenn wir eine Eigenschaft benötigen, die sich alle Objekte einer Klasse teilen, wie zum Beispiel ein Zähler für alle erzeugten Instanzen? Genau hier setzen die Konzepte dieses Kapitels an.
+            </p>
+            <p>
+                <strong><code>const</code>-Korrektheit</strong> ist ein Eckpfeiler von sicherem und gut lesbarem C++-Code. Sie erlaubt es dem Compiler, Programmierfehler zu finden und ermöglicht es Ihnen, Schnittstellen zu schaffen, die klar kommunizieren, welche Operationen sicher sind. <strong>Statische Member</strong> lösen das Problem von klassenweiten Daten, ohne auf globale Variablen zurückgreifen zu müssen. Und das <strong><code>friend</code></strong>-Konzept bietet einen kontrollierten Ausweg, wenn die strikte Kapselung der privaten Member für bestimmte, eng gekoppelte Operationen (wie z.B. das Überladen von Operatoren) gelockert werden muss.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>const-Methode</h4>
+                <p>Eine Methode, die deklariert wird, das Objekt, für das sie aufgerufen wird, nicht zu verändern. Sie wird mit dem Schlüsselwort <code>const</code> nach der Parameterliste markiert. In einer <code>const</code>-Methode ist der <code>this</code>-Zeiger ein Zeiger auf ein konstantes Objekt.</p>
+                <pre><code class="language-cpp">class MyClass {
+public:
+    void doSomething() const; // Dies ist eine const-Methode
+};</code></pre>
+            </div>
+            <div class="definition">
+                <h4>static-Attribut (Klassenattribut)</h4>
+                <p>Ein Attribut, das nur einmal für die gesamte Klasse existiert, unabhängig davon, wie viele Objekte dieser Klasse erzeugt werden. Alle Objekte teilen sich dasselbe statische Attribut. Es muss außerhalb der Klasse definiert und initialisiert werden.</p>
+            </div>
+            <div class="definition">
+                <h4>static-Methode (Klassenmethode)</h4>
+                <p>Eine Methode, die zur Klasse gehört, aber ohne ein Objekt dieser Klasse aufgerufen werden kann. Sie hat keinen <code>this</code>-Zeiger und kann daher nur auf andere statische Member (Attribute oder Methoden) zugreifen.</p>
+            </div>
+            <div class="definition">
+                <h4>friend-Funktion / friend-Klasse</h4>
+                <p>Eine Funktion oder eine andere Klasse, der explizit der Zugriff auf die <code>private</code>- und <code>protected</code>-Member einer Klasse gewährt wird. Die Freundschaft wird innerhalb der Klasse erklärt, die den Zugriff gewährt.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. const-Korrektheit anwenden</h3>
+            <p>Deklarieren Sie jede Methode, die den Zustand eines Objekts nicht ändert, als <code>const</code>. Dies hat zwei Vorteile:
+                <ol>
+                    <li>Der Compiler gibt einen Fehler aus, wenn Sie versehentlich versuchen, ein Attribut innerhalb dieser Methode zu ändern.</li>
+                    <li>Sie können diese Methode auch für konstante Objekte aufrufen.</li>
+                </ol>
+            </p>
+            <pre><code class="language-cpp">class Vector2D {
+private:
+    double x, y;
+public:
+    // Getter-Methoden verändern das Objekt nicht -> const
+    double getX() const { return x; }
+    double getY() const { return y; }
+
+    // Setter-Methoden verändern das Objekt -> nicht const
+    void setX(double newX) { x = newX; }
+};
+
+// ...
+const Vector2D start_point(0.0, 0.0);
+double x_coord = start_point.getX(); // OK, getX() ist const
+// start_point.setX(5.0); // FEHLER! start_point ist const.
+</code></pre>
+
+            <h3>2. Statische Member für klassenweite Daten verwenden</h3>
+            <p>Ein typisches Beispiel ist ein Zähler für erstellte Objekte.</p>
+            <pre><code class="language-cpp">// Counter.h
+class Counter {
+public:
+    Counter();
+    ~Counter();
+    static int getCount(); // Statische Methode
+private:
+    static int count_; // Statisches Attribut (nur Deklaration)
+};
+
+// Counter.cpp
+#include "Counter.h"
+
+// Definition und Initialisierung des statischen Attributs
+int Counter::count_ = 0;
+
+Counter::Counter() {
+    count_++; // Erhöhe den Zähler für jedes neue Objekt
+}
+
+Counter::~Counter() {
+    count_--; // Verringere ihn bei Zerstörung
+}
+
+int Counter::getCount() {
+    return count_; // Zugriff auf statisches Attribut
+}
+
+// main.cpp
+#include &lt;iostream&gt;
+#include "Counter.h"
+int main() {
+    std::cout << "Anzahl: " << Counter::getCount() << std::endl; // Ausgabe: 0
+    Counter c1;
+    Counter c2;
+    std::cout << "Anzahl: " << Counter::getCount() << std::endl; // Ausgabe: 2
+}
+</code></pre>
+
+            <h3>3. Gezielten Zugriff mit `friend` erlauben</h3>
+            <p>Manchmal muss eine externe Funktion direkt auf private Daten zugreifen. Das ist oft beim Überladen von Operatoren wie <code>&lt;&lt;</code> der Fall.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class MyNumber {
+private:
+    int value_;
+public:
+    MyNumber(int v) : value_(v) {}
+
+    // Deklariere die externe Funktion als Freund
+    friend std::ostream& operator&lt;&lt;(std::ostream& os, const MyNumber& num);
+};
+
+// Die Funktion ist kein Member von MyNumber, kann aber auf `value_` zugreifen.
+std::ostream& operator&lt;&lt;(std::ostream& os, const MyNumber& num) {
+    os << "MyNumber(" << num.value_ << ")"; // Zugriff auf private Member!
+    return os;
+}
+
+int main() {
+    MyNumber n(42);
+    std::cout << n << std::endl; // Ruft unsere überladene Funktion auf
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Übungsaufgaben aus KE04</h2>
+            <ol>
+                <li>
+                    <strong>`const`-Fehler finden:</strong> Analysieren Sie ein gegebenes Code-Beispiel (ähnlich Aufgabe 1) und identifizieren Sie, welche Methodenaufrufe zu Compiler-Fehlern führen, weil sie die `const`-Korrektheit verletzen. Begründen Sie Ihre Entscheidung.
+                </li>
+                <li>
+                    <strong>Statischen Zähler implementieren:</strong> Erweitern Sie eine einfache Klasse `Auto` um einen statischen `int`-Member, der zählt, wie viele `Auto`-Objekte aktuell existieren. Implementieren Sie eine statische `public`-Methode, die diesen Zähler zurückgibt. Testen Sie Ihre Implementierung in `main`.
+                </li>
+                 <li>
+                    <strong>`friend`-Funktion:</strong> Schreiben Sie eine Klasse `Vector3D` mit drei privaten `double`-Attributen (x, y, z). Schreiben Sie eine externe `friend`-Funktion `addVectors`, die zwei `Vector3D`-Objekte entgegennimmt und einen neuen `Vector3D` als deren Summe zurückgibt. Da die Funktion ein `friend` ist, kann sie direkt auf `v1.x` und `v2.x` etc. zugreifen.
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

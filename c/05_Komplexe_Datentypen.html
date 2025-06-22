@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 5: Komplexe Datentypen</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 5: Komplexe Datentypen: Arrays, Structs & Enums</h1>
+        <p>Daten strukturieren und die Realität im Code abbilden.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Lerneinheit kannst du komplexe, zusammengehörige Daten sinnvoll modellieren und verwalten. Du bist in der Lage, <strong>Arrays</strong> zur Speicherung von Listen gleichartiger Elemente zu verwenden. Du kannst benutzerdefinierte Datentypen mit <strong>Strukturen (<code>struct</code>)</strong> erstellen, um unterschiedliche Informationen zu bündeln. Du weißt, wie man mit <strong>Enumerationen (<code>enum</code>)</strong> für mehr Lesbarkeit im Code sorgt und mit <strong><code>typedef</code></strong> eigene, sprechende Typnamen vergibt. Schließlich kannst du diese Konzepte kombinieren, um verschachtelte Datenstrukturen wie z.B. ein Array von Strukturen zu erstellen.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Die bisherigen "einfachen" Datentypen wie <code>int</code> oder <code>char</code> sind Bausteine. Doch die Daten, mit denen wir in der Praxis arbeiten, sind selten nur ein einzelner Wert. Wir haben es mit mit Listen von Messwerten, den kompletten Adressdaten eines Kunden oder den Eigenschaften eines Autos zu tun. Hier kommen komplexe Datentypen ins Spiel. Sie erlauben uns, aus den einfachen Bausteinen größere, logische Einheiten zu konstruieren. 
+            </p>
+            <p>
+                <strong>Arrays</strong> sind die Antwort auf die Frage "Wie speichere ich 100 Noten?". <strong>Strukturen</strong> sind die Lösung für "Wie speichere ich Vorname, Nachname und Alter einer Person zusammen?".  Die Beherrschung dieser Konzepte ist unerlässlich, um Programme zu schreiben, die mehr als nur triviale Probleme lösen.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4><code>Array</code></h4>
+                <p>Ein Array ist ein Container für eine feste Anzahl von Elementen des <strong>gleichen</strong> Datentyps, die direkt hintereinander im Speicher liegen.  Der Zugriff auf einzelne Elemente erfolgt über einen numerischen <strong>Index</strong>, der bei 0 beginnt.</p>
+            </div>
+            <div class="definition">
+                <h4>String (in C)</h4>
+                <p>In C gibt es keinen eigenen Datentyp für Zeichenketten. Ein String ist stattdessen ein <strong>Array vom Typ <code>char</code></strong>, dessen Ende durch ein spezielles Nullzeichen (<code>'\0'</code>, auch EOS für "End-of-String" genannt) markiert wird.  Dieses Zeichen ist entscheidend, damit Funktionen wie <code>printf</code> wissen, wo der String aufhört.</p>
+            </div>
+            <div class="definition">
+                <h4><code>struct</code> (Struktur)</h4>
+                <p>Eine Struktur ist ein benutzerdefinierter Datentyp, der eine Sammlung von Variablen (sogenannte Member oder Elemente) unter einem einzigen Namen zusammenfasst.  Im Gegensatz zum Array können die Elemente einer Struktur <strong>unterschiedliche</strong> Datentypen haben. </p>
+            </div>
+            <div class="definition">
+                <h4><code>enum</code> (Enumeration)</h4>
+                <p>Eine Enumeration ist ein benutzerdefinierter Typ, der aus einer Menge von benannten Ganzzahl-Konstanten besteht.  Sie dient dazu, Code lesbarer zu machen, indem man "magische Zahlen" (z.B. <code>if (status == 2)</code>) durch sprechende Namen (z.B. <code>if (status == INACTIVE)</code>) ersetzt. </p>
+            </div>
+             <div class="definition">
+                <h4><code>typedef</code></h4>
+                <p>Ein Schlüsselwort, das es erlaubt, einen neuen, alternativen Namen (einen Alias) für einen bestehenden Datentyp zu definieren.  Dies erhöht die Lesbarkeit und kann helfen, plattformabhängigen Code zu vereinheitlichen. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>Listen erstellen mit Arrays</h3>
+            <p>Arrays sind das Mittel der Wahl für Listen von Elementen des gleichen Typs.</p>
+            <pre><code>// Definition eines Arrays für 5 Integer-Werte.
+// Die Indizes laufen von 0 bis 4!
+int punkte[5];
+
+// Wertzuweisung über den Index
+punkte[0] = 88;
+punkte[4] = 95;
+
+// Definition mit direkter Initialisierung
+// Der Compiler bestimmt die Größe (hier 4) selbst.
+double messwerte[] = {1.2, 3.4, 5.6, 7.8}; 
+
+// Zugriff in einer Schleife
+for (int i = 0; i < 4; i++) {
+    printf("Messwert %d: %.2f\n", i + 1, messwerte[i]);
+}
+</code></pre>
+            <p class="warning">Achtung: Der Zugriff auf einen Index außerhalb der Array-Grenzen (z.B. <code>punkte[5]</code>) ist ein schwerwiegender Fehler, den C nicht automatisch verhindert! </p>
+
+            <h3>Eigene Datentypen bauen mit <code>struct</code></h3>
+            <p>Mit Strukturen bündeln wir Daten, die logisch zusammengehören.</p>
+            <pre><code>// 1. Deklaration des neuen Datentyps 'struct Student'
+struct Student {
+    char name[50];
+    int matrikelnummer;
+    double durchschnittsnote;
+};
+
+// In main:
+// 2. Definition einer Variable vom Typ 'struct Student'
+struct Student s1;
+
+// 3. Zugriff auf die Elemente (Member) mit dem Punkt-Operator
+strcpy_s(s1.name, 50, "Max Mustermann");
+s1.matrikelnummer = 12345;
+s1.durchschnittsnote = 1.7;
+
+printf("Student: %s (Matr.-Nr.: %d)\n", s1.name, s1.matrikelnummer);
+</code></pre>
+
+            <h3>Lesbarkeit schaffen mit <code>enum</code> und <code>typedef</code></h3>
+            <p>Kombinieren wir diese beiden, um unseren Code sprechender zu machen.</p>
+            <pre><code>// 1. Deklaration einer Enumeration für Ampelphasen
+typedef enum {
+    RED,
+    YELLOW,
+    GREEN
+} TrafficLightState_t; // Direkte Kombination mit typedef
+
+// In main:
+// Definition einer Variable mit dem neuen, einfachen Namen
+TrafficLightState_t currentState = RED;
+
+// Verwendung in einer Selektion
+if (currentState == RED) {
+    printf("Bitte anhalten!\n");
+}
+</code></pre>
+
+            <h3>Alles kombiniert: Arrays von Strukturen</h3>
+            <p>Die wahre Stärke zeigt sich in der Kombination, z.B. eine Liste von Studenten.</p>
+            <pre><code>// Datentyp aus dem struct-Beispiel...
+// ... jetzt als Array für 3 Studenten
+struct Student kurs_prog2[3];
+
+// Zugriff auf den ersten Studenten und dessen Namen
+strcpy_s(kurs_prog2[0].name, 50, "Erika Musterfrau");
+kurs_prog2[0].matrikelnummer = 54321;
+
+// Zugriff auf den zweiten Studenten
+kurs_prog2[1].matrikelnummer = 54322;
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramme</h2>
+
+            <h3>Beispiel 1: String-Verarbeitung und das Nullzeichen</h3>
+            <p>Dieses Programm demonstriert die Warnung aus Aufgabe 2 des Übungsblatts: Ein C-String ist nur dann ein String, wenn er mit <code>'\0'</code> abgeschlossen ist.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    char acFirstName[20]; // Array wird definiert, Inhalt ist zufällig 
+
+    // Vorname wird Zeichen für Zeichen zugewiesen 
+    acFirstName[0] = 'T';
+    acFirstName[1] = 'e';
+    acFirstName[2] = 's';
+    acFirstName[3] = 't';
+
+    // Das WICHTIGE Nullzeichen wird hier "vergessen".
+    // acFirstName[4] = '\0';
+    
+    // printf sucht nach '\0' und gibt evtl. Müll mit aus! 
+    printf("Name ohne Nullzeichen: %s\n", acFirstName); 
+
+    // Korrektur: Nullzeichen hinzufügen
+    acFirstName[4] = '\0';
+    printf("Name mit Nullzeichen:  %s\n", acFirstName);
+
+    return 0;
+}
+</code></pre>
+
+            <h3>Beispiel 2: Verwaltung einer Bar-Liste (Array von Structs)</h3>
+            <p>Dieses Programm löst Aufgabe 5 des Übungsblatts und zeigt, wie man eine Liste von komplexen Objekten (hier Bars) definiert, initialisiert und ausgibt.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// Deklaration der Struktur 
+struct Bar {
+    char acBarName[30];      
+    char acSpecialOffer[30]; 
+    char acTown[20];         
+};
+
+int main(void) {
+    // Definition und Initialisierung eines Arrays von 3 Structs 
+    struct Bar myBars[3] = {
+        {"Adler", "Bier vom Fass", "Offenburg"},
+        {"Schraube", "Cocktails", "Lahr"},
+        {"Zum durstigen Studenten", "Mate", "Furtwangen"}
+    };
+
+    printf("--- Meine Lieblingsbars ---\n");
+    // Ausgabe der Elemente mit einer for-Schleife 
+    for (int i = 0; i < 3; i++) {
+        // Ausgabe pro Element in einer Zeile 
+        printf("Name: %-25s | Angebot: %-15s | Stadt: %s\n", 
+               myBars[i].acBarName, 
+               myBars[i].acSpecialOffer, 
+               myBars[i].acTown);
+    }
+    
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Studiengang-Auswahl</strong><br>
+                    Definiere eine <code>enum</code> für mindestens 3 Studiengänge (z.B. `INF`, `WINF`, `MINF`). Frage den Benutzer nach einer Zahl (0, 1 oder 2) und gib mit einer <code>switch</code>-Anweisung den vollen Namen des gewählten Studiengangs aus (z.B. "Informatik"). [vgl. ]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Deklariere `enum StudyCourse { INF, WINF, MINF };`. Definiere eine Variable `enum StudyCourse choice;` und weise das Ergebnis der Benutzereingabe (nach einem Cast) zu. Die `switch`-Anweisung prüft dann `case INF:`, `case WINF:`, etc.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Array füllen und lesen</strong><br>
+                    Definiere ein Integer-Array für 10 Elemente. Fülle das Array in einer <code>for</code>-Schleife so, dass an Index `i` der Wert `i * 10` steht. Gib anschließend das gesamte Array in einer zweiten Schleife wieder aus. [vgl. ]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die erste Schleife: <code>for (int i=0; i < 10; i++) { myArray[i] = i * 10; }</code>. Die zweite Schleife ist eine einfache `printf`-Schleife, die `myArray[i]` ausgibt.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Fahrzeug-Datenbank</strong><br>
+                    Deklariere eine Struktur `struct Car` mit den Elementen `char hersteller[50]`, `char modell[50]` und `int baujahr`. Definiere in `main` eine einzelne Variable dieses Typs und weise ihr per `scanf_s` die Daten eines Autos zu. Gib die Daten danach wieder aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Denke daran, dass du bei `scanf_s` für Strings die Puffergröße angeben musst: <code>scanf_s("%s", myCar.hersteller, (unsigned)_countof(myCar.hersteller));</code>. Für `int` ist es normal: `scanf_s("%d", &myCar.baujahr);`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Verschachtelte Strukturen</strong><br>
+                    Erweitere die `struct Car` aus Aufgabe 3. Deklariere eine zweite Struktur `struct Engine` mit den Elementen `int hubraum_ccm` und `int ps`. Füge eine Variable vom Typ `struct Engine` als neues Element zur `struct Car` hinzu. Weise allen Werten (inkl. Hubraum und PS) Werte zu und gib sie aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die neue Struktur: <code>struct Car { ...; struct Engine motor; };</code>. Der Zugriff erfolgt über zwei Punkte: <code>myCar.motor.ps = 150;</code>.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Bubblesort</strong><br>
+                    Definiere ein `int`-Array mit den Werten <code>{5, 1, 4, 2, 8}</code>. Implementiere den Bubblesort-Algorithmus aus dem Vorlesungsskript, um das Array aufsteigend zu sortieren. Gib das sortierte Array am Ende aus.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Du benötigst zwei geschachtelte `for`-Schleifen. Die innere Schleife vergleicht benachbarte Elemente `aiArr[j]` und `aiArr[j+1]` und vertauscht sie bei Bedarf mithilfe einer temporären Variable.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- TYPEDEF ---
+typedef unsigned int uint_t;
+
+// --- ENUM ---
+typedef enum { MONDAY, TUESDAY, WEDNESDAY } Day_t;
+Day_t today = MONDAY;
+
+// --- ARRAY ---
+// Definition
+int numbers[10];
+// Definition & Initialisierung
+char name[] = "Hans"; // Größe 5 (inkl. '\0')
+
+// --- STRUCT ---
+// Deklaration & Typedef
+typedef struct {
+    char title[100];
+    int pages;
+} Book_t;
+
+// Definition & Initialisierung
+Book_t myBook = {"Die Kunst des Programmierens", 800};
+
+// Zugriff
+myBook.pages = 850;
+
+// --- ARRAY VON STRUCTS ---
+Book_t library[50];
+strcpy_s(library[0].title, 100, "C Fibel");
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

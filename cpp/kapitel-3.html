@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 3: Operatorüberladung & Ressourcenmanagement</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 3: Operatorüberladung & Ressourcenmanagement</h1>
+        <p>Eigene Klassen intuitiv bedienbar machen und Speicher sicher verwalten.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit verstehst du, wie man das Verhalten von C++-Operatoren (wie <code>+</code>, <code>=</code>, <code>&lt;&lt;</code>) für eigene Klassen durch <strong>Operatorüberladung</strong> anpasst. Du kennst die "Regel der Drei" und kannst <strong>Kopierkonstruktor</strong>, <strong>Zuweisungsoperator</strong> und <strong>Destruktor</strong> implementieren, um dynamische Ressourcen korrekt zu verwalten und den Unterschied zwischen einer flachen und einer tiefen Kopie zu meistern.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Warum sollten wir `obj3 = obj1 + obj2;` nicht schreiben können, wenn es für `int`s funktioniert? Die Operatorüberladung erlaubt es uns, unseren eigenen Klassen ein ebenso intuitives Verhalten zu geben wie den eingebauten Datentypen. Wir können definieren, was es bedeutet, zwei `Complex`-Objekte zu addieren oder ein `Date`-Objekt mit `std::cout` auszugeben.
+            </p>
+            <p>
+                Gleichzeitig stoßen die vom Compiler generierten Standard-Methoden an ihre Grenzen, sobald unsere Klasse dynamischen Speicher (z.B. mit `new`) verwaltet. Die Standardkopie ist eine "flache Kopie", die nur den Zeigerwert kopiert, nicht aber die Daten, auf die gezeigt wird. Dies führt zu schwerwiegenden Fehlern. Das korrekte Management dieser Ressourcen über die "Regel der Drei" ist eine der fundamentalen Techniken für robuste C++-Programme.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Operatorüberladung</h4>
+                <p>Die Möglichkeit, die Bedeutung eines Operators für einen benutzerdefinierten Typ (eine Klasse) neu zu definieren. Die Funktion, die dies implementiert, wird mit dem Schlüsselwort <code>operator</code> gefolgt vom Operator-Symbol deklariert (z.B. <code>operator+</code>).</p>
+            </div>
+            <div class="definition">
+                <h4>Kopierkonstruktor</h4>
+                <p>Ein Konstruktor, der ein neues Objekt als Kopie eines bereits existierenden Objekts derselben Klasse erzeugt. Seine Signatur ist typischerweise <code>ClassName(const ClassName& other);</code>.</p>
+            </div>
+            <div class="definition">
+                <h4>Zuweisungsoperator</h4>
+                <p>Ein überladener Operator (<code>operator=</code>), der einem bereits existierenden Objekt den Zustand eines anderen Objekts zuweist. Seine Signatur ist typischerweise <code>ClassName& operator=(const ClassName& other);</code>.</p>
+            </div>
+            <div class="definition">
+                <h4>Flache vs. Tiefe Kopie (Shallow vs. Deep Copy)</h4>
+                <ul>
+                    <li><strong>Flache Kopie:</strong> Eine bitweise Kopie der Membervariablen. Wenn ein Member ein Zeiger ist, wird nur die Adresse kopiert, nicht die dahinterliegenden Daten. Beide Objekte zeigen danach auf denselben Speicher.</li>
+                    <li><strong>Tiefe Kopie:</strong> Erstellt eine vollständige, unabhängige Kopie. Wenn ein Member ein Zeiger ist, wird neuer Speicher allokiert und die Daten, auf die der Originalzeiger zeigt, werden in den neuen Speicher kopiert.</li>
+                </ul>
+            </div>
+            <div class="definition">
+                <h4>Die Regel der Drei (Rule of Three)</h4>
+                <p>Eine C++-Daumenregel, die besagt: Wenn eine Klasse einen der folgenden drei Member explizit benötigt, benötigt sie wahrscheinlich alle drei: Destruktor, Kopierkonstruktor, Zuweisungsoperator.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            <h3>1. Das Problem: Die flache Kopie</h3>
+            <p>Der vom Compiler generierte Kopierkonstruktor und Zuweisungsoperator sind für Klassen mit Zeigern gefährlich.</p>
+            <pre><code>class MyString {
+private:
+    char* data_;
+public:
+    // ...
+};
+
+MyString s1("Hello");
+MyString s2 = s1; // Kopierkonstruktor: s2.data_ zeigt jetzt auf dieselbe Adresse wie s1.data_!
+// Wenn s2 zerstört wird, wird der Speicher von "Hello" freigegeben.
+// s1 zeigt jetzt auf ungültigen Speicher (Dangling Pointer)!
+</code></pre>
+
+            <h3>2. Die Lösung: Die Regel der Drei implementieren</h3>
+            <p>Um das Problem zu lösen, müssen wir die drei speziellen Member-Funktionen selbst schreiben, um eine tiefe Kopie zu gewährleisten.</p>
+            <pre><code>// In der Klassendefinition (z.B. MyString.h)
+public:
+    ~MyString(); // 1. Destruktor
+    MyString(const MyString& other); // 2. Kopierkonstruktor
+    MyString& operator=(const MyString& other); // 3. Zuweisungsoperator
+
+// Implementierung (z.B. MyString.cpp)
+// 1. Destruktor: Gibt den Speicher frei
+MyString::~MyString() { delete[] data_; }
+
+// 2. Kopierkonstruktor: Allokiert neuen Speicher und kopiert den Inhalt
+MyString::MyString(const MyString& other) {
+    size_t len = strlen(other.data_) + 1;
+    data_ = new char[len];
+    strcpy_s(data_, len, other.data_);
+}
+
+// 3. Zuweisungsoperator: Gibt alten Speicher frei, allokiert neuen, kopiert Inhalt
+MyString& MyString::operator=(const MyString& other) {
+    if (this != &other) { // Wichtig: Selbstzuweisung verhindern!
+        delete[] data_; // Alten Speicher freigeben
+        size_t len = strlen(other.data_) + 1;
+        data_ = new char[len];
+        strcpy_s(data_, len, other.data_);
+    }
+    return *this; // Referenz auf sich selbst zurückgeben
+}
+</code></pre>
+            
+            <h3>3. Operatoren überladen</h3>
+            <p>Um z.B. `std::cout << myObject;` zu ermöglichen, überlädt man den `<<`-Operator. Da der Stream `std::cout` links vom Operator steht, kann dies keine Member-Funktion sein. Man verwendet eine globale `friend`-Funktion.</p>
+            <pre><code>// In der Klassendeklaration (z.B. Complex.h)
+class Complex {
+    // ...
+    // friend deklarieren, damit die Funktion auf private Member zugreifen kann
+    friend std::ostream& operator<<(std::ostream& os, const Complex& c);
+private:
+    double real_, imag_;
+};
+
+// Globale Implementierung (z.B. Complex.cpp)
+std::ostream& operator<<(std::ostream& os, const Complex& c) {
+    os << c.real_ << " + j(" << c.imag_ << ")";
+    return os;
+}
+</code></pre>
+        </section>
+
+        <section>
+             <h2>5. Beispielprogramm 1: Komplexe Zahlen addieren</h2>
+             <p>Wir erweitern die `Complex`-Klasse aus dem letzten Kapitel um einen überladenen `+`-Operator, um `z3 = z1 + z2;` zu ermöglichen.</p>
+            <pre><code>// In Complex.h (innerhalb der Klassendeklaration)
+public:
+    Complex operator+(const Complex& other) const;
+
+// In Complex.cpp
+Complex Complex::operator+(const Complex& other) const {
+    // Erzeuge ein neues Complex-Objekt mit den summierten Werten
+    return Complex(this->f64Real_ + other.f64Real_, this->f64Img_ + other.f64Img_);
+}
+
+// In main.cpp
+MyMath::Complex z1(3.0, 4.0);
+MyMath::Complex z2(1.0, -2.0);
+MyMath::Complex z3 = z1 + z2; // Ruft z1.operator+(z2) auf
+z3.vPrint(); // Gibt "4 + j(2)" aus
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li><strong>`Complex`-Subtraktion:</strong> Überlade den `-`-Operator für deine `Complex`-Klasse als Member-Funktion.</li>
+                <li><strong>`Complex`-Ausgabe:</strong> Implementiere den `<<`-Operator für `std::cout` für deine `Complex`-Klasse als `friend`-Funktion, wie oben im Beispiel gezeigt.</li>
+                <li><strong>Pre-Inkrement für `Counter`:</strong> Nimm die `Counter`-Klasse aus dem letzten Kapitel. Überlade den Pre-Inkrement-Operator (`++c`), sodass er den internen Wert erhöht und eine Referenz auf das Objekt zurückgibt. Die Signatur lautet: `Counter& operator++();`.</li>
+                <li><strong>Deep Copy für eine `Playlist`:</strong> Erstelle eine Klasse `Playlist`, die als privates Attribut einen dynamisch allokierten Zeiger auf ein Array von `std::string`s enthält (`std::string* tracks_;`). Implementiere die "Regel der Drei" (Destruktor, Kopierkonstruktor, Zuweisungsoperator), um eine korrekte tiefe Kopie zu gewährleisten.</li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 13: Fortgeschrittene Problemlösung</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 13: Fortgeschrittene Problemlösung & Praktische Tipps</h1>
+        <p>Rekursive Denkmuster vertiefen und häufige Praxisfallen meistern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                In diesem abschließenden Kapitel verfeinerst du dein algorithmisches Denken. Du lernst, unterschiedliche <strong>rekursive Lösungsstrategien</strong> zu erkennen und anzuwenden, insbesondere das "Problem um 1 reduzieren" und "Teile und Herrsche". Darüber hinaus meisterst du einen der häufigsten Fallstricke in der C-Praxis: Du verstehst, warum der <strong>Eingabepuffer von <code>scanf</code></strong> zu Problemen führen kann, und lernst eine robuste Methode, um diesen Puffer zu leeren und so stabile, benutzersichere Programme zu schreiben.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Wir haben Rekursion bereits kennengelernt, aber sie ist mehr als nur eine Alternative zur Schleife. Sie ist eine Denkweise, die für bestimmte Problemklassen (z.B. Baumstrukturen, Fraktale, Sortieralgorithmen wie Quicksort) die eleganteste und verständlichste Lösung darstellt. Zu erkennen, welches rekursive Muster zu einem Problem passt, ist eine wichtige Fähigkeit. 
+            </p>
+            <p>
+                Gleichzeitig ist technisches Wissen nur die halbe Miete. Ein professioneller Entwickler zeichnet sich dadurch aus, dass er die "Tücken" seiner Werkzeuge kennt und robuste Software schreibt. Das Problem des `scanf`-Eingabepuffers ist ein Paradebeispiel für eine solche Tücke, die bei Unkenntnis zu scheinbar unerklärlichen Fehlern und Endlosschleifen führt.  Dieses Kapitel schärft also sowohl dein abstraktes Denkvermögen als auch dein praktisches Handwerk.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Lineare Rekursion</h4>
+                <p>Ein Rekursionsmuster, bei dem sich eine Funktion genau einmal selbst aufruft. Das Problem wird dabei typischerweise um einen kleinen, konstanten Betrag (oft um 1) reduziert. Beispiel: Berechnung der Fakultät. </p>
+            </div>
+            <div class="definition">
+                <h4>Verzweigende Rekursion (Divide and Conquer)</h4>
+                <p>Ein Rekursionsmuster, bei dem eine Funktion sich mehrmals selbst aufruft, um ein Problem zu lösen. Das Problem wird in zwei oder mehr (oft gleich große) Teilprobleme zerlegt, die rekursiv gelöst und deren Ergebnisse dann kombiniert werden. </p>
+            </div>
+            <div class="definition">
+                <h4>Stack Overflow</h4>
+                <p>Ein kritischer Laufzeitfehler, der auftritt, wenn eine Rekursion kein funktionierendes Abbruchkriterium hat. Jeder rekursive Aufruf belegt Speicher auf dem Stack; wenn dieser Speicher voll ist, stürzt das Programm ab. </p>
+            </div>
+             <div class="definition">
+                <h4>Eingabepuffer (Input Buffer)</h4>
+                <p>Ein temporärer Speicherbereich, in dem Tastatureingaben zwischengespeichert werden, bevor sie von einer Funktion wie `scanf` verarbeitet werden. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Rekursive Lösungsstrategien erkennen</h3>
+            <p><strong>Strategie 1: Das Problem um 1 reduzieren (Lineare Rekursion)</strong></p>
+            <p>Dieses Muster passt, wenn man die Lösung für `n` finden kann, indem man die Lösung für `n-1` kennt und einen weiteren Schritt ausführt. Das klassische Beispiel ist die Potenzfunktion $a^b$.</p>
+            <p>Die rekursive Definition lautet:
+                $a^b = a \cdot a^{b-1}$
+                mit dem Abbruchkriterium: $a^0 = 1$.
+            </p>
+            <pre><code>long long power(int base, int exp) {
+    // Abbruchkriterium
+    if (exp == 0) {
+        return 1;
+    }
+    // Rekursiver Schritt: Reduziere das Problem (exp) um 1
+    else {
+        return base * power(base, exp - 1);
+    }
+}
+</code></pre>
+
+            <p><strong>Strategie 2: Teile und Herrsche (Verzweigende Rekursion)</strong></p>
+            <p>Dieses Muster passt, wenn man ein Problem in mehrere, unabhängige Teilprobleme zerlegen kann. Das Paradebeispiel ist die Fibonacci-Folge, bei der die n-te Zahl die Summe der beiden vorherigen ist.</p>
+            <p>Die rekursive Definition lautet:
+                $fib(n) = fib(n-1) + fib(n-2)$
+                mit den Abbruchkriterien: $fib(1) = 1$ und $fib(0) = 0$.
+            </p>
+            <pre><code>int fibonacci(int n) {
+    // Abbruchkriterien
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    
+    // Rekursiver Schritt: Zerlege in zwei Teilprobleme
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+</code></pre>
+            
+            <h3>2. Praxistipp: Den `scanf`-Eingabepuffer leeren</h3>
+            <p><strong>Das Problem:</strong> Der Benutzer soll eine Zahl eingeben, tippt aber "abc". `scanf("%d", &zahl)` versucht, "abc" zu lesen, scheitert und lässt "abc\n" unangetastet im Eingabepuffer zurück. Ein folgender `scanf`-Aufruf in einer Schleife würde sofort wieder auf "abc\n" stoßen, scheitern und so weiter – eine Endlosschleife entsteht. </p>
+            <p><strong>Die Lösung:</strong> Nach einem `scanf`-Aufruf, der fehlschlagen könnte, müssen wir den Puffer manuell leeren, d.h. alle Zeichen bis zum nächsten Zeilenumbruch lesen und verwerfen.</p>
+            <pre><code>// Die "magische" Zeile zum Leeren des Buffers:
+int c;
+while ((c = getchar()) != '\n' && c != EOF);
+</code></pre>
+            <p>Diese Schleife liest Zeichen für Zeichen, bis sie einen Zeilenumbruch (`\n`) oder das Dateiende (`EOF`) findet, und stellt so sicher, dass der Puffer für die nächste Eingabe sauber ist. </p>
+
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Die Türme von Hanoi</h2>
+            <p>Dieses klassische Rätsel hat eine verblüffend kurze und elegante rekursive Lösung, die dem "Teile und Herrsche"-Prinzip folgt. [vgl. 1203]</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// Löst das Problem für n Ringe von Turm A nach Turm C über Hilfsturm B
+void towersOfHanoi(int n, char from_rod, char to_rod, char aux_rod) {
+    // Abbruchkriterium: Wenn nur 1 Ring zu bewegen ist.
+    if (n == 1) {
+        printf("Bewege Ring 1 von %c nach %c\n", from_rod, to_rod);
+        return;
+    }
+    
+    // Rekursiver Schritt 1: Bewege n-1 Ringe vom Start- zum Hilfsturm.
+    towersOfHanoi(n - 1, from_rod, aux_rod, to_rod);
+    
+    // Bewege den verbliebenen größten Ring vom Start- zum Zielturm.
+    printf("Bewege Ring %d von %c nach %c\n", n, from_rod, to_rod);
+    
+    // Rekursiver Schritt 2: Bewege die n-1 Ringe vom Hilfs- zum Zielturm.
+    towersOfHanoi(n - 1, aux_rod, to_rod, from_rod);
+}
+
+int main(void) {
+    int num_rings = 3;
+    printf("Loesung fuer die Tuerme von Hanoi mit %d Ringen:\n", num_rings);
+    towersOfHanoi(num_rings, 'A', 'C', 'B'); // A=Source, C=Destination, B=Store
+    return 0;
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Robuste Benutzereingabe</h2>
+            <p>Dieses Programm zeigt, wie man eine Eingabeschleife mit Puffer-Leerung implementiert, sodass sie bei Fehleingaben nicht abstürzt.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int number = 0;
+    int items_read = 0;
+
+    while (items_read != 1) {
+        printf("Bitte geben Sie eine ganze Zahl ein: ");
+        // scanf_s gibt die Anzahl der erfolgreich gelesenen Elemente zurück.
+        items_read = scanf_s("%d", &number);
+
+        if (items_read == 1) {
+            // Erfolg!
+            printf("Danke! Sie haben %d eingegeben.\n", number);
+        } else {
+            // Fehler!
+            printf("Ungueltige Eingabe. Bitte versuchen Sie es erneut.\n");
+            // WICHTIG: Puffer leeren, um Endlosschleife zu vermeiden!
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+        }
+    }
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Rekursive Multiplikation</strong><br>
+                    Implementiere die Multiplikation zweier Zahlen `a * b` rekursiv, unter der Annahme, dass Multiplikation nur wiederholte Addition ist. Der rekursive Schritt ist also `a + multiply(a, b-1)`.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Funktion könnte `int multiply(int a, int b)` heißen. Das Abbruchkriterium ist `if (b == 0) return 0;` oder `if (b == 1) return a;`.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Rekursiver Bubblesort</strong><br>
+                    Vervollständige die rekursive Bubblesort-Funktion aus Aufgabe 2 des Übungsblattes. Nach der `for`-Schleife, die das größte Element ans Ende schiebt, muss sich die Funktion selbst für das um 1 verkleinerte Array aufrufen. [vgl. 1144, 1145]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Das Abbruchkriterium ist `if (uiSize <= 1) return;`. Der rekursive Aufruf lautet: `DoBubbleSortRecursiv(paiA, uiSize - 1);`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Palindrom-Prüfung</strong><br>
+                    Ein Palindrom ist ein Wort, das vorwärts und rückwärts gelesen dasselbe ist (z.B. "anna"). Schreibe eine rekursive Funktion `int is_palindrome(const char* str, int start, int end)`, die prüft, ob ein Wort ein Palindrom ist.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Abbruchkriterium 1: Wenn `start >= end`, ist es ein Palindrom (return 1). Abbruchkriterium 2: Wenn `str[start] != str[end]`, ist es keins (return 0). Rekursiver Schritt: `return is_palindrome(str, start + 1, end - 1);`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Robuster Ja/Nein-Dialog</strong><br>
+                    Schreibe eine Funktion, die den Benutzer fragt "Weiter? (j/n)". Die Funktion soll in einer Schleife bleiben, bis der Benutzer entweder 'j' oder 'n' eingibt. Stelle mit der Puffer-Leer-Technik sicher, dass die Schleife auch bei mehrfachen Falscheingaben (z.B. "abc") nicht fehlschlägt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Verwende eine `do-while`-Schleife. Lies mit `scanf_s(" %c", &choice, 1);` (mit Leerzeichen davor, um führende Leerzeichen zu überspringen) und leere danach immer den Puffer. Die Schleife läuft, solange `choice != 'j' && choice != 'n' ist.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- REKURSIONSMUSTER ---
+
+// 1. Lineare Rekursion (Problem - 1)
+ResultType solve(Problem p) {
+    if (p ist Basisfall) {
+        return Basisloesung;
+    } else {
+        return kombiniere(p, solve(verkleinere(p)));
+    }
+}
+
+// 2. Verzweigende Rekursion (Teile und Herrsche)
+ResultType solve(Problem p) {
+    if (p ist Basisfall) {
+        return Basisloesung;
+    } else {
+        Teilproblem p1, p2 = teile(p);
+        return kombiniere(solve(p1), solve(p2));
+    }
+}
+
+// --- PRAXISTIPP: SCANF-PUFFER LEEREN ---
+// Nach einem scanf-Aufruf, der keine Zeichenkette liest,
+// den Puffer leeren, um Endlosschleifen bei Fehleingaben zu vermeiden.
+int temp_char;
+while ((temp_char = getchar()) != '\n' && temp_char != EOF);
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

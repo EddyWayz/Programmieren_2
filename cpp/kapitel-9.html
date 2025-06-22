@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 9: Die Standard Template Library (STL)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 9: Die Standard Template Library (STL)</h1>
+        <p>Nutzen Sie die mächtigen und effizienten Container, Iteratoren und Algorithmen der C++ Standardbibliothek.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit kennen Sie die drei fundamentalen Säulen der STL: <strong>Container</strong>, <strong>Iteratoren</strong> und <strong>Algorithmen</strong>. Sie können die wichtigsten sequentiellen Container (<code>std::vector</code>, <code>std::list</code>, <code>std::deque</code>) und assoziativen Container (<code>std::map</code>, <code>std::set</code>) anwenden und deren grundlegende Eigenschaften und Leistungscharakteristiken unterscheiden. Sie verstehen, wie <strong>Iteratoren</strong> als vereinheitlichte Schnittstelle zum Durchlaufen von Containern dienen. Sie können die gebräuchlichsten <strong>Algorithmen</strong> der STL (z.B. <code>sort</code>, <code>find</code>, <code>for_each</code>, <code>count_if</code>) auf Container anwenden, um komplexe Operationen mit minimalem Code-Aufwand durchzuführen.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Warum sollte man das Rad neu erfinden? Anstatt grundlegende Datenstrukturen wie dynamische Arrays, verkettete Listen oder Suchbäume jedes Mal selbst zu implementieren, stellt C++ die Standard Template Library (STL) zur Verfügung. Diese ist eine Sammlung von extrem effizienten, robusten und intensiv getesteten Template-Klassen und -Funktionen.
+            </p>
+            <p>
+                Die Genialität der STL liegt in ihrem Design: Container (die Daten speichern), Algorithmen (die Daten verarbeiten) und Iteratoren (die als Bindeglied zwischen beiden fungieren) sind voneinander entkoppelt. Das bedeutet, Sie können denselben Sortier-Algorithmus auf ein Array, eine Liste oder einen anderen Containertyp anwenden. Die Verwendung der STL führt zu kürzerem, sichereren, schnelleren und besser lesbarem Code. Die Kenntnis der STL ist für jeden C++-Programmierer unerlässlich.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Container</h4>
+                <p>Objekte, die andere Objekte verwalten und speichern. Man unterscheidet hauptsächlich zwischen sequentiellen Containern (z.B. <code>vector</code>, <code>list</code>) und assoziativen Containern (z.B. <code>map</code>, <code>set</code>).</p>
+            </div>
+            <div class="definition">
+                <h4><code>std::vector</code></h4>
+                <p>Ein dynamisches Array. Speichert Elemente zusammenhängend im Speicher. Erlaubt sehr schnellen wahlfreien Zugriff (<code>v[i]</code>), aber langsames Einfügen/Löschen in der Mitte.</p>
+            </div>
+             <div class="definition">
+                <h4><code>std::list</code></h4>
+                <p>Eine doppelt verkettete Liste. Speichert Elemente verstreut im Speicher. Erlaubt sehr schnelles Einfügen/Löschen an beliebiger Stelle, aber nur langsamen sequentiellen Zugriff.</p>
+            </div>
+            <div class="definition">
+                <h4><code>std::map</code></h4>
+                <p>Ein assoziativer Container, der Schlüssel-Wert-Paare (key-value) speichert. Die Elemente sind nach dem Schlüssel sortiert. Ermöglicht sehr schnelles Suchen, Einfügen und Löschen basierend auf dem Schlüssel.</p>
+            </div>
+            <div class="definition">
+                <h4>Iterator</h4>
+                <p>Ein "verallgemeinerter Zeiger", der auf ein Element in einem Container zeigt. Iteratoren ermöglichen es, durch einen Container zu "laufen" (iterieren) und stellen die Verbindung zu den Algorithmen her. Jeder Container stellt Typen wie <code>begin()</code> und <code>end()</code> bereit, um Iteratoren auf das erste Element bzw. "hinter" das letzte Element zu erhalten.</p>
+            </div>
+            <div class="definition">
+                <h4>Algorithmus</h4>
+                <p>Eine Template-Funktion, die Operationen auf einem Bereich von Elementen ausführt. Der Bereich wird durch zwei Iteratoren (Anfang und Ende) definiert. Beispiele sind <code>std::sort</code>, <code>std::find</code>, <code>std::copy</code>.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Einen `std::vector` verwenden</h3>
+            <p>Der `vector` ist der am häufigsten verwendete Container. Er ist flexibel und effizient für die meisten Anwendungsfälle.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+
+int main() {
+    // Ein Vektor von Strings
+    std::vector&lt;std::string&gt; names;
+
+    // Elemente hinzufügen
+    names.push_back("Alice");
+    names.push_back("Bob");
+    names.push_back("Charlie");
+
+    // Auf Elemente zugreifen
+    std::cout << "Erster Name: " << names[0] << std::endl;
+    
+    // Durch einen Vektor mit einem range-based for-loop iterieren (bevorzugt)
+    for (const std::string& name : names) {
+        std::cout << name << std::endl;
+    }
+}
+</code></pre>
+
+            <h3>2. Mit Iteratoren und Algorithmen arbeiten</h3>
+            <p>Algorithmen operieren auf Iterator-Paaren. <code>begin()</code> zeigt auf das erste Element, <code>end()</code> zeigt auf die Position *nach* dem letzten Element.</p>
+            <pre><code class="language-cpp">#include &lt;vector&gt;
+#include &lt;algorithm&gt; // Wichtig für die Algorithmen!
+#include &lt;iostream&gt;
+
+int main() {
+    std::vector&lt;int&gt; numbers = {10, 5, 8, 2, 9};
+
+    // Finde ein Element
+    // std::find gibt einen Iterator auf das gefundene Element oder numbers.end() zurück
+    auto it = std::find(numbers.begin(), numbers.end(), 8);
+
+    if (it != numbers.end()) {
+        std::cout << "Element 8 gefunden!" << std::endl;
+    }
+
+    // Sortiere den Vektor
+    std::sort(numbers.begin(), numbers.end()); // Sortiert von {10, 5, ...} zu {2, 5, ...}
+
+    // Gib den sortierten Vektor aus
+    for (int num : numbers) {
+        std::cout << num << " ";
+    }
+    std::cout << std::endl;
+}
+</code></pre>
+            
+            <h3>3. Eine `std::map` für Schlüssel-Wert-Paare verwenden</h3>
+            <p>Eine Map ist ideal, um Daten über einen eindeutigen Schlüssel schnell nachzuschlagen.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+
+int main() {
+    // Eine Map von Namen (string) zu Telefonnummern (int)
+    std::map&lt;std::string, int&gt; phonebook;
+
+    // Einträge hinzufügen
+    phonebook["Alice"] = 12345;
+    phonebook["Bob"] = 67890;
+    phonebook.insert(std::make_pair("Charlie", 54321));
+
+    // Einen Wert nachschlagen
+    std::cout << "Bobs Nummer: " << phonebook["Bob"] << std::endl;
+
+    // Durch eine Map iterieren
+    for (const auto& pair : phonebook) {
+        std::cout << pair.first << ": " << pair.second << std::endl;
+    }
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Übungsaufgaben aus KE09</h2>
+            <ol>
+                <li>
+                    <strong>`vector` vs. `list`:</strong> Erstellen Sie einen `std::vector` und eine `std::list` mit 1 Million Zufallszahlen. Messen Sie die Zeit, die benötigt wird, um 1000 Zahlen in der Mitte des Containers einzufügen. Messen Sie danach die Zeit, um 1000-mal auf ein zufälliges Element zuzugreifen. Vergleichen und erklären Sie die Ergebnisse.
+                </li>
+                <li>
+                    <strong>Telefonbuch mit `map`:</strong> Implementieren Sie ein einfaches Telefonbuch-Programm mit einer `std::map&lt;std::string, std::string&gt;`. Das Programm soll es dem Benutzer ermöglichen, neue Einträge hinzuzufügen, eine Nummer zu einem gegebenen Namen zu suchen und alle Einträge auszugeben.
+                </li>
+                 <li>
+                    <strong>Algorithmen anwenden:</strong> Erstellen Sie einen `std::vector` mit Objekten einer eigenen Klasse (z.B. `Student` mit Name und Matrikelnummer).
+                    <ul>
+                        <li>Verwenden Sie <code>std::sort</code> mit einer Lambda-Funktion, um die Studenten nach Matrikelnummer zu sortieren.</li>
+                        <li>Verwenden Sie <code>std::find_if</code>, um den ersten Studenten mit einer bestimmten Eigenschaft zu finden.</li>
+                        <li>Verwenden Sie <code>std::count_if</code>, um zu zählen, wie viele Studenten eine Bedingung erfüllen (z.B. eine bessere Note als 2.0 haben).</li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

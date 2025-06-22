@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 10: Nützliche Werkzeuge (Utilities)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 10: Nützliche Werkzeuge (Utilities)</h1>
+        <p>Schreiben Sie sicheren, modernen und ausdrucksstarken C++-Code mit Smart Pointern und Lambda-Ausdrücken.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit können Sie die grundlegenden Probleme der manuellen Speicherverwaltung mit <code>new</code> und <code>delete</code> lösen, indem Sie <strong>Smart Pointer</strong> (insbesondere <code>std::unique_ptr</code> und <code>std::shared_ptr</code>) verwenden. Sie verstehen das Konzept der „Resource Acquisition Is Initialization“ (RAII) und die Semantiken von alleinigem Besitz (unique ownership) und geteiltem Besitz (shared ownership). Des Weiteren können Sie anonyme Funktionen, sogenannte <strong>Lambda-Ausdrücke</strong>, definieren und verwenden, um kurzen, prägnanten Code direkt dort zu schreiben, wo er benötigt wird, insbesondere in Verbindung mit STL-Algorithmen.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Die manuelle Speicherverwaltung mit <code>new</code> und <code>delete</code> ist eine der größten Fehlerquellen in C++. Vergisst man ein <code>delete</code>, hat man ein Speicherleck. Ruft man <code>delete</code> zu früh oder doppelt auf, führt das zu Abstürzen. <strong>Smart Pointer</strong> lösen dieses Problem, indem sie den Lebenszyklus eines dynamisch allokierten Objekts an ihre eigene Lebensdauer binden. Sobald der Smart Pointer selbst zerstört wird (z.B. am Ende eines Gültigkeitsbereichs), ruft er automatisch <code>delete</code> für das verwaltete Objekt auf. Das ist sicherer, einfacher und weniger fehleranfällig.
+            </p>
+            <p>
+                <strong>Lambda-Ausdrücke</strong> sind eine Revolution für die Arbeit mit STL-Algorithmen. Anstatt eine separate Funktion oder ein komplexes Funktionsobjekt definieren zu müssen, nur um es einmalig an <code>std::sort</code> oder <code>std::find_if</code> zu übergeben, können Sie die Logik direkt und anonym "inline" schreiben. Das macht den Code kürzer, besser lesbar und hält die Logik dort, wo sie hingehört.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>RAII (Resource Acquisition Is Initialization)</h4>
+                <p>Ein zentrales Programmier-Idiom in C++. Es besagt, dass die Belegung einer Ressource (Speicher, Datei, Netzwerkverbindung) an die Lebenszeit eines Objekts gebunden wird. Der Konstruktor belegt die Ressource, der Destruktor gibt sie garantiert wieder frei. Smart Pointer sind die perfekte Umsetzung dieses Prinzips.</p>
+            </div>
+            <div class="definition">
+                <h4>Smart Pointer</h4>
+                <p>Ein Klassen-Template, das einen rohen Zeiger (raw pointer) umschließt und dessen Lebenszyklus automatisch verwaltet. Er verhält sich syntaktisch wie ein normaler Zeiger (mit <code>*</code> und <code>-></code>), verhindert aber Speicherlecks.</p>
+            </div>
+             <div class="definition">
+                <h4><code>std::unique_ptr</code></h4>
+                <p>Ein Smart Pointer, der den <strong>alleinigen Besitz</strong> an einem Objekt repräsentiert. Er kann nicht kopiert, aber verschoben (moved) werden. Wenn der <code>unique_ptr</code> zerstört wird, wird das Objekt gelöscht. Ideal für den Fall, dass eine Ressource genau einen Besitzer hat.</p>
+            </div>
+            <div class="definition">
+                <h4><code>std::shared_ptr</code></h4>
+                <p>Ein Smart Pointer, der <strong>geteilten Besitz</strong> ermöglicht. Er verwendet einen Referenzzähler: Mehrere <code>shared_ptr</code> können auf dasselbe Objekt zeigen. Das Objekt wird erst dann gelöscht, wenn der letzte <code>shared_ptr</code>, der darauf zeigt, zerstört wird.</p>
+            </div>
+            <div class="definition">
+                <h4>Lambda-Ausdruck</h4>
+                <p>Eine anonyme, lokale Funktion. Sie kann direkt an Ort und Stelle definiert werden. Ihre Syntax besteht aus einer Capture-Klausel <code>[]</code>, einer optionalen Parameterliste <code>()</code> und einem Funktionskörper <code>{}</code>.</p>
+                <pre><code class="language-cpp">auto myLambda = [](int x, int y) { return x + y; };</code></pre>
+            </div>
+            <div class="definition">
+                <h4>Capture-Klausel <code>[]</code></h4>
+                <p>Der eckige Klammer-Teil eines Lambdas. Er legt fest, welche Variablen aus dem umgebenden Gültigkeitsbereich innerhalb des Lambdas sichtbar sind und wie sie "eingefangen" werden (als Kopie <code>[=]</code> oder als Referenz <code>[&]</code>).</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Manuelle Speicherverwaltung ersetzen: `std::unique_ptr`</h3>
+            <p>Anstatt `new` direkt zu verwenden, nutzen wir `std::make_unique`. Der Speicher wird automatisch freigegeben, wenn `ptr` den Gültigkeitsbereich verlässt.</p>
+            <pre><code class="language-cpp">#include &lt;memory&gt; // Wichtig für Smart Pointer
+#include &lt;iostream&gt;
+
+class MyData {
+public:
+    MyData() { std::cout << "MyData erstellt\n"; }
+    ~MyData() { std::cout << "MyData zerstoert\n"; }
+    void doWork() { std::cout << "Arbeite...\n"; }
+};
+
+void useMyData() {
+    // Sicher: Speicher wird garantiert freigegeben.
+    std::unique_ptr&lt;MyData&gt; ptr = std::make_unique&lt;MyData&gt;();
+    ptr->doWork();
+} // Hier wird der Destruktor von ptr aufgerufen, der 'delete' auf dem MyData-Objekt aufruft.
+
+int main() {
+    useMyData();
+    // Ausgabe zeigt, dass der Destruktor aufgerufen wurde.
+}
+</code></pre>
+
+            <h3>2. Geteilten Besitz mit `std::shared_ptr` modellieren</h3>
+            <p>Wenn mehrere Teile des Codes die Verantwortung für ein Objekt teilen müssen, ist `shared_ptr` die richtige Wahl. Er wird mit `std::make_shared` erzeugt.</p>
+            <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+
+void processData(std::shared_ptr&lt;MyData&gt; p) {
+    std::cout << "Use count in function: " << p.use_count() << std::endl;
+    p->doWork();
+} // p wird hier zerstört, der Referenzzähler sinkt.
+
+int main() {
+    std::shared_ptr&lt;MyData&gt; p1 = std::make_shared&lt;MyData&gt;();
+    std::cout << "Use count after creation: " << p1.use_count() << std::endl; // = 1
+
+    {
+        std::shared_ptr&lt;MyData&gt; p2 = p1; // Kopieren ist erlaubt, Zähler wird erhöht
+        std::cout << "Use count after copy: " << p1.use_count() << std::endl; // = 2
+    } // p2 wird hier zerstört, Zähler sinkt auf 1.
+
+    processData(p1); // Temporäre Kopie für den Parameter, Zähler steigt auf 2 und sinkt wieder
+    
+    std::cout << "Use count before main ends: " << p1.use_count() << std::endl; // = 1
+} // p1 wird hier zerstört, Zähler sinkt auf 0, MyData-Objekt wird gelöscht.
+</code></pre>
+            
+            <h3>3. Lambda-Ausdrücke mit STL-Algorithmen verwenden</h3>
+            <p>Lambdas vereinfachen die Nutzung von Algorithmen, die ein "Callable" (etwas Aufrufbares) als Argument erwarten.</p>
+            <pre><code class="language-cpp">#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;iostream&gt;
+
+int main() {
+    std::vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+
+    // Finde die Anzahl gerader Zahlen mit std::count_if
+    int limit = 0; // Variable aus dem umgebenden Kontext
+    
+    int even_count = std::count_if(numbers.begin(), numbers.end(), 
+        // Lambda-Ausdruck als Prädikat:
+        [&limit](int n) { 
+            // 'limit' wurde als Referenz "gecaptured" und kann hier verwendet werden.
+            return (n % 2) == 0 && n > limit;
+        }
+    );
+
+    std::cout << "Anzahl gerader Zahlen: " << even_count << std::endl;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Übungsaufgaben aus KE10</h2>
+            <ol>
+                <li>
+                    <strong>Code refaktorisieren:</strong> Nehmen Sie ein älteres Programm (z.B. die CAD-Anwendung aus KE06), das rohe Zeiger (<code>new</code>/<code>delete</code>) verwendet, und schreiben Sie es um, sodass es stattdessen `std::unique_ptr` oder `std::shared_ptr` verwendet. Erklären Sie Ihre Wahl des jeweiligen Smart Pointers.
+                </li>
+                <li>
+                    <strong>Lambda für Sortierung:</strong> Erstellen Sie einen `std::vector` mit Objekten einer `Person`-Klasse (mit Attributen `name` und `alter`). Verwenden Sie `std::sort` und einen Lambda-Ausdruck, um den Vektor einmal nach Namen und einmal nach Alter (absteigend) zu sortieren.
+                </li>
+                 <li>
+                    <strong>Capture-Methoden:</strong> Schreiben Sie eine Funktion, die einen `int threshold` entgegennimmt und einen Lambda-Ausdruck zurückgibt. Dieser Lambda soll ein `int` als Argument nehmen und `true` zurückgeben, wenn dieses Argument größer als der ursprüngliche `threshold` ist. Welche Capture-Methode (`[=]` oder `[&]`) ist hierfür sinnvoll und warum?
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

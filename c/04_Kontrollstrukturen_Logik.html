@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 4: Kontrollstrukturen</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 4: Kontrollstrukturen: Logik, Schleifen & Rekursion</h1>
+        <p>Den Programmablauf mit Verzweigungen und Wiederholungen steuern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Am Ende dieser Einheit bist du in der Lage, den Ablauf deiner C-Programme gezielt zu steuern. Du kannst bedingte Anweisungen mit <strong>Selektionen</strong> (<code>if</code>, <code>if-else</code>, <code>switch</code>) treffen und Code-Abschnitte mit <strong>Schleifen</strong> (<code>for</code>, <code>while</code>, <code>do-while</code>) wiederholen. Du verstehst, wie man diese Strukturen verschachtelt, um komplexe Logik abzubilden. Außerdem kannst du den Unterschied zwischen einer iterativen (schleifenbasierten) und einer <strong>rekursiven</strong> (sich selbst aufrufenden) Lösung für ein Problem erkennen und beide Ansätze implementieren.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Bisher liefen unsere Programme streng linear von oben nach unten ab – wie ein Zug auf einem geraden Gleis. Kontrollstrukturen sind die Weichen und Signale, die es dem Zug erlauben, Abzweigungen zu nehmen oder bestimmte Streckenabschnitte mehrfach zu befahren.  Ohne sie könnten wir keine Entscheidungen treffen ("Wenn der Benutzer 'ja' eingibt, tue dies, ansonsten das") und keine sich wiederholenden Aufgaben effizient lösen ("Gib die Zahlen von 1 bis 100 aus").
+            </p>
+            <p>
+                Die Beherrschung von Selektionen und Schleifen ist der entscheidende Schritt von einem einfachen "Rechenknecht" zu einem Programm, das dynamisch auf unterschiedliche Situationen reagieren kann. Sie sind das Herzstück quasi jedes Algorithmus.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Kontrollstruktur</h4>
+                <p>Ein Sprachelement, das den normalen, sequenziellen Programmablauf verändert.  Die drei grundlegenden Arten sind Sequenz, Selektion und Schleife (Iteration). </p>
+            </div>
+            <div class="definition">
+                <h4>Selektion (Verzweigung)</h4>
+                <p>Ermöglicht es, basierend auf einer Bedingung zu entscheiden, welcher Code-Block als Nächstes ausgeführt wird.  Die wichtigsten Selektionen in C sind <code>if-else</code> und <code>switch</code>. </p>
+            </div>
+            <div class="definition">
+                <h4>Iteration (Schleife)</h4>
+                <p>Ermöglicht es, einen Code-Block wiederholt auszuführen, solange eine Bedingung erfüllt ist.  Man unterscheidet kopf- und fußgesteuerte Schleifen.</p>
+            </div>
+            <div class="definition">
+                <h4>Kopfgesteuerte vs. Fußgesteuerte Schleife</h4>
+                <ul>
+                    <li><strong>Kopfgesteuert (<code>for</code>, <code>while</code>)</strong>: Die Bedingung wird <strong>vor</strong> jeder Ausführung des Schleifenkörpers geprüft. Die Schleife kann also auch 0-mal durchlaufen werden. </li>
+                    <li><strong>Fußgesteuert (<code>do-while</code>)</strong>: Die Bedingung wird <strong>nach</strong> jeder Ausführung geprüft. Der Schleifenkörper wird daher mindestens einmal durchlaufen. </li>
+                </ul>
+            </div>
+             <div class="definition">
+                <h4>Rekursion</h4>
+                <p>Eine Technik, bei der eine Funktion sich selbst aufruft, um ein Problem zu lösen.  Jede Rekursion benötigt zwingend ein <strong>Abbruchkriterium</strong> (einen Basisfall), um eine Endlosschleife zu verhindern. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>Entscheidungen treffen mit Selektionen</h3>
+            <p><strong>Die `if`-`else`-Kette:</strong> Für eine oder mehrere Bedingungen.</p>
+            <pre><code>int note = 2;
+if (note == 1) {
+    printf("Sehr gut!");
+} else if (note < 5) {
+    printf("Bestanden.");
+} else {
+    printf("Nicht bestanden.");
+}</code></pre>
+
+            <p><strong>Die `switch`-Anweisung:</strong> Ideal, wenn eine einzelne Ganzzahl-Variable viele spezifische Werte annehmen kann.</p>
+            <pre><code>char auswahl = 'B';
+switch (auswahl) {
+    case 'A':
+        printf("Option A gewählt.\n");
+        break; // Verhindert "Fall-through" in den nächsten Fall
+    case 'B':
+        printf("Option B gewählt.\n");
+        break;
+    default: // Wird ausgeführt, wenn kein anderer Fall zutrifft
+        printf("Ungültige Auswahl.\n");
+        break;
+}</code></pre>
+
+            <h3>Aufgaben wiederholen mit Schleifen</h3>
+            <p><strong>Die `for`-Schleife:</strong> Die beste Wahl, wenn die Anzahl der Wiederholungen von vornherein bekannt ist.</p>
+            <pre><code>// Zählt von 0 bis 4 (5 Durchläufe)
+for (int i = 0; i < 5; i++) {
+    printf("Durchlauf Nummer %d\n", i);
+}
+// Struktur: for(Initialisierung; Bedingung; Inkrementierung)</code></pre>
+            
+            <p><strong>Die `while`-Schleife:</strong> Flexibel, wird verwendet, wenn die Anzahl der Durchläufe von einer externen Bedingung abhängt.</p>
+            <pre><code>int eingabe = 0;
+while (eingabe != 42) {
+    printf("Geben Sie die magische Zahl ein: ");
+    scanf("%d", &eingabe);
+}
+printf("Korrekt!\n");</code></pre>
+            
+            <p><strong>Die `do-while`-Schleife:</strong> Garantiert, dass der Code-Block mindestens einmal ausgeführt wird.</p>
+            <pre><code>char antwort;
+do {
+    printf("Möchten Sie das Programm beenden? (j/n): ");
+    scanf(" %c", &antwort); // Leerzeichen vor %c ist wichtig!
+} while (antwort != 'j' && antwort != 'n');</code></pre>
+            
+            <h3>Rekursion vs. Iteration am Beispiel der Fakultät</h3>
+            <p>Die Fakultät von n (n!) ist das Produkt aller ganzen Zahlen von 1 bis n. Man kann sie auf zwei Wegen berechnen:</p>
+            <pre><code>// Iterative Lösung mit einer for-Schleife
+unsigned long long CalcFacultyIterativ(unsigned int n) {
+    unsigned long long result = 1;
+    for (unsigned int i = 1; i <= n; i++) {
+        result *= i;
+    }
+    return result;
+}
+
+// Rekursive Lösung
+unsigned long long int CalcFacultyRecursiv(unsigned int n) {
+    // 1. Abbruchkriterium / Basisfall
+    if (n == 0) {
+        return 1;
+    }
+    // 2. Rekursiver Selbstaufruf
+    else {
+        return n * CalcFacultyRecursiv(n - 1);
+    }
+}
+</code></pre>
+            <p>Die rekursive Variante ist oft kürzer und eleganter, kann aber bei sehr großen `n` zu Problemen führen (Stack Overflow). Die iterative Lösung ist meist speichereffizienter.</p>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramme</h2>
+
+            <h3>Beispiel 1: Der Logik-Tester</h3>
+            <p>Dieses Programm demonstriert die verschiedenen Selektions-Strukturen, wie sie in Aufgabe 1 des Übungsblatts gefordert sind. </p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int wert;
+    printf("Geben Sie eine ganze Zahl ein: ");
+    scanf("%d", &wert);
+
+    // 1. Einfache Selektion (if)
+    if (wert > 100) {
+        printf("Die Zahl ist größer als 100.\n");
+    }
+
+    // 2. Zweifache Selektion (if-else)
+    if (wert % 2 == 0) {
+        printf("Die Zahl ist gerade.\n");
+    } else {
+        printf("Die Zahl ist ungerade.\n");
+    }
+
+    // 3. Mehrfache Selektion (switch)
+    printf("Ihre Eingabe als Schulnote interpretiert: ");
+    switch (wert) {
+        case 1: printf("Sehr Gut\n"); break;
+        case 2: printf("Gut\n"); break;
+        case 3: printf("Befriedigend\n"); break;
+        case 4: printf("Ausreichend\n"); break;
+        default: printf("Durchgefallen oder ungültig\n"); break;
+    }
+    
+    return 0;
+}
+</code></pre>
+
+            <h3>Beispiel 2: Muster zeichnen mit geschachtelten Schleifen</h3>
+            <p>Dieses Beispiel löst einen Teil von Aufgabe 3 des Übungsblatts und zeigt, wie man durch Verschachteln von zwei <code>for</code>-Schleifen zweidimensionale Muster erzeugen kann. </p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int breite;
+    printf("Bitte ungerade Breite fuer die Figur eingeben: ");
+    scanf("%d", &breite);
+
+    printf("\nFigur 1:\n");
+    // Äußere Schleife für die Zeilen (y-Achse)
+    for (int y = 0; y < breite; y++) {
+        // Innere Schleife für die Spalten (x-Achse)
+        for (int x = 0; x < breite; x++) {
+            // Eine einfache Selektion entscheidet, welches Zeichen gedruckt wird
+            if (y >= x) {
+                putchar('A');
+            } else {
+                putchar('B');
+            }
+        }
+        putchar('\n'); // Zeilenumbruch nach jeder Zeile
+    }
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Temperatur-Warner</strong><br>
+                    Lies eine Temperatur als <code>double</code> von der Tastatur ein. Gib mit einer <code>if-else if-else</code>-Kette aus, ob es "kalt" (unter 10°C), "moderat" (10-25°C) oder "heiß" (über 25°C) ist.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Struktur: <code>if (temp < 10) { ... } else if (temp <= 25) { ... } else { ... }</code>.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Countdown</strong><br>
+                    Implementiere einen Countdown von 10 bis 1 mit einer <code>for</code>-Schleife. Nach der Schleife soll "Start!" ausgegeben werden.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die `for`-Schleife muss rückwärts zählen: <code>for (int i = 10; i > 0; i--)</code>.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Menü-Auswahl</strong><br>
+                    Schreibe ein Programm, das ein Menü anzeigt (1=Start, 2=Optionen, 3=Ende) und den Benutzer mit einer <code>do-while</code>-Schleife so lange nach einer Eingabe fragt, bis er '3' für Ende eingibt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Lege eine `int choice;` an. Die Schleifenbedingung ist `while (choice != 3);`. Innerhalb der Schleife fragst du mit `printf` und liest mit `scanf` die Wahl ein.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Kleines Einmaleins</strong><br>
+                    Gib das kleine Einmaleins (von 1x1 bis 10x10) mithilfe von zwei geschachtelten <code>for</code>-Schleifen tabellarisch auf der Konsole aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die äußere Schleife läuft für `i` von 1 bis 10, die innere für `j` von 1 bis 10. Innerhalb der inneren Schleife berechnest und druckst du <code>i * j</code>. Nutze `printf("\t");` um einen Tabulator für eine saubere Ausrichtung einzufügen.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Rekursive Summe</strong><br>
+                    Implementiere die Funktion <code>int SumIterativ(int n)</code> aus Aufgabe 4 des Übungsblatts rekursiv. Sie soll die Summe der Zahlen von 1 bis n berechnen.  Der Basisfall ist, wenn n=0, dann ist die Summe 0.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Logik ist: `if (n == 0) { return 0; } else { return n + SumIterativ(n - 1); }`.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- SELEKTION ---
+// if-else-if Kette
+if (bedingung1) {
+    // ...
+} else if (bedingung2) {
+    // ...
+} else {
+    // ...
+}
+
+// switch für Ganzzahlen
+switch (variable) {
+    case WERT_1:
+        // ...
+        break;
+    case WERT_2:
+        // ...
+        break;
+    default:
+        // ...
+        break;
+}
+
+// --- ITERATION (SCHLEIFEN) ---
+// for-Schleife (zählergesteuert)
+for (int i = 0; i < ANZAHL; i++) {
+    // ...
+}
+
+// while-Schleife (kopfgesteuert)
+while (bedingung) {
+    // ...
+}
+
+// do-while-Schleife (fußgesteuert, läuft mind. 1x)
+do {
+    // ...
+} while (bedingung);
+
+// --- REKURSION ---
+// Typisches Muster
+Rueckgabetyp RecursiveFunc(Parameter p) {
+    // 1. Basisfall / Abbruchkriterium
+    if (p erfüllt Basisfall) {
+        return basis_wert;
+    }
+    // 2. Rekursiver Schritt
+    else {
+        // Problem verkleinern und sich selbst aufrufen
+        return ... RecursiveFunc(verkleinertes_p);
+    }
+}
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

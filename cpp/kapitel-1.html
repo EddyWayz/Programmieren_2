@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 14: Von C zu C++</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 1: Von C zu C++ (Super-C Features)</h1>
+        <p>Entdecke die direkten prozeduralen Verbesserungen, die C++ bietet.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit verstehst du die grundlegenden prozeduralen Erweiterungen, die C++ gegenüber C bietet. Du kannst die C++ <strong>Streams</strong> (<code>cout</code>, <code>cin</code>) für die Konsolenein- und -ausgabe verwenden, Code mit <strong>Namespaces</strong> organisieren, um Namenskonflikte zu vermeiden, und die sicherere <strong><code>std::string</code></strong>-Klasse anstelle von C-Style-Zeichenketten nutzen. Du kennst den Unterschied zwischen Zeigern und den typsicheren <strong>Referenzen</strong> (<code>&</code>) und kannst flexiblere Funktionen durch <strong>Überladung</strong> und <strong>Default-Parameter</strong> schreiben.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                C++ ist mehr als nur eine objektorientierte Erweiterung von C. Es wurde entworfen, um viele der alltäglichen Probleme und Fehlerquellen von C direkt zu beheben und die Sprache ausdrucksstärker und sicherer zu machen. Diese sogenannten <strong>"Super-C"-Features</strong> sind prozedurale Verbesserungen, die du sofort nutzen kannst, um besseren Code zu schreiben, noch bevor du deine erste eigene Klasse definierst.
+            </p>
+            <p>
+                Dieser Übergang zeigt dir, wie C++-Konzepte wie Referenzen, Namespaces und die strenge Typisierung die Entwicklung robusterer Software fördern. Wir bauen direkt auf deinem C-Wissen auf und ersetzen nach und nach C-Idiome durch ihre modernen C++-Entsprechungen.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Stream</h4>
+                <p>Ein C++-Konzept, das eine Folge von Daten (Bytes) repräsentiert, die von einer Quelle (z.B. Tastatur) zu einem Ziel (z.B. Bildschirm) fließt. Die Standard-Streams für die Konsole sind <code>std::cin</code> (Eingabe) und <code>std::cout</code> (Ausgabe).</p>
+            </div>
+            <div class="definition">
+                <h4>Namespace</h4>
+                <p>Ein benannter Bereich, der C++-Bezeichner (Funktionen, Variablen, Typen) gruppiert, um Namenskonflikte zwischen verschiedenen Code-Teilen oder Bibliotheken zu verhindern.</p>
+            </div>
+            <div class="definition">
+                <h4><code>::</code> (Scope Resolution Operator)</h4>
+                <p>Der Zugriffsoperator, mit dem auf einen Bezeichner innerhalb eines bestimmten Namespaces zugegriffen wird. Beispiel: <code>std::cout</code>.</p>
+            </div>
+            <div class="definition">
+                <h4>Referenz (<code>&</code>)</h4>
+                <p>Ein Alias, also ein alternativer Name für eine bereits existierende Variable. Eine Referenz muss bei ihrer Definition initialisiert werden und kann danach nicht mehr auf eine andere Variable "umgebogen" werden. Sie kann im Gegensatz zu Zeigern nicht `NULL` sein.</p>
+            </div>
+             <div class="definition">
+                <h4>Funktionsüberladung (Function Overloading)</h4>
+                <p>Die Möglichkeit, mehrere Funktionen mit demselben Namen, aber unterschiedlichen Parameterlisten zu definieren. C++ wählt anhand der übergebenen Argumente automatisch die passende Funktion aus.</p>
+            </div>
+             <div class="definition">
+                <h4>Funktionstemplate</h4>
+                <p>Eine Vorlage, nach der der Compiler Funktionen für beliebige Datentypen erstellen kann. Dies ermöglicht generische Programmierung, ohne für jeden Typ eine eigene Funktion schreiben zu müssen.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Von `printf` zu `iostream`</h3>
+            <p>Die C++-Art der Konsolen-I/O verwendet Streams. Anstelle von Format-Spezifizierern werden die Shift-Operatoren `<<` (für Ausgabe) und `>>` (für Eingabe) genutzt, um Daten in den bzw. aus dem Stream zu "schieben".</p>
+            <pre><code>#include &lt;iostream&gt; // Die C++ Headerdatei für I/O
+#include &lt;string&gt;   // Die C++ Headerdatei für Strings
+
+int main() {
+    int alter;
+    std::string name;
+
+    std::cout << "Bitte gib deinen Vornamen ein: ";
+    std::cin >> name; // Liest ein Wort von der Tastatur
+
+    std::cout << "Bitte gib dein Alter ein: ";
+    std::cin >> alter;
+
+    std::cout << "Hallo " << name << ", du bist " << alter << " Jahre alt." << std::endl;
+    return 0;
+}
+</code></pre>
+
+            <h3>2. Namespaces: Ordnung im globalen Chaos</h3>
+            <p>Alle Elemente der C++-Standardbibliothek (wie `cout`, `cin`, `string`) liegen im Namespace `std`. Es gibt drei Wege, sie zu nutzen:</p>
+            <pre><code>// 1. Qualifizierter Name (BEVORZUGT): Immer den Namespace angeben.
+std::cout << "Sicher und eindeutig." << std::endl;
+
+// 2. using-Deklaration: Bestimmte Namen in den aktuellen Scope holen.
+using std::cout;
+cout << "Auch eine gute Option."; // std:: wird nicht mehr benötigt
+
+// 3. using-Direktive (NICHT EMPFOHLEN in Headern): Holt alles aus std.
+using namespace std;
+cout << "Bequem, aber birgt die Gefahr von Namenskonflikten.";
+</code></pre>
+            
+            <h3>3. Referenzen: Die sicherere Alternative zu Zeigern</h3>
+            <p>Für "Call by Reference" sind Referenzen in C++ oft die bessere Wahl als Zeiger.</p>
+            <pre><code>// C-Stil mit Zeiger
+void add_one_ptr(int* p_num) {
+    if (p_num != NULL) { // Sanity-Check nötig
+        (*p_num)++;      // Umständliche Dereferenzierung
+    }
+}
+
+// C++-Stil mit Referenz
+void add_one_ref(int& r_num) { // '&' in der Deklaration macht es zur Referenz
+    // Kein Sanity-Check nötig, Referenz kann nicht NULL sein.
+    r_num++;                  // Zugriff wie auf eine normale Variable.
+}
+
+int main() {
+    int x = 5;
+    add_one_ptr(&x); // Muss Adresse übergeben
+    add_one_ref(x);  // Übergebe Variable direkt, Syntax wie bei Call by Value
+}
+</code></pre>
+
+            <h3>4. Flexiblere Funktionen</h3>
+            <p><strong>Überladung:</strong> Derselbe Funktionsname für unterschiedliche Datentypen.</p>
+            <pre><code>void print(int val) { std::cout << "Integer: " << val << std::endl; }
+void print(double val) { std::cout << "Double: " << val << std::endl; }
+// Der Compiler wählt automatisch die richtige Funktion.
+print(10);    // Ruft die int-Version auf
+print(3.14);  // Ruft die double-Version auf
+</code></pre>
+            <p><strong>Default-Werte:</strong> Parameter am Ende können optionale Werte erhalten.</p>
+            <pre><code>// Der Parameter 'prefix' hat einen Default-Wert
+void log(const std::string& message, const std::string& prefix = "LOG: ") {
+    std::cout << prefix << message << std::endl;
+}
+log("Programm gestartet.");       // Gibt "LOG: Programm gestartet." aus
+log("Fehler!", "ERROR: ");     // Gibt "ERROR: Fehler!" aus
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Überladener Geometrie-Rechner</h2>
+            <p>Dieses Programm nutzt Funktionsüberladung, um mit einer Funktion namens `calc_area` die Fläche unterschiedlicher geometrischer Formen zu berechnen.</p>
+            <pre><code>#include &lt;iostream&gt;
+
+// Fläche für einen Kreis
+double calc_area(double radius) {
+    return 3.14159 * radius * radius;
+}
+
+// Fläche für ein Rechteck
+double calc_area(double width, double height) {
+    return width * height;
+}
+
+int main() {
+    std::cout << "Flaeche Kreis (Radius 5): " << calc_area(5.0) << std::endl;
+    std::cout << "Flaeche Rechteck (4x5): " << calc_area(4.0, 5.0) << std::endl;
+    return 0;
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Generischer Tausch mit Templates</h2>
+            <p>Dieses Beispiel zeigt ein Funktionstemplate, das zwei Variablen beliebigen Typs mittels Referenzen vertauschen kann, und demonstriert die sicherere `std::string`-Klasse.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+// Ein Template für eine Tausch-Funktion
+template &lt;typename T&gt;
+void my_swap(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+int main() {
+    int x = 10, y = 20;
+    std::cout << "Vorher: x=" << x << ", y=" << y << std::endl;
+    my_swap(x, y);
+    std::cout << "Nachher: x=" << x << ", y=" << y << std::endl;
+
+    std::string s1 = "Hello", s2 = "World";
+    std::cout << "Vorher: s1=" << s1 << ", s2=" << s2 << std::endl;
+    my_swap(s1, s2);
+    std::cout << "Nachher: s1=" << s1 << ", s2=" << s2 << std::endl;
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Stream-I/O</strong><br>
+                    Schreibe ein Programm, das `<iostream>` verwendet, um den Benutzer nach seinem Lieblingsessen (`std::string`) und einer Glückszahl (`int`) zu fragen und die Eingaben danach wieder ausgibt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Benutze `std::cout <<` für die Aufforderung und `std::cin >>` um die Werte in eine `std::string`- und eine `int`-Variable einzulesen.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Pass-by-Reference</strong><br>
+                    Schreibe eine Funktion `void reset(int& value)`, die eine Ganzzahl per Referenz entgegennimmt und sie auf 0 zurücksetzt. Teste die Funktion in `main`.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>In `main` deklariere `int x = 100;`. Rufe `reset(x);` auf und gib `x` danach aus – es sollte `0` sein.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Funktion überladen</strong><br>
+                    Implementiere eine überladene Funktion `print_array`. Eine Version soll ein `int`-Array, die andere ein `double`-Array entgegennehmen und die jeweiligen Inhalte auf der Konsole ausgeben.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Du benötigst zwei Funktionen: `void print_array(int arr[], int size)` und `void print_array(double arr[], int size)`. Der Funktionskörper mit der `for`-Schleife ist bei beiden fast identisch.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Maximum-Template</strong><br>
+                    Schreibe ein Funktionstemplate `template <class T> T get_max(T a, T b)`, das den größeren von zwei Werten zurückgibt. Teste es in `main` mit Integers, Doubles und `std::string`s.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Logik innerhalb der Funktion ist ein einfacher `if (a > b)`-Vergleich. C++ weiß, wie man Zahlen und auch `std::string`s vergleicht.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Default-Parameter für Begrüßung</strong><br>
+                    Schreibe eine Funktion `void greet(const std::string& name, const std::string& greeting = "Hallo")`. Rufe sie einmal nur mit einem Namen auf und einmal mit einem Namen und einer anderen Begrüßung (z.B. "Guten Tag").
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>`greet("Max");` wird "Hallo Max" ausgeben. `greet("Dr. Schmidt", "Guten Tag");` wird "Guten Tag Dr. Schmidt" ausgeben.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- I/O mit Streams ---
+#include &lt;iostream&gt;
+std::cout << "Ausgabe"; // Ausgabe
+std::cin >> variable;   // Eingabe
+
+// --- Namespaces ---
+#include &lt;string&gt;
+std::string s; // Qualifizierter Name (bevorzugt)
+using namespace std;
+string s2; // Pauschal (in .cpp-Dateien ok, in Headern vermeiden)
+
+// --- Referenzen ---
+// Als Funktionsparameter (Call by Reference)
+void func(int& ref); 
+// Aufruf
+int x = 10;
+func(x); // x kann in func geändert werden
+
+// --- Funktionsüberladung ---
+void print(int x);
+void print(double d);
+void print(const std::string& s);
+
+// --- Templates ---
+template &lt;typename T&gt;
+T func(T param) { /* ... */ }
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

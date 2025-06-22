@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 7: Operatoren überladen</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 7: Operatoren überladen</h1>
+        <p>Ermöglichen Sie es Ihren eigenen Klassen, mit den Standard-Operatoren von C++ intuitiv und natürlich zu arbeiten.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit sind Sie in der Lage, die meisten C++-Operatoren für Ihre eigenen Klassen zu überladen. Sie verstehen den Unterschied zwischen der Implementierung eines Operators als <strong>Member-Funktion</strong> und als <strong>freie (<code>friend</code>-)Funktion</strong> und wissen, wann welche Form zu bevorzugen ist. Sie können sowohl binäre (z.B. <code>+</code>, <code>==</code>) als auch unäre Operatoren (z.B. <code>-</code>, <code>!</code>) überladen. Ein besonderer Fokus liegt auf dem korrekten Überladen der <strong>Inkrement-/Dekrement-Operatoren</strong> (<code>++</code>, <code>--</code>) in ihrer Präfix- und Postfix-Form sowie dem wichtigen Idiom für das Überladen der <strong>Stream-Operatoren</strong> (<code>&lt;&lt;</code>, <code>&gt;&gt;</code>).
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Stellen Sie sich vor, Sie haben eine Klasse für komplexe Zahlen oder für Vektoren. Wäre es nicht elegant und intuitiv, wenn Sie einfach schreiben könnten: <code>Vector v3 = v1 + v2;</code> anstatt <code>Vector v3 = v1.add(v2);</code>? Genau das ermöglicht das Überladen von Operatoren.
+            </p>
+            <p>
+                Indem Sie den Standard-Operatoren eine spezifische Bedeutung für Ihre Datentypen geben, wird der Code nicht nur kürzer und lesbarer, sondern er verhält sich auch so, wie man es von den eingebauten Datentypen (wie <code>int</code> oder <code>double</code>) gewohnt ist. Besonders wichtig ist dies für die nahtlose Integration eigener Typen in die C++-Standardbibliothek, zum Beispiel beim Ausgeben eines Objekts mit <code>std::cout</code>. Sie bringen C++ bei, wie es mit Ihren Objekten "sprechen" soll.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Operator überladen</h4>
+                <p>Einem Operator wird eine neue Implementierung für einen benutzerdefinierten Datentyp (eine <code>class</code> oder <code>struct</code>) zur Verfügung gestellt. Dies geschieht durch das Schreiben einer speziellen Funktion mit dem Namen <code>operator@</code>, wobei <code>@</code> das Symbol des Operators ist (z.B. <code>operator+</code>).</p>
+            </div>
+            <div class="definition">
+                <h4>Implementierung als Member-Funktion</h4>
+                <p>Der Operator wird als Methode der Klasse implementiert. Der linke Operand ist implizit das Objekt selbst (<code>*this</code>). Funktioniert nur, wenn der linke Operand ein Objekt der Klasse ist.</p>
+                <pre><code class="language-cpp">class Vector { public: Vector operator+(const Vector& rhs) const; };</code></pre>
+            </div>
+            <div class="definition">
+                <h4>Implementierung als freie Funktion (oft `friend`)</h4>
+                <p>Der Operator wird als globale Funktion außerhalb der Klasse implementiert. Beide Operanden werden als Argumente übergeben. Diese Form ist notwendig, wenn der linke Operand nicht vom Klassentyp ist (z.B. bei <code>std::cout << myObject</code>).</p>
+                <pre><code class="language-cpp">class Vector { /* ... */ friend Vector operator+(const Vector& lhs, const Vector& rhs); };</code></pre>
+            </div>
+             <div class="definition">
+                <h4>Präfix- vs. Postfix-Inkrement</h4>
+                <p>Beide Operatoren (<code>++obj</code> und <code>obj++</code>) müssen unterschiedlich überladen werden. Die Postfix-Version erhält vom Compiler einen zusätzlichen, unbenutzten <code>int</code>-Parameter, um sie von der Präfix-Version zu unterscheiden.</p>
+                <pre><code class="language-cpp">MyClass& operator++();    // Präfix ++obj
+MyClass operator++(int); // Postfix obj++</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Binären Operator als Member-Funktion überladen (z.B. `+`)</h3>
+            <p>Der linke Operand ist <code>*this</code>, der rechte wird als Parameter übergeben. Das Ergebnis wird typischerweise als neues Objekt zurückgegeben.</p>
+            <pre><code class="language-cpp">class Complex {
+private:
+    double real, imag;
+public:
+    Complex(double r, double i) : real(r), imag(i) {}
+
+    // this->real + rhs.real
+    Complex operator+(const Complex& rhs) const {
+        // Gibt ein neues Complex-Objekt zurück, das die Summe ist
+        return Complex(this->real + rhs.real, this->imag + rhs.imag);
+    }
+};
+
+// Anwendung
+Complex c1(1, 2), c2(3, 4);
+Complex c3 = c1 + c2; // Ruft c1.operator+(c2) auf
+</code></pre>
+
+            <h3>2. Vergleichsoperator als Member-Funktion überladen (z.B. `==`)</h3>
+            <p>Gibt typischerweise einen <code>bool</code>-Wert zurück.</p>
+            <pre><code class="language-cpp">class Complex {
+    // ...
+    bool operator==(const Complex& rhs) const {
+        return (this->real == rhs.real) && (this->imag == rhs.imag);
+    }
+};
+
+// Anwendung
+if (c1 == c2) { /* ... */ } // Ruft c1.operator==(c2) auf
+</code></pre>
+
+            <h3>3. Stream-Operator `<<` als freie `friend`-Funktion überladen</h3>
+            <p>Dies ist der Standardweg, um Objekte auf `std::cout` auszugeben. Die Funktion muss eine Referenz auf den `ostream` zurückgeben, um Verkettungen (<code>cout << a << b;</code>) zu ermöglichen.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class Complex {
+    // ...
+    // Deklariert die externe Funktion als Freund, damit sie auf private Member zugreifen kann
+    friend std::ostream& operator&lt;&lt;(std::ostream& os, const Complex& c);
+};
+
+// Implementierung als freie Funktion
+std::ostream& operator&lt;&lt;(std::ostream& os, const Complex& c) {
+    os << "(" << c.real << ", " << c.imag << "i)";
+    return os;
+}
+
+// Anwendung
+Complex c(5, -2);
+std::cout << "Die komplexe Zahl ist: " << c << std::endl;
+</code></pre>
+
+             <h3>4. Präfix- und Postfix-Operatoren überladen</h3>
+            <p>Die Präfix-Version gibt eine Referenz auf das modifizierte Objekt zurück. Die Postfix-Version muss den alten Zustand sichern, das Objekt verändern und dann den alten Zustand als Kopie zurückgeben.</p>
+             <pre><code class="language-cpp">class Counter {
+private:
+    int value_;
+public:
+    // ...
+    // Präfix: Zuerst erhöhen, dann zurückgeben
+    Counter& operator++() {
+        ++value_;
+        return *this;
+    }
+
+    // Postfix: Alten Wert merken, erhöhen, alten Wert zurückgeben
+    Counter operator++(int) {
+        Counter temp = *this; // Kopie des alten Zustands
+        ++(*this); // Ruft den Präfix-Operator auf
+        return temp; // Gibt die Kopie zurück
+    }
+};
+</code></pre>
+        </section>
+        
+        <section>
+            <h2>5. Übungsaufgaben aus KE07</h2>
+            <ol>
+                <li>
+                    <strong>Vektor-Klasse:</strong> Implementieren Sie eine Klasse `Vector2D` mit x- und y-Koordinaten. Überladen Sie die Operatoren <code>+</code> und <code>-</code> zur Vektoraddition/-subtraktion. Überladen Sie den Operator <code>*</code> mit einem `double` als rechtem Operanden für die Skalarmultiplikation.
+                </li>
+                <li>
+                    <strong>Vergleichsoperatoren:</strong> Erweitern Sie Ihre `Vector2D`-Klasse, indem Sie die Operatoren <code>==</code> und <code>!=</code> überladen. Zwei Vektoren sollen als gleich gelten, wenn ihre x- und y-Koordinaten jeweils übereinstimmen.
+                </li>
+                 <li>
+                    <strong>Input-Stream-Operator:</strong> Überladen Sie den Operator <code>&gt;&gt;</code> für Ihre `Vector2D`-Klasse, sodass Sie einen Vektor direkt von der Konsole (<code>std::cin</code>) einlesen können. Das Format könnte sein, dass der Benutzer nacheinander die x- und die y-Koordinate eingibt.
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

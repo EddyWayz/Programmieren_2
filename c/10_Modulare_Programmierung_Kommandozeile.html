@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 10: Modulare Programmierung</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 10: Modulare Programmierung & Kommandozeilenparameter</h1>
+        <p>Projekte strukturieren und von außen steuern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit kannst du C-Projekte professionell in mehrere, voneinander unabhängige <strong>Module</strong> aufteilen. Du verstehst die Trennung von öffentlicher Schnittstelle (<strong>Header-Datei `.h`</strong>) und privater Implementierung (<strong>Source-Datei `.c`</strong>). Du kannst das <code>static</code>-Schlüsselwort zur <strong>Kapselung</strong> von Funktionen und Variablen einsetzen. Des Weiteren bist du in der Lage, die <strong><code>main</code>-Funktion</strong> so zu schreiben, dass sie <strong>Kommandozeilenargumente</strong> (`argc`, `argv`) entgegennehmen und verarbeiten kann.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Während kleine Programme in einer einzigen Datei leben können, ist dies für reale Projekte undenkbar. Die <strong>Modulare Programmierung</strong> ist das Grundprinzip, um Komplexität zu beherrschen.  Man zerlegt ein großes Problem in kleinere, logische Teilprobleme, die als eigenständige Module implementiert werden.  Dies ermöglicht es, im Team zu arbeiten, Code wiederzuverwenden und die Wartbarkeit drastisch zu erhöhen.
+            </p>
+            <p>
+                <strong>Kommandozeilenparameter</strong> sind die klassische Schnittstelle, um ein Programm beim Start zu konfigurieren.  Anstatt den Benutzer interaktiv nach einem Dateinamen oder einer Einstellung zu fragen, kann man diese direkt beim Aufruf mitgeben. Dies ist unerlässlich für die Automatisierung von Aufgaben und die Integration von Programmen in Skripte.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Modul (Module)</h4>
+                <p>Eine funktional geschlossene Einheit innerhalb eines Softwaresystems.  In C besteht ein Modul typischerweise aus einer Quelldatei (`.c`) und einer zugehörigen Headerdatei (`.h`). </p>
+            </div>
+            <div class="definition">
+                <h4>Header-Datei (`.h`)</h4>
+                <p>Die öffentliche Schnittstelle ("Interface") eines Moduls. Sie enthält die Deklarationen von Funktionen, `typedefs` und `#defines`, die von anderen Modulen genutzt werden sollen. </p>
+            </div>
+            <div class="definition">
+                <h4>Source-Datei (`.c`)</h4>
+                <p>Die Implementierung eines Moduls. Sie enthält die Definitionen der in der Headerdatei deklarierten Funktionen sowie modulinterne (private) Funktionen und Variablen. </p>
+            </div>
+            <div class="definition">
+                <h4>Kapselung (Encapsulation)</h4>
+                <p>Das Verbergen der internen Funktionsweise eines Moduls vor dem Zugriff von außen.  In C wird dies vor allem durch das Schlüsselwort <code>static</code> erreicht. </p>
+            </div>
+             <div class="definition">
+                <h4>`static` (im globalen Kontext)</h4>
+                <p>Wird eine globale Variable oder eine Funktion mit `static` deklariert, ist ihre Sichtbarkeit auf diejenige Datei beschränkt, in der sie definiert wurde.  Sie kann von anderen Modulen nicht gesehen oder aufgerufen werden.</p>
+            </div>
+             <div class="definition">
+                <h4>Kommandozeilenargumente (`argc`, `argv`)</h4>
+                <p>Parameter, die einem Programm beim Start über die Kommandozeile übergeben werden.  Die `main`-Funktion empfängt sie über die Parameter `int argc` (die Anzahl der Argumente) und `char* argv[]` (ein Array von Zeichenketten, die die Argumente enthalten). </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Von einer Datei zu Modulen</h3>
+            <p>Stell dir ein einfaches Programm vor, das mathematische Hilfsfunktionen bereitstellt.</p>
+
+            <p><strong>`math_utils.h` (Die öffentliche Schnittstelle)</strong></p>
+            <pre><code>#ifndef MATH_UTILS_H_
+#define MATH_UTILS_H_
+
+// Diese Funktion ist für andere Module sichtbar und nutzbar.
+int add(int a, int b);
+
+#endif // MATH_UTILS_H_
+</code></pre>
+            <p><strong>`math_utils.c` (Die private Implementierung)</strong></p>
+            <pre><code>#include "math_utils.h"
+
+// Diese interne Zählervariable ist dank 'static' nur in dieser Datei sichtbar.
+static int s_call_counter = 0;
+
+// Die Implementierung der öffentlichen Funktion.
+int add(int a, int b) {
+    s_call_counter++;
+    return a + b;
+}
+</code></pre>
+            <p><strong>`main.c` (Der Nutzer des Moduls)</strong></p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include "math_utils.h" // Wir inkludieren die Schnittstelle
+
+int main(void) {
+    int result = add(5, 3); // OK, add() ist öffentlich
+    // s_call_counter++; // FEHLER! s_call_counter ist privat in math_utils.c
+    printf("Ergebnis: %d\n", result);
+    return 0;
+}
+</code></pre>
+
+            <h3>2. Kommandozeilenparameter verarbeiten</h3>
+            <p>Um Parameter zu empfangen, muss die Signatur von `main` erweitert werden. </p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt; // Für atof()
+
+// argc: Anzahl der Argumente. Ist immer mindestens 1.
+// argv: Ein Array von Zeichenketten (char*).
+int main(int argc, char* argv[]) {
+
+    printf("Das Programm wurde mit %d Argumenten aufgerufen.\n", argc);
+
+    // Alle Argumente ausgeben
+    for (int i = 0; i < argc; i++) {
+        printf("Argument %d: %s\n", i, argv[i]);
+    }
+    
+    // Beispiel: Dreiecks-Test vom Aufruf: ./programm 3.0 4.0 5.0
+    if (argc == 4) { // 1 (Programmname) + 3 Seitenlängen
+        // Konvertiere Text (ASCII) in double
+        double a = atof(argv[1]);
+        double b = atof(argv[2]);
+        double c = atof(argv[3]);
+        printf("Die Seiten sind: %.2f, %.2f, %.2f\n", a, b, c);
+    }
+
+    return 0;
+}
+</code></pre>
+            <p><code>argv[0]</code> enthält immer den Namen des aufgerufenen Programms.  Die eigentlichen Parameter beginnen bei `argv[1]`. Alle Parameter werden als Text (Zeichenketten) übergeben und müssen bei Bedarf in Zahlen umgewandelt werden (z.B. mit `atoi` oder `atof`). </p>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Modul für Textanalyse</h2>
+            <p>Wir erstellen ein Modul `text_tool.c/.h`, das eine Funktion zur Zählung von Zeichen bereitstellt, und nutzen es in `main.c`.</p>
+            <p><b>text_tool.h</b></p>
+            <pre><code>#ifndef TEXT_TOOL_H_
+#define TEXT_TOOL_H_
+int count_occurrences(const char* text, char search_char);
+#endif</code></pre>
+            <p><b>text_tool.c</b></p>
+            <pre><code>#include "text_tool.h"
+
+// Implementierung der öffentlichen Funktion
+int count_occurrences(const char* text, char search_char) {
+    int count = 0;
+    if (text == NULL) return 0;
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == search_char) {
+            count++;
+        }
+    }
+    return count;
+}</code></pre>
+            <p><b>main.c</b></p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include "text_tool.h"
+
+int main(void) {
+    const char* my_string = "Hello modular world!";
+    char to_find = 'l';
+    int num = count_occurrences(my_string, to_find);
+    printf("Der Buchstabe '%c' kommt %d mal im Text vor.\n", to_find, num);
+    return 0;
+}</code></pre>
+            
+            <h2>Beispielprogramm 2: Dreiecks-Analyse per Kommandozeile</h2>
+            <p>Dieses Programm ist eine Implementierung von Aufgabe 1 des Übungsblatts. Es erwartet drei Zahlen als Kommandozeilenparameter und klassifiziert das entsprechende Dreieck. </p>
+            <pre><code>#include &lt;stdio.h&gt;

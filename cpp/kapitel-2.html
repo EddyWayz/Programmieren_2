@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 2: Klassen und Objekte</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 2: Klassen und Objekte</h1>
+        <p>Der Einstieg in die Objektorientierte Programmierung (OOP).</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit verstehst du das Kernprinzip der Objektorientierung: die Unterscheidung zwischen <strong>Klasse</strong> (dem Bauplan) und <strong>Objekt</strong> (der Instanz). Du bist in der Lage, eigene einfache Klassen zu definieren, die private Daten (<strong>Attribute</strong>) und öffentliche Operationen (<strong>Methoden</strong>) kapseln. Du kannst den Zugriff mit `public` und `private` steuern, <strong>Konstruktoren</strong> zur Initialisierung von Objekten schreiben und Objekte sowohl statisch als auch dynamisch (mit `new` und `delete`) erzeugen. 
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                In C haben wir Daten (in `structs`) und Funktionen, die diese Daten bearbeiten, getrennt voneinander gehalten. Die Objektorientierung führt diese beiden zusammen. Eine Klasse ist wie eine "intelligente" `struct`, die nicht nur ihre Daten kennt, sondern auch alle Operationen, die auf diesen Daten sinnvoll sind. 
+            </p>
+            <p>
+                Ein `Complex`-Objekt weiß zum Beispiel selbst, wie es seinen Betrag berechnet oder sich auf der Konsole ausgibt. Wir müssen nicht mehr eine externe Funktion `print_complex(my_complex_number)` aufrufen, sondern sagen dem Objekt direkt: `my_complex_number.print()`. Dieses Prinzip der <strong>Kapselung</strong> macht Code logischer, wiederverwendbarer und deutlich einfacher zu warten.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Klasse (Class)</h4>
+                <p>Ein benutzerdefinierter Datentyp, der als Bauplan für Objekte dient. Er definiert eine Kombination aus Daten (Attributen) und Funktionen (Methoden), die auf diesen Daten operieren. </p>
+            </div>
+            <div class="definition">
+                <h4>Objekt (Object) / Instanz (Instance)</h4>
+                <p>Eine konkrete Realisierung einer Klasse im Speicher. Während `Car` die Klasse (der Bauplan) ist, sind `mein_VW` und `dein_BMW` Objekte (die fertigen Autos). Ein Objekt ist eine Instanz einer Klasse. </p>
+            </div>
+            <div class="definition">
+                <h4>Attribut (Member Variable)</h4>
+                <p>Eine Variable, die innerhalb einer Klasse definiert ist und den Zustand eines Objekts beschreibt. </p>
+            </div>
+            <div class="definition">
+                <h4>Methode (Member Function)</h4>
+                <p>Eine Funktion, die innerhalb einer Klasse definiert ist und das Verhalten eines Objekts beschreibt. </p>
+            </div>
+            <div class="definition">
+                <h4>Kapselung (Encapsulation)</h4>
+                <p>Eines der vier Grundprinzipien der OOP. Es bedeutet, die Attribute eines Objekts vor direktem Zugriff von außen zu schützen (sie `private` zu machen) und den Zugriff nur über öffentliche Methoden (`public`) zu erlauben. </p>
+            </div>
+            <div class="definition">
+                <h4>Konstruktor & Destruktor</h4>
+                <ul>
+                    <li><strong>Konstruktor:</strong> Eine spezielle Methode, die denselben Namen wie die Klasse hat. Sie wird automatisch aufgerufen, wenn ein Objekt erzeugt wird, um es zu initialisieren. </li>
+                    <li><strong>Destruktor:</strong> Eine spezielle Methode mit dem Namen `~ClassName`. Sie wird automatisch aufgerufen, wenn ein Objekt zerstört wird, um Ressourcen (z.B. Speicher) freizugeben. </li>
+                </ul>
+            </div>
+            <div class="definition">
+                <h4>`this`-Zeiger</h4>
+                <p>Ein impliziter Zeiger, der in jeder (nicht-statischen) Methode einer Klasse verfügbar ist. Er zeigt auf die Speicheradresse des Objekts, für das die Methode gerade aufgerufen wird. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Trennung von Deklaration und Definition</h2>
+            <p>Professioneller C++-Code wird modular aufgebaut. Die "Was"-Frage (Was kann die Klasse?) wird in der Header-Datei (`.h`) deklariert, die "Wie"-Frage (Wie macht sie das?) in der Source-Datei (`.cpp`) implementiert.</p>
+
+            <p><strong>`Complex.h` (Die öffentliche Schnittstelle)</strong></p>
+            <pre><code>#ifndef COMPLEX_H
+#define COMPLEX_H
+
+namespace MyMath {
+    class Complex {
+    public:
+        // Konstruktor
+        Complex(double real, double imag);
+
+        // Öffentliche Methoden (Interface)
+        void vPrint() const; // const verspricht, das Objekt nicht zu ändern
+        double f64GetReal() const;
+        void vSetReal(double real_new);
+
+    private:
+        // Private Daten (Implementierungsdetail)
+        double f64Real_;
+        double f64Img_;
+    };
+}
+#endif
+</code></pre>
+
+            <p><strong>`Complex.cpp` (Die Implementierung)</strong></p>
+            <pre><code>#include "Complex.h"
+#include &lt;iostream&gt;
+
+// using namespace MyMath; // Vereinfacht den Zugriff 
+
+// Definition der Methoden mit dem Scope Resolution Operator ::
+MyMath::Complex::Complex(double real, double imag) {
+    f64Real_ = real;
+    f64Img_ = imag;
+}
+
+double MyMath::Complex::f64GetReal() const {
+    return f64Real_;
+}
+
+void MyMath::Complex::vSetReal(double real_new) {
+    f64Real_ = real_new;
+}
+
+void MyMath::Complex::vPrint() const {
+    std::cout << f64Real_ << " + j(" << f64Img_ << ")" << std::endl;
+}
+</code></pre>
+            <p>In `main.cpp` würde man dann `#include "Complex.h"` verwenden und ein Objekt mit `MyMath::Complex z1(3.0, 4.0);` erzeugen. </p>
+
+            <h3>Statisches vs. Dynamisches Erzeugen von Objekten</h3>
+            <pre><code>// Statische Allokation (auf dem Stack). Lebensdauer ist an den Scope gebunden.
+MyMath::Complex z1(3.0, 4.0);
+z1.vPrint(); // Zugriff mit Punkt-Operator
+
+// Dynamische Allokation (auf dem Heap). Manuelle Speicherverwaltung!
+MyMath::Complex* p_z2 = new MyMath::Complex(-1.0, -1.0); // new ruft Konstruktor auf
+p_z2->vPrint(); // Zugriff mit Pfeil-Operator
+
+delete p_z2; // WICHTIG: delete ruft Destruktor auf und gibt Speicher frei
+p_z2 = nullptr;
+</code></pre>
+
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Eine einfache Zähler-Klasse</h2>
+            <p>Diese Klasse kapselt einen Zählerwert. Man kann ihn nur über öffentliche Methoden erhöhen, zurücksetzen und abfragen.</p>
+            <pre><code>// Counter.h
+class Counter {
+public:
+    Counter(); // Default-Konstruktor
+    void increment();
+    void reset();
+    int getValue() const; // const-Methode
+private:
+    int value_;
+};
+
+// Counter.cpp
+#include "Counter.h"
+Counter::Counter() {
+    value_ = 0; // Initialisiert den Zähler immer mit 0
+}
+void Counter::increment() { value_++; }
+void Counter::reset() { value_ = 0; }
+int Counter::getValue() const { return value_; }
+
+// main.cpp
+#include &lt;iostream&gt;
+#include "Counter.h"
+int main() {
+    Counter c;
+    c.increment();
+    c.increment();
+    std::cout << "Wert: " << c.getValue() << std::endl; // Gibt 2 aus
+    c.reset();
+    std::cout << "Wert nach Reset: " << c.getValue() << std::endl; // Gibt 0 aus
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Die `Complex`-Klasse</h2>
+            <p>Dies ist eine Implementierung der `Complex`-Klasse aus Aufgabe 1 des Übungsblatts.</p>
+            <pre><code>// In Main.cpp, nachdem Complex.h und Complex.cpp wie oben erstellt wurden:
+#include &lt;iostream&gt;
+#include "Complex.h" // Unsere eigene Klasse einbinden
+
+int main() {
+    // Statisches Objekt mit dem Konstruktor erzeugen
+    MyMath::Complex z1{3.0, -4.0}; 
+
+    std::cout << "Z1: ";
+    z1.vPrint(); 
+
+    // Setter verwenden, um das Objekt zu ändern
+    z1.vSetReal(-1.0);
+    z1.vSetf64Img(-1.0); 
+
+    std::cout << "Z1 nach Aenderung: ";
+    z1.vPrint(); 
+
+    // Getter verwenden, um einen Wert abzufragen
+    std::cout << "Realteil von Z1: " << z1.f64GetReal() << std::endl; 
+    
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Klasse `Rectangle`</strong><br>
+                    Definiere eine Klasse `Rectangle` mit zwei privaten `double`-Attributen `width_` und `height_`. Schreibe einen Konstruktor, der diese beiden Werte initialisiert. Implementiere eine öffentliche Methode `double getArea() const`, die die Fläche berechnet und zurückgibt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Deklaration in der `.h`-Datei, die Implementierung in der `.cpp`. Der Konstruktor sieht so aus: `Rectangle::Rectangle(double w, double h)`. `getArea` gibt einfach `width_ * height_` zurück.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Getter und Setter</strong><br>
+                    Erweitere die `Rectangle`-Klasse um Getter- (`getWidth() const`, `getHeight() const`) und Setter-Methoden (`setWidth(double w)`, `setHeight(double h)`). Implementiere im Setter eine Logik, die negative Werte für Breite oder Höhe verhindert (z.B. auf 0 setzt).
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>In `setWidth(double w)`: `if (w > 0) { width_ = w; } else { width_ = 0; }`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Dynamisches Objekt</strong><br>
+                    Erzeuge in `main` ein `Rectangle`-Objekt auf dem Heap mit `new`. Rufe die `getArea`-Methode über den Zeiger auf und gib das Ergebnis aus. Vergiss nicht, den Speicher am Ende mit `delete` wieder freizugeben.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>`Rectangle* p_rect = new Rectangle(10.0, 5.0);`. Der Aufruf erfolgt mit dem Pfeiloperator: `p_rect->getArea();`. Am Ende `delete p_rect;`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>`const`-Korrektheit</strong><br>
+                    Erstelle in `main` ein `const Rectangle`-Objekt. Überprüfe, dass du dessen `getArea()`- und `getWidth()`-Methoden aufrufen kannst (sofern sie als `const` deklariert sind). Versuche, eine `setWidth()`-Methode aufzurufen und beobachte den Compiler-Fehler.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Ein `const`-Objekt kann nur `const`-Methoden aufrufen. Da `setWidth` das Objekt verändern würde, kann es nicht `const` sein und darf daher nicht aufgerufen werden.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Ringbuffer-Klasse</strong><br>
+                    Implementiere das Grundgerüst der `Ringbuffer`-Klasse aus Aufgabe 2. Lege die privaten Attribute (`as32Elements_`, `u32ReadPos_`, etc.) und die öffentlichen Methodendeklarationen (`s32ReadElement`, `s32WriteElement`) in der Header-Datei an. Implementiere den Konstruktor in der `.cpp`-Datei, sodass er alle Zähler auf 0 setzt und das Array mit Nullen füllt. 
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Der Konstruktor benötigt eine `for`-Schleife, um das interne Array `as32Elements_` zu initialisieren.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- Klassendeklaration in .h-Datei ---
+class MyClass {
+public: // Öffentliche Schnittstelle
+    // Konstruktor
+    MyClass(int initial_value);
+    // Destruktor
+    ~MyClass();
+
+    // Öffentliche Methoden
+    void setValue(int new_value);
+    int getValue() const; // const-Methode (liest nur)
+
+private: // Gekapselte Daten
+    int value_;
+};
+
+// --- Methodendefinition in .cpp-Datei ---
+#include "MyClass.h"
+
+// Konstruktor mit Initialisierungsliste (bevorzugt)
+MyClass::MyClass(int initial_value) : value_{initial_value} {
+    // Konstruktor-Körper
+}
+
+// Destruktor
+MyClass::~MyClass() {
+    // Aufräumarbeiten
+}
+
+// Methode
+int MyClass::getValue() const {
+    return value_; // oder this->value_
+}
+
+// --- Objekterzeugung ---
+// Statisch (auf dem Stack)
+MyClass obj1{42};
+obj1.setValue(100);
+
+// Dynamisch (auf dem Heap)
+MyClass* p_obj2 = new MyClass{10};
+p_obj2->setValue(200);
+delete p_obj2;
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

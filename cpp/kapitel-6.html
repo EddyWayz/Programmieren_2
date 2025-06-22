@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 6: Polymorphie und virtuelle Funktionen</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 6: Polymorphie und virtuelle Funktionen</h1>
+        <p>Schreiben Sie flexiblen Code, der mit einer ganzen Familie von verwandten Objekten umgehen kann, ohne deren genauen Typ zu kennen.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach der Bearbeitung dieser Einheit beherrschen Sie das Konzept des <strong>dynamischen Polymorphismus</strong> in C++. Sie können Methoden mithilfe des Schlüsselworts <strong><code>virtual</code></strong> als überschreibbar deklarieren. Sie wissen, wie man <strong>abstrakte Klassen</strong> mit rein virtuellen Funktionen (<code>= 0</code>) erstellt, um Interfaces zu definieren. Des Weiteren verstehen Sie die zwingende Notwendigkeit von <strong>virtuellen Destruktoren</strong> bei der Arbeit mit Klassenhierarchien und dynamischem Speicher. Sie können Methoden mit dem <code>override</code>-Spezifizierer sicher überschreiben und das Liskovsche Substitutionsprinzip in der Praxis anwenden.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Stellen Sie sich eine Grafikanwendung vor. Sie haben eine Vielzahl von geometrischen Formen: <code>Kreis</code>, <code>Rechteck</code>, <code>Dreieck</code>, <code>Polygon</code> usw. Sie möchten alle diese Formen in einer einzigen Liste speichern und sie mit einer einfachen Schleife zeichnen, etwa so: <code>for (auto form : alleFormen) { form.zeichne(); }</code>.
+            </p>
+            <p>
+                Ohne Polymorphismus wäre das unmöglich, da die Liste Objekte unterschiedlicher Typen enthalten müsste. Der Polymorphismus ("Vielgestaltigkeit") erlaubt es uns, eine Liste von Zeigern auf eine gemeinsame Basisklasse (z.B. <code>Form*</code>) zu verwalten. Wenn wir dann die Methode <code>zeichne()</code> über einen solchen Zeiger aufrufen, sorgt C++ zur Laufzeit dafür, dass die korrekte, spezifische <code>zeichne()</code>-Methode (die des Kreises, die des Rechtecks etc.) ausgeführt wird. Diesen Mechanismus nennt man <strong>dynamische Bindung</strong> (Late Binding) und er ist der Schlüssel zu flexiblen und leicht erweiterbaren Systemen.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Dynamischer Polymorphismus</h4>
+                <p>Die Fähigkeit eines Programms, zur Laufzeit zu entscheiden, welche von mehreren gleichnamigen Methoden in einer Klassenhierarchie aufgerufen wird. Die Entscheidung basiert auf dem tatsächlichen Typ des Objekts, auf das ein Basisklassen-Zeiger oder eine -Referenz verweist.</p>
+            </div>
+            <div class="definition">
+                <h4>Virtuelle Funktion (<code>virtual</code>)</h4>
+                <p>Eine Memberfunktion, die in einer Basisklasse mit dem Schlüsselwort <code>virtual</code> deklariert wird. Dies signalisiert dem Compiler, dass die Methode in abgeleiteten Klassen überschrieben werden kann und Aufrufe über Basisklassen-Zeiger/-Referenzen dynamisch gebunden werden sollen.</p>
+            </div>
+             <div class="definition">
+                <h4>Überschreiben (<code>override</code>)</h4>
+                <p>Eine Methode in einer abgeleiteten Klasse implementiert eine virtuelle Methode der Basisklasse neu. Die Signatur (Name, Parameter, const-Modifizierer) muss exakt übereinstimmen. Der optionale, aber empfohlene Spezifizierer <code>override</code> prüft dies zur Compile-Zeit.</p>
+            </div>
+            <div class="definition">
+                <h4>Abstrakte Klasse</h4>
+                <p>Eine Klasse, von der keine Objekte instanziiert werden können. Sie dient als Vorlage für abgeleitete Klassen. Eine Klasse wird abstrakt, sobald sie mindestens eine rein virtuelle Funktion enthält.</p>
+            </div>
+            <div class="definition">
+                <h4>Rein Virtuelle Funktion (Pure Virtual Function)</h4>
+                <p>Eine virtuelle Funktion, die in der Basisklasse nur deklariert, aber nicht implementiert wird, indem man ihr <code>= 0;</code> anfügt. Jede nicht-abstrakte abgeleitete Klasse ist gezwungen, diese Funktion zu implementieren.</p>
+                <pre><code class="language-cpp">virtual void zeichne() const = 0;</code></pre>
+            </div>
+            <div class="definition">
+                <h4>Virtueller Destruktor</h4>
+                <p>Ein Destruktor in einer Basisklasse, der als <code>virtual</code> deklariert ist. Dies stellt sicher, dass beim Löschen eines abgeleiteten Objekts über einen Basisklassen-Zeiger der korrekte Destruktor (erst der der Kindklasse, dann der der Basisklasse) aufgerufen wird, um Speicherlecks zu vermeiden.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Polymorphismus ermöglichen: `virtual`</h3>
+            <p>Um die dynamische Bindung zu aktivieren, muss die Methode in der Basisklasse als <code>virtual</code> gekennzeichnet sein. Alle abgeleiteten Klassen, die diese Methode neu implementieren, überschreiben sie dann.</p>
+            <pre><code class="language-cpp">class Tier {
+public:
+    // virtual aktiviert den Polymorphismus für diese Funktion
+    virtual void lautGeben() const { 
+        std::cout << "Ein Tier macht einen Laut." << std::endl; 
+    }
+    // Wichtig: Virtueller Destruktor!
+    virtual ~Tier() {}
+};
+
+class Hund : public Tier {
+public:
+    // Überschreiben der virtuellen Funktion. 'override' ist guter Stil.
+    void lautGeben() const override {
+        std::cout << "Wuff!" << std::endl;
+    }
+};
+</code></pre>
+
+            <h3>2. Polymorphie anwenden</h3>
+            <p>Polymorphismus funktioniert nur über <strong>Zeiger oder Referenzen</strong> auf die Basisklasse.</p>
+            <pre><code class="language-cpp">Tier* pTier1 = new Hund();
+Tier* pTier2 = new Katze(); // Angenommen, Katze existiert auch
+
+pTier1->lautGeben(); // Gibt "Wuff!" aus
+pTier2->lautGeben(); // Gibt "Miau!" aus
+
+// Wichtig: Speicher freigeben!
+delete pTier1; 
+delete pTier2;
+</code></pre>
+            <p>Ohne <code>virtual</code> in `Tier::lautGeben()` würden beide Aufrufe die Methode der Basisklasse (`Tier`) ausführen, da die Entscheidung statisch zur Compile-Zeit getroffen würde.</p>
+            
+            <h3>3. Abstrakte Klassen als "Verträge" nutzen</h3>
+            <p>Oft will man gar kein Objekt der Basisklasse (z.B. `Form`) erstellen, sondern sie nur als Schablone ("Interface") nutzen. Dies erreicht man durch rein virtuelle Funktionen.</p>
+            <pre><code class="language-cpp">// Eine abstrakte Klasse "Form"
+class Form {
+public:
+    // Rein virtuelle Funktion: Jede konkrete Form MUSS dies implementieren.
+    virtual double berechneFlaeche() const = 0; 
+    
+    virtual ~Form() = default; // Der Destruktor muss implementiert sein
+};
+
+class Kreis : public Form {
+private: 
+    double radius_;
+public:
+    Kreis(double r) : radius_(r) {}
+    // Kreis MUSS berechneFlaeche implementieren, sonst ist er auch abstrakt.
+    double berechneFlaeche() const override {
+        return 3.14159 * radius_ * radius_;
+    }
+};
+
+int main() {
+    // Form f; // FEHLER: Form ist eine abstrakte Klasse.
+    Form* pForm = new Kreis(10.0); // OK
+    std::cout << "Flaeche: " << pForm->berechneFlaeche() << std::endl;
+    delete pForm;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Wichtiger Sonderfall: Der virtuelle Destruktor</h2>
+            <p><strong>Regel:</strong> Jede Klasse, die mindestens eine virtuelle Funktion besitzt, sollte auch einen virtuellen Destruktor haben.</p>
+            <p>Wird ein abgeleitetes Objekt, das dynamisch erzeugt wurde, über einen Basisklassen-Zeiger gelöscht, wird ohne virtuellen Destruktor nur der Destruktor der Basisklasse aufgerufen. Ressourcen, die im Destruktor der abgeleiteten Klasse freigegeben werden müssten (z.B. Speicher, Dateien), gehen verloren. Dies führt zu Speicherlecks und undefiniertem Verhalten.</p>
+             <pre><code class="language-cpp">// FALSCH:
+class Base { public: ~Base() { /* ... */ } };
+class Derived : public Base { private: int* p_; public: Derived() {p_ = new int[100];} ~Derived() {delete[] p_;} };
+Base* b = new Derived();
+delete b; // Ruft NUR ~Base() auf. Die 100 ints werden NICHT freigegeben!
+
+// RICHTIG:
+class Base { public: virtual ~Base() { /* ... */ } };
+class Derived : public Base { private: int* p_; public: Derived() {p_ = new int[100];} ~Derived() {delete[] p_;} };
+Base* b = new Derived();
+delete b; // Ruft ~Derived() und DANACH ~Base() auf. Alles korrekt.
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben aus KE06</h2>
+            <ol>
+                <li>
+                    <strong>CAD-Programm:</strong> Implementieren Sie die Klassenhierarchie aus Übung 1. Erstellen Sie eine abstrakte Basisklasse `Shape` mit einer rein virtuellen Methode `vDraw()`. Leiten Sie davon `Point`, `Circle` und `Rectangle` ab. Erstellen Sie eine Klasse `CAD_Drawing`, die in einem `std::set` eine Sammlung von `Shape*` verwalten kann. Die `vDrawIt()`-Methode von `CAD_Drawing` soll dann über alle Formen iterieren und deren jeweilige `vDraw()`-Methode aufrufen.
+                </li>
+                <li>
+                    <strong>Speicherleck finden:</strong> Analysieren Sie ein Codebeispiel, das ein Speicherleck aufgrund eines fehlenden virtuellen Destruktors enthält. Erklären Sie genau, warum der Speicher nicht freigegeben wird. Korrigieren Sie den Code.
+                </li>
+                 <li>
+                    <strong>Liskovsches Substitutionsprinzip:</strong> Erklären Sie anhand eines Beispiels, warum eine Funktion, die eine Referenz auf eine Basisklasse erwartet (z.B. <code>void process(Base& b)</code>), problemlos mit einem Objekt einer abgeleiteten Klasse aufgerufen werden kann. Warum funktioniert der umgekehrte Weg nicht?
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

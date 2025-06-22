@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 11: Design Patterns (Entwurfsmuster)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 11: Design Patterns (Entwurfsmuster)</h1>
+        <p>Lernen Sie bewährte Schablonen zur Lösung wiederkehrender Entwurfsprobleme in der objektorientierten Programmierung.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit verstehen Sie, was <strong>Design Patterns</strong> sind und welchen Zweck sie erfüllen. Sie können die grundlegende Idee hinter den drei Pattern-Kategorien (Erzeugungsmuster, Strukturmuster, Verhaltensmuster) erläutern. Sie kennen die Motivation, die Struktur und die Anwendung von drei fundamentalen Entwurfsmustern: dem <strong>Singleton</strong> (Einzelstück), der <strong>Factory Method</strong> (Fabrikmethode) und dem <strong>Observer</strong> (Beobachter). Sie können diese Muster in einfachen C++-Szenarien implementieren, um flexiblere und wartbarere Softwarearchitekturen zu erstellen.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Beim Entwurf von Software stößt man immer wieder auf ähnliche Probleme: Wie stellt man sicher, dass von einer Klasse nur genau ein einziges Objekt existiert? Wie entkoppelt man die Erzeugung von Objekten von dem Code, der sie verwendet? Wie benachrichtigt man eine Reihe von Objekten, wenn sich der Zustand eines anderen Objekts ändert, ohne sie fest aneinander zu koppeln?
+            </p>
+            <p>
+                Anstatt für diese Standardprobleme jedes Mal das Rad neu zu erfinden, haben erfahrene Entwickler im Laufe der Zeit bewährte Lösungsstrategien katalogisiert: die <strong>Design Patterns</strong>. Ein Entwurfsmuster ist keine fertige Klasse oder Bibliothek, sondern eine allgemeine, wiederverwendbare Lösungsschablone. Es beschreibt das Problem, die beteiligten Klassen und Objekte, deren Rollen und wie sie interagieren. Die Kenntnis von Design Patterns hebt Sie von einem reinen Programmierer zu einem Software-Architekten und verbessert die Kommunikation im Team, da man über bewährte Konzepte spricht.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Ausgewählte Design Patterns</h2>
+            <div class="definition">
+                <h4>Singleton (Einzelstück)</h4>
+                <p><strong>Kategorie:</strong> Erzeugungsmuster.<br>
+                <strong>Zweck:</strong> Stellt sicher, dass von einer Klasse nur eine einzige Instanz existiert und bietet einen globalen Zugriffspunkt darauf.<br>
+                <strong>Anwendung:</strong> Logging-Klassen, Konfigurationsmanager, Hardware-Schnittstellen.</p>
+            </div>
+            <div class="definition">
+                <h4>Factory Method (Fabrikmethode)</h4>
+                <p><strong>Kategorie:</strong> Erzeugungsmuster.<br>
+                <strong>Zweck:</strong> Definiert eine Schnittstelle zur Erstellung eines Objekts, überlässt es aber den Unterklassen, zu entscheiden, welche konkrete Klasse instanziiert wird. Entkoppelt den Client-Code von der konkreten Objekterzeugung.<br>
+                <strong>Anwendung:</strong> Frameworks, Erzeugung von Dokumenten in einer Anwendung (Text, Tabelle, ...).</p>
+            </div>
+            <div class="definition">
+                <h4>Observer (Beobachter)</h4>
+                <p><strong>Kategorie:</strong> Verhaltensmuster.<br>
+                <strong>Zweck:</strong> Definiert eine 1-zu-N-Abhängigkeit zwischen Objekten. Wenn ein Objekt (das "Subjekt") seinen Zustand ändert, werden alle von ihm abhängigen Objekte (die "Beobachter") automatisch benachrichtigt und aktualisiert.<br>
+                <strong>Anwendung:</strong> Grafische Benutzeroberflächen (GUI), Event-Systeme, Model-View-Controller (MVC) Architektur.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Implementierungsbeispiele</h2>
+            
+            <h3>1. Singleton</h3>
+            <p>Der Konstruktor wird `private` gemacht. Eine statische Methode gibt eine Referenz auf eine statische Instanz der Klasse zurück.</p>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class Logger {
+private:
+    // 1. Privater Konstruktor
+    Logger() {} 
+
+public:
+    // 3. Löschen von Kopierkonstruktor und Zuweisungsoperator
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
+
+    // 2. Statische Methode für den Zugriff
+    static Logger& getInstance() {
+        // Statische lokale Variable, wird nur einmal erstellt
+        static Logger instance; 
+        return instance;
+    }
+
+    void log(const std::string& message) {
+        std::cout << "[LOG]: " << message << std::endl;
+    }
+};
+
+int main() {
+    // Logger myLogger; // FEHLER: Konstruktor ist private
+    Logger::getInstance().log("Programm gestartet.");
+    Logger::getInstance().log("Ein weiteres Ereignis.");
+}
+</code></pre>
+
+            <h3>2. Factory Method</h3>
+            <p>Eine Basisklasse `Creator` deklariert die Fabrikmethode `createProduct()`. Konkrete `Creator`-Klassen überschreiben diese, um spezifische `Product`-Objekte zu erzeugen.</p>
+            <pre><code class="language-cpp">// Produkt-Interface und konkrete Produkte
+class Document { public: virtual void open() = 0; virtual ~Document() = default; };
+class TextDocument : public Document { public: void open() override { /* ... */ } };
+class SpreadsheetDocument : public Document { public: void open() override { /* ... */ } };
+
+// Creator-Interface und konkrete Creators
+class Application {
+public:
+    // Die Fabrikmethode
+    virtual std::unique_ptr&lt;Document&gt; createDocument() = 0; 
+    virtual ~Application() = default;
+};
+
+class TextApplication : public Application {
+public:
+    std::unique_ptr&lt;Document&gt; createDocument() override {
+        return std::make_unique&lt;TextDocument&gt;();
+    }
+};
+</code></pre>
+            
+            <h3>3. Observer</h3>
+            <p>Das `Subject` verwaltet eine Liste von `Observer`-Zeigern. Bei einer Zustandsänderung ruft es die `update()`-Methode jedes registrierten Observers auf.</p>
+            <pre><code class="language-cpp">#include &lt;vector&gt;
+#include &lt;memory&gt;
+#include &lt;algorithm&gt;
+
+// Forward Declaration
+class Subject;
+
+class Observer {
+public:
+    virtual void update(Subject* subject) = 0;
+    virtual ~Observer() = default;
+};
+
+class Subject {
+private:
+    std::vector&lt;Observer*&gt; observers_;
+public:
+    void attach(Observer* observer) { observers_.push_back(observer); }
+    void detach(Observer* observer) { /* ... remove observer from vector ... */ }
+    void notify() {
+        for (Observer* obs : observers_) {
+            obs->update(this);
+        }
+    }
+};
+
+// Beispiel: Ein Temperatursensor (Subject) und Anzeigen (Observers)
+class TemperatureSensor : public Subject {
+private:
+    float temperature_;
+public:
+    void setTemperature(float temp) {
+        temperature_ = temp;
+        notify(); // Benachrichtige alle Beobachter
+    }
+    float getTemperature() const { return temperature_; }
+};
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Übungsaufgaben aus KE11</h2>
+            <ol>
+                <li>
+                    <strong>Logging-Singleton:</strong> Implementieren Sie eine `FileLogger`-Klasse als Singleton. Die `log`-Methode soll die Nachrichten nicht auf der Konsole ausgeben, sondern in eine Datei namens `log.txt` schreiben. Stellen Sie sicher, dass Ihr Singleton threadsicher ist (Hinweis: `static`-Variablen in Funktionen sind in modernen C++-Compilern threadsicher).
+                </li>
+                <li>
+                    <strong>Figuren-Fabrik:</strong> Sie haben eine abstrakte Klasse `Shape` (wie in KE06) und konkrete Ableitungen wie `Circle`, `Rectangle`. Schreiben Sie eine `ShapeFactory`-Klasse mit einer statischen Methode `createShape(std::string type)`. Diese Methode soll je nach übergebenem String (z.B. "circle" oder "rectangle") ein `std::unique_ptr&lt;Shape&gt;` des entsprechenden Typs zurückgeben.
+                </li>
+                 <li>
+                    <strong>Nachrichten-Ticker (Observer):</strong> Implementieren Sie das Observer-Pattern. Ein `NewsPublisher` (das Subjekt) soll eine `publish(string news)`-Methode haben. Mehrere `NewsSubscriber` (die Observer) können den Publisher abonnieren. Wenn eine neue Nachricht publiziert wird, sollen alle Subscriber die Nachricht auf der Konsole ausgeben, z.B. "Subscriber [Name] received news: [Nachricht]".
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 11: Die C-Standardbibliothek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 11: Die C-Standardbibliothek</h1>
+        <p>Den professionellen Werkzeugkasten von C meisterhaft einsetzen.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Am Ende dieser Einheit kennst und nutzt du die wichtigsten Funktionen der C-Standardbibliothek. Du kannst Zeichenketten sicher manipulieren (<strong><code>string.h</code></strong>), Zufallszahlen erzeugen und Strings in Zahlen umwandeln (<strong><code>stdlib.h</code></strong>), komplexe mathematische Berechnungen durchführen (<strong><code>math.h</code></strong>) und die Ausführungszeit von Codeabschnitten messen (<strong><code>time.h</code></strong>). Du verstehst, warum die Nutzung dieser Standardfunktionen der Neuerfindung des Rads vorzuziehen ist.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Ein guter Handwerker baut nicht jedes Mal seinen Hammer selbst – er hat einen Koffer mit erprobten, verlässlichen Werkzeugen. Die C-Standardbibliothek ist genau das: ein Satz von Header-Dateien und Funktionen, die für grundlegende Aufgaben wie String-Manipulation, mathematische Berechnungen oder Speicherverwaltung optimiert, getestet und auf jeder C-konformen Plattform verfügbar sind.
+            </p>
+            <p>
+                Die Kenntnis dieser Bibliotheken trennt den Anfänger vom fortgeschrittenen Programmierer. Sie ermöglicht es dir, dich auf die eigentliche Logik deines Problems zu konzentrieren, anstatt grundlegende Funktionalität immer wieder neu zu implementieren. Das Ergebnis ist kürzerer, lesbarerer, sichererer und portablerer Code.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Standardbibliothek</h4>
+                <p>Die Menge an vordefinierten Funktionen und Typen, die durch den C-Standard festgelegt und von jedem C-Compiler bereitgestellt werden muss.  Der Zugriff erfolgt durch das Inkludieren der entsprechenden Header-Datei (z.B. <code>&lt;string.h&gt;</code>).</p>
+            </div>
+            <div class="definition">
+                <h4>Tokenizing</h4>
+                <p>Der Prozess, eine Zeichenkette anhand eines oder mehrerer Trennzeichen (Delimiter) in eine Reihe von kleineren Teil-Zeichenketten (Tokens) zu zerlegen. Beispiel: Die Zeile "Max;Mustermann" wird mit dem Delimiter ";" in die Tokens "Max" und "Mustermann" zerlegt.</p>
+            </div>
+            <div class="definition">
+                <h4>Pseudo-Zufallszahl</h4>
+                <p>Eine Zahl, die von einem Algorithmus erzeugt wird und zufällig erscheint, aber bei gleichem Startwert (Seed) immer dieselbe Sequenz erzeugt.</p>
+            </div>
+             <div class="definition">
+                <h4>Seed (Startwert)</h4>
+                <p>Ein Initialwert für einen Zufallszahlengenerator. Um bei jedem Programmstart eine andere Zufallssequenz zu erhalten, wird oft die aktuelle Uhrzeit als Seed verwendet.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. <code>&lt;string.h&gt;</code> – Der Werkzeugkasten für Zeichenketten</h3>
+            <ul>
+                <li><strong>Länge ermitteln:</strong> <code>size_t strlen(const char* str);</code> gibt die Anzahl der Zeichen <i>ohne</i> das `\0`-Zeichen zurück.</li>
+                <li><strong>Sicher kopieren:</strong> <code>errno_t strcpy_s(char* dest, size_t dest_size, const char* src);</code> kopiert einen String sicher in einen Puffer.</li>
+                <li><strong>Vergleichen:</strong> <code>int strcmp(const char* str1, const char* str2);</code> vergleicht zwei Strings lexikographisch. Gibt `< 0` (str1<str2), `0` (str1==str2) oder `> 0` (str1>str2) zurück.</li>
+                <li><strong>Suchen:</strong> <code>char* strchr(const char* str, int character);</code> findet das erste Vorkommen eines Zeichens in einem String.</li>
+                <li><strong>Zerlegen (Tokenizing):</strong> <code>char* strtok_s(char* str, const char* delimiters, char** context);</code> zerlegt einen String in Tokens.</li>
+            </ul>
+
+            <h3>2. <code>&lt;stdlib.h&gt;</code> – Allgemeine Hilfsmittel</h3>
+            <ul>
+                <li><strong>String-Konvertierung:</strong> <code>int atoi(const char* str);</code> (ASCII to integer), <code>double atof(const char* str);</code> (ASCII to float). Für eine robuste Konvertierung mit Fehlerprüfung ist `strtod` vorzuziehen. </li>
+                <li><strong>Zufallszahlen:</strong> <code>int rand(void);</code> gibt eine Zufallszahl zwischen 0 und `RAND_MAX` zurück. Muss vorher mit <code>void srand(unsigned int seed);</code> initialisiert werden.</li>
+                <li><strong>Sortieren:</strong> <code>void qsort(...);</code> ist die generische, schnelle Sortierfunktion (siehe Kapitel 8).</li>
+            </ul>
+
+            <h3>3. <code>&lt;math.h&gt;</code> – Für Mathematiker</h3>
+            <ul>
+                <li><strong>Potenz & Wurzel:</strong> <code>double pow(double base, double exponent);</code> (Potenz), <code>double sqrt(double x);</code> (Quadratwurzel).</li>
+                <li><strong>Trigonometrie:</strong> <code>double sin(double x);</code>, <code>double cos(double x);</code>. Für die Umrechnung von kartesischen in Polarkoordinaten ist <code>double atan2(double y, double x);</code> extrem nützlich, da sie den korrekten Quadranten berücksichtigt. </li>
+                <li><strong>Runden:</strong> <code>double floor(double x);</code> (abrunden), <code>double ceil(double x);</code> (aufrunden).</li>
+            </ul>
+
+            <h3>4. <code>&lt;time.h&gt;</code> – Alles rund um die Zeit</h3>
+            <ul>
+                <li><strong>Seed für Zufallszahlen:</strong> <code>time_t time(time_t* timer);</code> wird oft mit `NULL` aufgerufen, um die Sekunden seit dem 1.1.1970 zu erhalten – ein perfekter, sich ständig ändernder Seed: `srand((unsigned int)time(NULL));`</li>
+                <li><strong>Laufzeitmessung:</strong> <code>clock_t clock(void);</code> gibt die Anzahl der "CPU-Ticks" seit Programmstart zurück. Die Differenz zweier `clock()`-Aufrufe geteilt durch `CLOCKS_PER_SEC` ergibt die vergangene Zeit in Sekunden.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Zufalls-Passwort-Generator</h2>
+            <p>Dieses Programm kombiniert <code>stdlib.h</code> und <code>time.h</code>, um ein zufälliges Passwort zu erzeugen.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+int main(void) {
+    char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    char password[11]; // 10 Zeichen + Nullterminator
+    int charset_length = sizeof(charset) - 1;
+
+    // 1. Zufallsgenerator mit der aktuellen Zeit initialisieren
+    srand((unsigned int)time(NULL));
+
+    // 2. 10 zufällige Zeichen auswählen
+    for (int i = 0; i < 10; i++) {
+        int random_index = rand() % charset_length;
+        password[i] = charset[random_index];
+    }
+    // 3. String korrekt abschließen
+    password[10] = '\0';
+
+    printf("Ihr zufaelliges Passwort: %s\n", password);
+
+    return 0;
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Laufzeit einer Schleife messen</h2>
+            <p>Dieses Programm nutzt `time.h`, um zu messen, wie lange eine rechenintensive Schleife zur Ausführung benötigt. [vgl. 5618, 5620]</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+void long_running_task(void) {
+    long long sum = 0;
+    // Eine Schleife mit vielen Durchläufen, um die Zeitmessung sichtbar zu machen
+    for (int i = 0; i < 200000000; i++) {
+        sum += i;
+    }
+}
+
+int main(void) {
+    clock_t start, end;
+    double cpu_time_used;
+
+    // 1. Startzeitpunkt merken
+    start = clock();
+
+    // 2. Die zu messende Funktion aufrufen
+    long_running_task();
+
+    // 3. Endzeitpunkt merken
+    end = clock();
+
+    // 4. Differenz berechnen und in Sekunden umrechnen
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    printf("Die Funktion benoetigte %f Sekunden CPU-Zeit.\n", cpu_time_used);
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Text umkehren</strong><br>
+                    Frage den Benutzer nach einem Wort. Lies es mit `scanf_s` ein. Benutze `strlen` um die Länge zu ermitteln und gib das Wort dann mit einer `for`-Schleife, die rückwärts läuft, umgekehrt wieder auf der Konsole aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Wenn die Länge `L` ist, läuft die Schleife von `i = L - 1` abwärts bis `0` und gibt `wort[i]` aus.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Gleich oder nicht?</strong><br>
+                    Schreibe ein Programm, das den Benutzer nach seinem Passwort fragt. Vergleiche die Eingabe mit dem geheimen Passwort "topsecret" mittels `strcmp`. Gib aus, ob die Eingabe korrekt war oder nicht.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>`strcmp` gibt `0` zurück, wenn die Strings identisch sind. Die Bedingung lautet also `if (strcmp(eingabe, "topsecret") == 0)`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Abstand zweier Punkte</strong><br>
+                    Definiere eine `struct Point {double x; double y;}`. Frage den Benutzer nach den Koordinaten von zwei Punkten. Berechne den Abstand zwischen ihnen mit der Formel $\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}$. Verwende `sqrt` und `pow` aus `math.h`.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Implementierung ist eine direkte Übersetzung der Formel: `distance = sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Robuster Zahlen-Input</strong><br>
+                    Schreibe ein Programm, das eine Zeile Text einliest. Verwende `strtod`, um zu versuchen, eine `double`-Zahl vom Anfang der Zeile zu konvertieren. Gib eine Fehlermeldung aus, wenn die Konvertierung fehlschlug oder wenn nach der Zahl noch weitere Zeichen (außer Leerzeichen) folgten. [vgl. 5615]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>`strtod` nimmt einen `char**` als zweiten Parameter. Nach dem Aufruf zeigt dieser Zeiger auf das erste Zeichen nach der konvertierten Zahl. Du kannst prüfen, ob dieses Zeichen `\0` oder ein Leerzeichen ist.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Würfel-Simulator</strong><br>
+                    Simuliere 100 Würfe eines sechsseitigen Würfels. Initialisiere den Zufallsgenerator mit `srand` und `time`. Generiere in einer Schleife 100 Zufallszahlen und bilde sie auf den Bereich 1-6 ab. Gib jeden Wurf aus.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Formel für einen Würfelwurf ist `(rand() % 6) + 1`. Der Modulo-Operator `% 6` erzeugt Zahlen von 0-5, die Addition von 1 verschiebt den Bereich auf 1-6.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- string.h ---
+#include &lt;string.h&gt;
+strlen(str);          // Länge
+strcmp(s1, s2);       // Vergleichen
+strcpy_s(d, sz, s);   // Kopieren
+strcat_s(d, sz, s);   // Anhängen
+strtok_s(s, d, &ctx); // Zerlegen
+
+// --- stdlib.h ---
+#include &lt;stdlib.h&gt;
+atoi(str);  // String zu int
+atof(str);  // String zu double
+srand(seed); // Zufallsgenerator initialisieren
+rand();     // Nächste Zufallszahl holen
+qsort(...); // Sortieren
+
+// --- math.h ---
+#define _USE_MATH_DEFINES // Für M_PI in MSVS
+#include &lt;math.h&gt;
+pow(base, exp); // Potenz
+sqrt(val);      // Quadratwurzel
+sin(rad), cos(rad);
+atan2(y, x);    // Sicherer Arkustangens
+ceil(val), floor(val); // Auf-/Abrunden
+
+// --- time.h ---
+#include &lt;time.h&gt;
+// Seed für srand
+srand((unsigned int)time(NULL));
+// Laufzeitmessung
+clock_t start = clock();
+// ... code ...
+clock_t end = clock();
+double duration = ((double)(end-start))/CLOCKS_PER_SEC;
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

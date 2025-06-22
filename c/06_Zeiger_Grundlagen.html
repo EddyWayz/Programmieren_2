@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 6: Zeiger (Teil 1)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 6: Zeiger (Teil 1) - Adressen und Referenzen</h1>
+        <p>Das mächtigste Konzept in C: Direkter Zugriff auf den Speicher.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Am Ende dieser Einheit verstehst du das grundlegende Konzept von Zeigern. Du weißt, dass ein Zeiger eine Variable ist, die eine Speicheradresse enthält. Du kannst die beiden wichtigsten Operatoren im Umgang mit Zeigern – den <strong>Adressoperator `&`</strong> und den <strong>Dereferenzierungsoperator `*`</strong> – sicher anwenden. Du verstehst den fundamentalen Unterschied zwischen <strong>Call by Value</strong> und <strong>Call by Reference</strong> und kannst Zeiger nutzen, um einer Funktion zu erlauben, Variablen ihres Aufrufers zu modifizieren.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Warum sind Zeiger so wichtig und berüchtigt? Weil sie das Herzstück der C-Programmierung sind. Sie erlauben uns, die Abstraktionsebene zu verlassen und direkt mit Adressen im Arbeitsspeicher zu hantieren. Das ist extrem mächtig  und gleichzeitig fehleranfällig.
+            </p>
+            <p>Zeiger sind für viele fortgeschrittene Techniken unerlässlich:</p>
+            <ul>
+                <li><strong>Effiziente Funktionsaufrufe:</strong> Anstatt riesige Datenstrukturen (wie `structs`) zu kopieren, übergeben wir nur einen kleinen, schnellen Zeiger.</li>
+                <li><strong>Veränderliche Parameter:</strong> Sie sind der Standardweg, um einer Funktion zu erlauben, Werte außerhalb ihres eigenen Gültigkeitsbereichs zu verändern (das klassische Problem, "mehrere Werte zurückzugeben"). </li>
+                <li><strong>Dynamische Speicherverwaltung:</strong> Speicher zur Laufzeit anfordern und freigeben (z.B. für verkettete Listen) ist ohne Zeiger undenkbar. </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Speicheradresse</h4>
+                <p>Jedes Byte im Arbeitsspeicher (RAM) hat eine eindeutige Nummer, ähnlich einer Hausnummer. Diese Nummer ist seine Adresse.</p>
+            </div>
+            <div class="definition">
+                <h4>Zeiger (Pointer)</h4>
+                <p>Ein Zeiger ist eine spezielle Variable, deren Inhalt keine normale Zahl oder ein Zeichen ist, sondern die <strong>Speicheradresse einer anderen Variable</strong>.  Er "zeigt" quasi auf diese andere Variable.</p>
+            </div>
+            <div class="definition">
+                <h4>Adressoperator `&`</h4>
+                <p>Wenn dieser Operator vor einem Variablennamen steht, liefert er nicht den Wert der Variable, sondern deren <strong>Speicheradresse</strong>.  Man liest ihn als "Adresse von...".</p>
+            </div>
+            <div class="definition">
+                <h4>Dereferenzierungsoperator `*`</h4>
+                <p>Wenn dieser Operator vor einer Zeigervariable steht, greift er nicht auf den Inhalt des Zeigers (die Adresse) zu, sondern auf den <strong>Wert, der sich an dieser Adresse befindet</strong>.  Man liest ihn als "Wert an der Adresse...".</p>
+            </div>
+            <div class="definition">
+                <h4>`NULL`-Zeiger</h4>
+                <p>Ein spezieller, definierter Wert für einen Zeiger, der garantiert auf "nichts" zeigt.  Zeiger sollten immer mit `NULL` initialisiert werden, um einen definierten Zustand zu haben, bevor sie auf eine gültige Adresse zeigen. </p>
+            </div>
+             <div class="definition">
+                <h4>Call by Value vs. Call by Reference</h4>
+                <ul>
+                    <li><strong>Call by Value:</strong> Standard in C. Die Funktion erhält nur eine <strong>Kopie</strong> des Arguments. Änderungen an der Kopie haben keine Auswirkung auf das Original. </li>
+                    <li><strong>Call by Reference:</strong> Man übergibt nicht den Wert selbst, sondern die <strong>Adresse</strong> (einen Zeiger) des Arguments. Die Funktion kann über diesen Zeiger das Original im aufrufenden Code verändern. </li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>Die Anatomie eines Zeigers</h3>
+            <p>Ein Zeiger wird mit einem Sternchen `*` deklariert. Er muss vom gleichen Typ sein wie die Variable, auf die er zeigen soll.</p>
+            <pre><code>int main(void) {
+    int ival = 42;          // Eine normale Integer-Variable.
+    int* pival = NULL;      // Ein Zeiger, der auf einen Integer zeigen KANN.
+                            // Er wird sicher mit NULL initialisiert. 
+
+    // 1. Die Adresse von 'ival' holen und im Zeiger 'pival' speichern.
+    pival = &ival;          // Lese: "pival wird die Adresse von ival zugewiesen."
+
+    // 2. Den Wert an der Adresse, auf die 'pival' zeigt, ausgeben.
+    printf("Wert über Zeiger: %d\n", *pival); // Lese: "Gib den Wert an der Adresse pival aus."
+
+    // 3. Den Wert der Originalvariable 'ival' über den Zeiger ändern.
+    *pival = 100;           // Lese: "Speichere 100 an der Adresse, auf die pival zeigt."
+    
+    printf("Neuer Wert von ival: %d\n", ival); // Gibt jetzt 100 aus!
+    
+    return 0;
+}
+</code></pre>
+
+            <h3>Die Magie von Call by Reference</h3>
+            <p>Sehen wir uns an, warum "Call by Value" manchmal nicht ausreicht und wie Zeiger das Problem lösen. Wir wollen zwei Variablen vertauschen.</p>
+            
+            <p><strong>Der gescheiterte Versuch (Call by Value):</strong></p>
+            <pre><code>void swap_fails(int a, int b) { // a und b sind nur Kopien!
+    int temp = a;
+    a = b;
+    b = temp;
+}
+// In main:
+int x = 5, y = 10;
+swap_fails(x, y); // Die Originale x und y werden NICHT verändert!
+</code></pre>
+            
+            <p><strong>Die korrekte Lösung (Call by Reference):</strong></p>
+            <pre><code>// Die Funktion erwartet Adressen (Zeiger)
+void swap_works(int* p_a, int* p_b) { 
+    int temp = *p_a;   // Hole den Wert an der Adresse von p_a
+    *p_a = *p_b;       // Speichere an Adresse p_a den Wert von Adresse p_b
+    *p_b = temp;       // Speichere an Adresse p_b den temporären Wert
+}
+// In main:
+int x = 5, y = 10;
+swap_works(&x, &y); // Wir übergeben die ADRESSEN von x und y!
+// Jetzt sind x und y tatsächlich vertauscht.
+</code></pre>
+
+            <h3>Zeiger auf Strukturen</h3>
+            <p>Bei Strukturen ist es ineffizient, die ganze Struktur zu kopieren. Man übergibt stattdessen einen Zeiger. Für den Zugriff auf Elemente gibt es den Pfeiloperator `->`.</p>
+            <pre><code>struct Point { double x; double y; };
+struct Point myPoint = {10.0, 20.0};
+struct Point* p_point = &myPoint;
+
+// Diese beiden Zeilen sind äquivalent:
+(*p_point).x = 15.0;     // Umständlich mit Dereferenzierung und Punkt.
+p_point->y = 25.0;       // Elegant mit dem Pfeiloperator. Bevorzugt!
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramme</h2>
+
+            <h3>Beispiel 1: Die Zeiger-Inspektion</h3>
+            <p>Dieses Programm demonstriert die grundlegenden Operationen und Ausgaben, wie in Aufgabe 1 des Übungsblatts gefordert.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int iVar = 73;
+    int* piVal = NULL;
+
+    // Den Zeiger auf die Variable zeigen lassen
+    piVal = &iVar;
+
+    printf("--- Inspektion ---\n");
+    // Adresse der Variable iVar
+    printf("Adresse von iVar:              %p\n", &iVar);
+
+    // Wert des Zeigers piVal (ist die Adresse von iVar)
+    printf("Wert von piVal (die Adresse):    %p\n", piVal);
+    
+    // Die Adresse, an der die Zeigervariable selbst gespeichert ist
+    printf("Adresse von piVal selbst:        %p\n", &piVal);
+
+    // Der Wert, auf den der Zeiger zeigt (dereferenziert)
+    printf("Wert, auf den piVal zeigt (*): %d\n", *piVal);
+    
+    return 0;
+}
+</code></pre>
+
+            <h3>Beispiel 2: Mehrere "Rückgabewerte" mit Call by Reference</h3>
+            <p>Diese Funktion nimmt zwei Zahlen und "gibt" sowohl deren Summe als auch deren Produkt zurück, indem sie Zeiger als Ausgabeparameter verwendet.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// Funktion, die zwei Werte über Zeiger "zurückgibt"
+void calculate(int a, int b, int* p_sum, int* p_product) {
+    // Sanity Check: Nur arbeiten, wenn die Zeiger gültig sind 
+    if (p_sum != NULL && p_product != NULL) {
+        *p_sum = a + b;
+        *p_product = a * b;
+    }
+}
+
+int main(void) {
+    int num1 = 10, num2 = 5;
+    int summe, produkt; // Variablen, um die Ergebnisse zu speichern
+
+    // Wir übergeben die Adressen von 'summe' und 'produkt'
+    calculate(num1, num2, &summe, &produkt);
+
+    printf("Zahlen: %d und %d\n", num1, num2);
+    printf("Summe:   %d\n", summe);
+    printf("Produkt: %d\n", produkt);
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Zeiger-Grundlagen</strong><br>
+                    Definiere eine <code>int</code>-Variable `my_age = 30;` und einen Integer-Zeiger `p_age`. Lasse den Zeiger auf die Variable zeigen. Gib dann drei Dinge aus: die Adresse von `my_age`, den Wert von `p_age` und den Wert, auf den `p_age` zeigt. [vgl. 3063, 3064, 3065, 3066, 3067, 3068, 3069]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die ersten beiden Ausgaben (`&my_age` und `p_age`) sollten identisch sein. Die dritte Ausgabe (`*p_age`) sollte 30 sein.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Indirekte Wertänderung</strong><br>
+                    Definiere eine `double`-Variable `price = 19.99;`. Definiere einen Zeiger `p_price`, der auf `price` zeigt. Erhöhe den Preis um 5.00, indem du <strong>nur</strong> den Zeiger verwendest. Gib anschließend den Wert von `price` aus, um das Ergebnis zu überprüfen.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Operation lautet: `*p_price = *p_price + 5.0;` oder kurz `*p_price += 5.0;`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Struct per Referenz ändern</strong><br>
+                    Definiere eine `struct Point {int x; int y;};`. Erstelle in `main` eine Variable `my_point = {10, 20};`. Schreibe eine Funktion `void movePoint(struct Point* p, int dx, int dy)`, die die x- und y-Koordinaten des Punktes um `dx` und `dy` verschiebt. Rufe die Funktion in `main` auf und gib die neuen Koordinaten aus. [vgl. 3071, 3072, 3073, 3074, 3075, 3076, 3077]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Innerhalb der Funktion verwendest du den Pfeiloperator: `p->x += dx;` und `p->y += dy;`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Array als Zeiger</strong><br>
+                    Schreibe eine Funktion `void setFirstElement(int* p_array, int value)`. Diese Funktion soll das erste Element des übergebenen Arrays auf `value` setzen. Erstelle in `main` ein Array `int numbers[5] = {0};`, rufe die Funktion auf und gib das Array danach aus, um zu sehen, dass das erste Element geändert wurde.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Innerhalb der Funktion dereferenzierst du den Zeiger, um das erste Element zu ändern: `*p_array = value;`. Da Arrays immer als Referenz übergeben werden, funktioniert dies. </p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Sanity Check implementieren</strong><br>
+                    Erweitere die Funktion aus Aufgabe 4. Bevor du auf den Zeiger zugreifst, prüfe, ob er `NULL` ist. Rufe die Funktion aus `main` einmal mit deinem `numbers`-Array auf und einmal mit `NULL`. Dein Programm sollte beim zweiten Aufruf nicht abstürzen. [vgl. 3092, 3093]
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Füge am Anfang der Funktion hinzu: `if (p_array == NULL) { return; /* Frühzeitiger Abbruch */ }`.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- GRUNDLAGEN ---
+int var = 10;
+int* p = NULL; // Deklaration eines Integer-Zeigers
+p = &var;      // Zuweisung: p enthält jetzt die ADRESSE von var
+
+// --- DIE ZWEI OPERATOREN ---
+// & (Adresse von): Liefert die Speicheradresse einer Variable.
+printf("Adresse von var: %p\n", &var);
+
+// * (Wert an Adresse): Greift auf den Wert zu, auf den ein Zeiger zeigt.
+printf("Wert von var: %d\n", *p); // Gibt 10 aus
+*p = 20; // Ändert den Wert von 'var' auf 20
+
+// --- FUNKTIONSAUFRUFE ---
+// Call by Value (Kopie wird übergeben)
+void func_val(int num);
+func_val(var);
+
+// Call by Reference (Adresse/Zeiger wird übergeben)
+void func_ref(int* p_num);
+func_ref(&var); // oder func_ref(p);
+
+// --- STRUCT-ZUGRIFF PER ZEIGER ---
+struct Point* p_point;
+p_point->x = 5; // Pfeiloperator
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

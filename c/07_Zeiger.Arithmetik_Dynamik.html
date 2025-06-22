@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 7: Zeiger (Teil 2)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 7: Zeiger (Teil 2) - Zeigerarithmetik & Dynamischer Speicher</h1>
+        <p>Den Speicher navigieren und zur Laufzeit verwalten.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit kannst du mittels <strong>Zeigerarithmetik</strong> effizient durch Arrays navigieren. Du verstehst die Äquivalenz von Array- und Zeigernotation. Das Kernlernziel ist die Beherrschung der <strong>dynamischen Speicherverwaltung</strong>: Du weißt, was der <strong>Heap</strong> ist und kannst mit <code>malloc()</code> Speicher zur Laufzeit anfordern, ihn nutzen und mit <code>free()</code> wieder korrekt freigeben. Du bist dir der Gefahr von <strong>Speicherlecks (Memory Leaks)</strong> bewusst und kennst den sicheren Workflow, um diese zu vermeiden.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Wenn einfache Zeiger das "Sehen" von Speicheradressen ermöglichen, dann ist Zeigerarithmetik das "Gehen" – die Fähigkeit, sich gezielt im Speicher zu bewegen. Dieses Konzept ist fundamental, um zu verstehen, wie Arrays intern funktionieren.
+            </p>
+            <p>
+                Die größte Einschränkung, die wir bisher hatten, war, dass die Größe all unserer Daten (insbesondere Arrays) zur Kompilierzeit feststehen musste. Was aber, wenn wir ein Programm schreiben, das eine vom Benutzer angegebene Anzahl von Werten verarbeiten soll? Hier kommt die dynamische Speicherverwaltung ins Spiel. Sie erlaubt es einem Programm, flexibel auf Anforderungen zu reagieren und Speicher genau dann anzufordern, wenn er gebraucht wird. Dies ist die Grundlage für alle flexiblen Datenstrukturen und ein Kennzeichen professioneller Software.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Zeigerarithmetik</h4>
+                <p>Die Durchführung von arithmetischen Operationen (wie Addition oder Inkrement) auf Zeigern. Eine Operation wie <code>pointer++</code> erhöht die Adresse nicht um 1, sondern um die Größe des Datentyps, auf den der Zeiger zeigt (z.B. um 4 Bytes bei einem <code>int*</code>). </p>
+            </div>
+            <div class="definition">
+                <h4>Heap</h4>
+                <p>Ein großer, flexibler Speicherbereich, aus dem ein Programm zur Laufzeit Speicherblöcke anfordern kann. Im Gegensatz zum Stack, der automatisch verwaltet wird, ist der Programmierer für die Freigabe von Heap-Speicher selbst verantwortlich.</p>
+            </div>
+            <div class="definition">
+                <h4>Dynamische Speicherverwaltung</h4>
+                <p>Der Prozess, Speicher auf dem Heap zur Laufzeit anzufordern (Allokation) und wieder freizugeben (Deallokation). </p>
+            </div>
+            <div class="definition">
+                <h4>`malloc()`</h4>
+                <p>Die Standard-Bibliotheksfunktion (`memory allocation`) zum Anfordern eines Speicherblocks einer bestimmten Größe vom Heap. Sie gibt einen `void*`-Zeiger auf den Anfang des Blocks oder `NULL` im Fehlerfall zurück. </p>
+            </div>
+            <div class="definition">
+                <h4>`free()`</h4>
+                <p>Die Standard-Bibliotheksfunktion zum Freigeben eines zuvor mit `malloc`, `calloc` oder `realloc` allokierten Speicherblocks. </p>
+            </div>
+             <div class="definition">
+                <h4>Speicherleck (Memory Leak)</h4>
+                <p>Ein Programmierfehler, bei dem dynamisch allokierter Speicher nicht mehr freigegeben wird. Das Programm verliert die Referenz (den Zeiger) auf den Speicher, kann ihn aber nicht mehr nutzen, was auf Dauer den verfügbaren Speicher des Systems aufbraucht. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Navigieren mit Zeigerarithmetik</h3>
+            <p>Ein Array-Name ist im Grunde ein konstanter Zeiger auf das erste Element. Daher können wir mit Zeigerarithmetik auf alle Elemente zugreifen. Die beiden folgenden Schreibweisen sind äquivalent: </p>
+            <pre><code>int numbers[] = {10, 20, 30, 40};
+int* p = numbers; // p zeigt jetzt auf numbers[0]
+
+// Zugriff auf das dritte Element (Index 2)
+int val1 = numbers[2];      // Klassische Array-Notation
+int val2 = *(p + 2);        // Äquivalente Zeiger-Notation
+// Lese: "Gehe von p aus 2 Elemente weiter und dereferenziere dann."
+
+printf("Wert 1: %d, Wert 2: %d\n", val1, val2); // Beide sind 30
+</code></pre>
+            
+            <h3>2. Der Lebenszyklus der dynamischen Speicherverwaltung</h3>
+            <p>Die Arbeit mit dynamischem Speicher folgt immer einem strengen, sicheren Muster in <strong>sechs Schritten</strong>:</p>
+            <pre><code>#include &lt;stdlib.h&gt; // Für malloc() und free()
+
+void dynamic_demo(int size) {
+    // SCHRITT 1: Zeiger deklarieren und mit NULL initialisieren.
+    int* p_dynamic_array = NULL;
+
+    // SCHRITT 2: Speicher anfordern.
+    // Der Cast (int*) ist für C++ Kompatibilität gute Praxis.
+    p_dynamic_array = (int*)malloc(size * sizeof(int));
+
+    // SCHRITT 3: Überprüfen, ob die Anforderung erfolgreich war! KRITISCH!
+    if (p_dynamic_array == NULL) {
+        printf("Fehler: Speicher konnte nicht allokiert werden!\n");
+        return; // Funktion sicher beenden
+    }
+
+    // SCHRITT 4: Den Speicher nutzen (wie ein normales Array).
+    printf("Speicher erfolgreich allokiert. Fülle ihn...\n");
+    for (int i = 0; i < size; i++) {
+        p_dynamic_array[i] = i * i;
+    }
+
+    // SCHRITT 5: Den Speicher wieder freigeben, wenn er nicht mehr gebraucht wird.
+    free(p_dynamic_array);
+
+    // SCHRITT 6: Den Zeiger auf NULL setzen, um "dangling pointers" zu vermeiden.
+    p_dynamic_array = NULL;
+}
+</code></pre>
+
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Array-Summe mit Zeigerarithmetik</h2>
+            <p>Dieses Programm berechnet die Summe aller Elemente eines Arrays, greift dabei aber ausschließlich über Zeigernotation auf die Elemente zu.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int values[] = {5, 10, 15, 20, 25};
+    int* p_val = values; // Zeiger auf das erste Element
+    int sum = 0;
+    
+    // sizeof(values) ist die Größe des gesamten Arrays in Bytes.
+    // sizeof(int) ist die Größe eines einzelnen Elements.
+    // Die Division ergibt die Anzahl der Elemente.
+    int num_elements = sizeof(values) / sizeof(int);
+
+    printf("Berechne die Summe der Elemente...\n");
+    for (int i = 0; i < num_elements; i++) {
+        // Lese den Wert an der Adresse (p_val + i) und addiere ihn zur Summe.
+        sum += *(p_val + i);
+    }
+    
+    printf("Die Summe ist: %d\n", sum);
+    
+    return 0;
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Flexibles Array zur Laufzeit</h2>
+            <p>Dieses Programm ist das Paradebeispiel für dynamischen Speicher. Es fragt den Benutzer, wie viele Zahlen er speichern möchte, allokiert genau so viel Speicher, füllt ihn und gibt ihn am Ende wieder frei. [vgl. 5175]</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void) {
+    int count = 0;
+    short* p_numbers = NULL; // Schritt 1
+
+    printf("Wie viele Zahlen moechten Sie speichern? ");
+    scanf_s("%d", &count);
+
+    // Schritt 2: Speicher anfordern
+    p_numbers = (short*)malloc(count * sizeof(short));
+
+    // Schritt 3: Erfolg prüfen
+    if (p_numbers == NULL) {
+        printf("Fehler bei der Speicheranforderung!\n");
+        return 1; // Programm mit Fehlercode beenden
+    }
+
+    // Schritt 4: Speicher nutzen
+    for (int i = 0; i < count; i++) {
+        p_numbers[i] = (short)(i + 1); // Füllen mit 1, 2, 3, ...
+    }
+    printf("Die %d Zahlen sind:\n", count);
+    for (int i = 0; i < count; i++) {
+        printf("%d ", p_numbers[i]);
+    }
+    printf("\n");
+
+    // Schritt 5: Speicher freigeben
+    free(p_numbers);
+
+    // Schritt 6: Zeiger auf NULL setzen
+    p_numbers = NULL;
+    
+    printf("Speicher wurde erfolgreich freigegeben.\n");
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Zeigerarithmetik anwenden</strong><br>
+                    Definiere ein `int`-Array mit 5 Elementen und initialisiere es. Definiere einen `int`-Zeiger, der auf das <strong>dritte</strong> Element (Index 2) zeigt. Gib den Wert aus, auf den er zeigt. Dekrementiere den Zeiger danach einmal und gib den neuen Wert aus. [vgl. 5135, 5137, 5146, 5147]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Initialisierung: `int* p = &my_array[2];`. Ausgabe: `*p`. Dekrement: `p--;`. Neue Ausgabe: `*p`.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Array durchlaufen (nur mit Zeiger)</strong><br>
+                    Definiere ein `char`-Array mit dem Inhalt "Hallo". Erstelle einen `char`-Zeiger, der auf den Anfang des Arrays zeigt. Schreibe eine `while`-Schleife, die so lange läuft, bis der Zeiger auf das Nullzeichen `\0` zeigt. In der Schleife gib das Zeichen aus, auf das der Zeiger zeigt, und inkrementiere dann den Zeiger.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Schleifenbedingung lautet `while (*p != '\0')`. Innerhalb der Schleife: `printf("%c", *p); p++;`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Dynamische Kopie eines Strings</strong><br>
+                    Schreibe ein Programm, das den Benutzer nach seinem Vornamen fragt. Allokiere danach mit `malloc` exakt so viel Speicher, wie für den Namen (inklusive `\0`) benötigt wird. Kopiere den Namen in den neuen Speicher und gib die Kopie aus. Gib den Speicher am Ende frei.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Lies den Namen zuerst in einen großen, statischen Puffer ein (z.B. `char buffer[100];`). Benutze `strlen(buffer)` um die Länge zu ermitteln. Allokiere `strlen(buffer) + 1` Bytes. Kopiere mit `strcpy_s` und gib am Ende den Speicher mit `free` frei.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>`calloc` für sauberen Speicher</strong><br>
+                    Allokiere dynamisch ein Array für 10 `double`-Werte einmal mit `malloc` und einmal mit `calloc`. Schreibe für jeden Fall eine Schleife, die die 10 Werte direkt nach der Allokation ausgibt. Welchen Unterschied stellst du fest?
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Der Speicher von `malloc` wird zufällige "Müll"-Werte enthalten. Der Speicher von `calloc` wird sauber mit `0.0` initialisiert sein. </p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Speicherleck provozieren</strong><br>
+                    Schreibe eine Funktion `void memory_leak_creator(void)`. Innerhalb dieser Funktion allokierst du Speicher für 1000 `int`s und tust sonst nichts. Rufe diese Funktion in `main` auf. Beschreibe in einem Kommentar, warum hier ein Speicherleck entsteht.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Der Zeiger, der die Adresse des allokierten Speichers hält, ist eine lokale Variable der Funktion. Sobald die Funktion endet, ist dieser Zeiger weg. Der Speicher auf dem Heap bleibt aber reserviert und ist nun für immer verloren, da es keine Referenz mehr auf ihn gibt.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- ZEIGERARITHMETIK ---
+int arr[5];
+int* p = arr; // p zeigt auf arr[0]
+
+// Zugriff auf das i-te Element:
+arr[i]    // Array-Notation
+*(p + i)  // Zeiger-Notation (Äquivalent)
+
+// Zeiger inkrementieren:
+p++; // p zeigt jetzt auf arr[1]
+
+// --- DYNAMISCHER SPEICHER: DER SICHERE WORKFLOW ---
+#include &lt;stdlib.h&gt;
+
+// 1. Deklarieren & Initialisieren
+Datentyp* p_mem = NULL;
+
+// 2. Anfordern & Casten
+p_mem = (Datentyp*)malloc(ANZAHL * sizeof(Datentyp));
+
+// 3. Auf NULL prüfen!
+if (p_mem == NULL) {
+    // Fehlerbehandlung!
+}
+
+// 4. Speicher nutzen (z.B. p_mem[i] = ...)
+
+// 5. Freigeben
+free(p_mem);
+
+// 6. Zeiger auf NULL setzen
+p_mem = NULL;
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

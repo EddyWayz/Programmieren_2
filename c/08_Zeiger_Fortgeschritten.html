@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 8: Zeiger (Teil 3)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 8: Zeiger (Teil 3) - Zeiger auf Zeiger & Funktionszeiger</h1>
+        <p>Die Königsdisziplin der C-Programmierung meistern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit kannst du die fortgeschrittensten Zeiger-Konzepte in C anwenden. Du bist in der Lage, <strong>Zeiger auf Zeiger</strong> (z.B. <code>int**</code>) zu deklarieren und zu verwenden, um einen Zeiger innerhalb einer aufgerufenen Funktion zu verändern. Des Weiteren verstehst du das Konzept von <strong>Funktionszeigern</strong>, kannst diese definieren und nutzen, um Funktionen wie Variablen zu behandeln. Du kannst damit flexible Architekturen (z.B. Arrays von Funktionszeigern) und sogenannte <strong>Callback-Funktionen</strong> für generische Algorithmen wie <code>qsort</code> implementieren.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Warum braucht man so etwas Abstraktes wie einen Zeiger, der auf einen anderen Zeiger zeigt? Ein Hauptanwendungsfall ist die Manipulation von Zeigern in Funktionen. Will eine Funktion den Zeiger des Aufrufers selbst verändern (und nicht nur den Wert, auf den er zeigt), muss sie dessen Adresse kennen. Dies ist fundamental für den Aufbau dynamischer Datenstrukturen wie der <strong>verketteten Liste</strong>. 
+            </p>
+            <p>
+                <strong>Funktionszeiger</strong> heben die Trennung von Code und Daten auf. Sie erlauben es, Funktionen als Parameter an andere Funktionen zu übergeben.  Dies ist das Geheimnis hinter hochgradig wiederverwendbaren Bibliotheksfunktionen. Ein perfektes Beispiel ist die Standard-Sortierfunktion <code>qsort</code>: Sie kann jeden beliebigen Datentyp sortieren, weil wir ihr eine maßgeschneiderte Vergleichsfunktion als "Werkzeug" mitgeben.  Dieses Konzept wird als <strong>Callback-Funktion</strong> bezeichnet. 
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Zeiger auf Zeiger (Pointer to Pointer)</h4>
+                <p>Eine Variable, die als Wert die Speicheradresse einer anderen Zeigervariable enthält. Deklaration: <code>Datentyp** ppName;</code>. </p>
+            </div>
+            <div class="definition">
+                <h4>Funktionszeiger (Function Pointer)</h4>
+                <p>Eine Variable, die als Wert die Startadresse des Maschinencodes einer Funktion im Speicher enthält.  Sie ermöglicht es, Funktionen indirekt aufzurufen und zur Laufzeit auszuwählen, welche Funktion ausgeführt wird. </p>
+            </div>
+            <div class="definition">
+                <h4>Callback-Funktion</h4>
+                <p>Eine Funktion, die einer anderen (oft einer Bibliotheks-)Funktion als Argument (mittels eines Funktionszeigers) übergeben wird.  Die Bibliotheksfunktion "ruft zurück" in den Anwendungscode, um eine spezifische Operation durchzuführen, z.B. den Vergleich zweier Elemente. </p>
+            </div>
+             <div class="definition">
+                <h4>Verkettete Liste (Linked List)</h4>
+                <p>Eine dynamische Datenstruktur, bei der die Elemente (Knoten) nicht zusammenhängend im Speicher liegen müssen.  Jeder Knoten enthält neben den Nutzdaten einen Zeiger auf den nächsten Knoten in der Kette.  Dies erlaubt ein sehr effizientes Einfügen und Löschen von Elementen. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Zeiger auf Zeiger (`**`) verstehen</h3>
+            <p>Stell dir eine Kette von Referenzen vor:</p>
+            <pre><code>int iVal = 42;
+int* piVal = &iVal;      // piVal zeigt auf iVal.
+int** ppiVal = &piVal;   // ppiVal zeigt auf piVal.
+</code></pre>
+            <p>Die Dereferenzierung erfolgt schrittweise:</p>
+            <ul>
+                <li><code>ppiVal</code>: enthält die Adresse von `piVal`.</li>
+                <li><code>*ppiVal</code>: ergibt den Inhalt von `piVal` (also die Adresse von `iVal`).</li>
+                <li><code>**ppiVal</code>: ergibt den Inhalt von `iVal` (also 42). </li>
+            </ul>
+            <p><strong>Hauptanwendung: Einen Zeiger in einer Funktion ändern.</strong></p>
+            <pre><code>// Diese Funktion soll den Zeiger pc, der in main definiert ist, verschieben.
+// Dazu braucht sie dessen Adresse, also einen Zeiger auf einen Zeiger.
+void movePointer(char** ppc) {
+    if (ppc != NULL && *ppc != NULL) {
+        (*ppc)++; // Inkrementiert den Originalzeiger in main
+    }
+}
+
+int main(void) {
+    char text[] = "Hallo";
+    char* p = text; // p zeigt auf 'H'
+    
+    printf("Vorher: %c\n", *p); // Gibt 'H' aus
+    movePointer(&p); // Wir übergeben die ADRESSE von p!
+    printf("Nachher: %c\n", *p); // Gibt 'a' aus
+    return 0;
+}
+</code></pre>
+
+            <h3>2. Funktionszeiger definieren und verwenden</h3>
+            <p>Die Syntax ist zunächst ungewohnt. Die Klammern um den Zeigernamen sind entscheidend.</p>
+            <pre><code>// Deklaration einer Funktion
+void sagHallo(void);
+
+// Deklaration eines passenden Funktionszeigers
+void (*p_func)(void); // p_func ist ein Zeiger auf eine Funktion, die void erwartet und void zurückgibt.
+
+// Zuweisung (der Adressoperator '&' ist optional)
+p_func = sagHallo;
+
+// Aufruf der Funktion über den Zeiger (beide Varianten sind gültig)
+(*p_func)(); 
+p_func();
+</code></pre>
+            
+            <h3>3. Anwendungsfall: Die Standardfunktion `qsort`</h3>
+            <p>Die `qsort`-Funktion aus `stdlib.h` ist das perfekte Beispiel für einen Callback. Sie kann alles sortieren, wenn wir ihr sagen, *wie* man zwei Elemente vergleicht.</p>
+            <pre><code>#include &lt;stdlib.h&gt;
+
+// Die Callback-Funktion. Sie MUSS diese Signatur haben.
+// Sie erhält Zeiger auf zwei zu vergleichende Elemente.
+int compare_integers(const void* p1, const void* p2) {
+    // Casten der void-Zeiger auf den korrekten Typ
+    int int_a = *(const int*)p1;
+    int int_b = *(const int*)p2;
+
+    // Logik: <0 wenn a<b, 0 wenn a==b, >0 wenn a>b
+    return int_a - int_b;
+}
+
+int main(void) {
+    int numbers[] = {50, 20, 80, 10, 30};
+    int count = sizeof(numbers)/sizeof(int);
+
+    // Aufruf von qsort:
+    // 1. Array, 2. Anzahl, 3. Elementgröße, 4. Funktionszeiger auf unsere Vergleichsfunktion
+    qsort(numbers, count, sizeof(int), compare_integers);
+    
+    //... Array ausgeben ...
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Zeiger auf Zeiger in Aktion</h2>
+            <p>Dieses Programm löst Aufgabe 1 des Übungsblatts und demonstriert, wie ein Zeiger auf einen Zeiger übergeben werden muss, um den ursprünglichen Zeiger zu verändern. [vgl. 1074, 1075]</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// Die Funktion bekommt einen Zeiger auf einen char-Zeiger
+void checkAndMove(char** ppc) {
+    // Sanity-Checks
+    if (ppc == NULL || *ppc == NULL) {
+        return;
+    }
+    // Überprüfen, auf welches Zeichen der Original-Zeiger zeigt
+    if (**ppc == 'l') {
+        printf("Zeiger zeigt auf 'l'. Inkrementiere ihn zweimal.\n");
+        (*ppc)++; // Der Originalzeiger wird verschoben
+        (*ppc)++; // Der Originalzeiger wird nochmal verschoben
+    }
+}
+
+int main(void) {
+    char acHello[] = "Hello World";
+    char* pcVal = &acHello[2]; // Zeigt auf das erste 'l'
+
+    printf("pcVal zeigt vor dem Aufruf auf: %c\n", *pcVal);
+    
+    // Die Adresse von pcVal wird übergeben
+    checkAndMove(&pcVal);
+
+    printf("pcVal zeigt nach dem Aufruf auf: %c\n", *pcVal); // Zeigt jetzt auf 'o'
+
+    return 0;
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Array von Funktionszeigern</h2>
+            <p>Dieses Programm implementiert eine Art "dynamisches Routing". Je nach Index wird eine andere Funktion aufgerufen. [vgl. 1085]</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+void f1(void) { printf("Funktion 1 wurde aufgerufen.\n"); }
+void f2(void) { printf("Funktion 2 wurde aufgerufen.\n"); }
+void f3(void) { printf("Funktion 3 wurde aufgerufen.\n"); }
+
+int main(void) {
+    // Array von 3 Zeigern auf Funktionen vom Typ void(void)
+    void (*apf[3])(void);
+
+    // Zuweisung der Funktionen zum Array
+    apf[0] = &f1;
+    apf[1] = &f2;
+    apf[2] = &f3;
+
+    printf("Rufe Funktionen über Array-Index auf:\n");
+    // Aufrufe über den Index
+    apf[0]();
+    apf[2]();
+    
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Dreifache Referenz</strong><br>
+                    Definiere eine `int` Variable `i=10`, einen Zeiger `pi`, der auf `i` zeigt, und einen Zeiger-auf-Zeiger `ppi`, der auf `pi` zeigt. Ändere den Wert von `i` auf `99` nur unter Verwendung der Variable `ppi`. Gib `i` danach aus, um das Ergebnis zu prüfen.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Zuweisung lautet: `**ppi = 99;`.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Einfacher Funktionszeiger</strong><br>
+                    Schreibe eine Funktion `void printName(char* name)`, die einen Namen ausgibt. Definiere in `main` einen passenden Funktionszeiger, weise ihm die Adresse deiner Funktion zu und rufe die Funktion über den Zeiger auf, um deinen Namen auszugeben.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Definition des Zeigers: `void (*p_print_func)(char*);`. Der Aufruf: `p_print_func("DeinName");`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Mini-Rechner mit Funktionszeiger-Array</strong><br>
+                    Implementiere zwei Funktionen: `int add(int, int)` und `int subtract(int, int)`. Erstelle ein Array von zwei Funktionszeigern, das auf diese beiden Funktionen zeigt. Frage den Benutzer nach zwei Zahlen und ob er addieren (0) oder subtrahieren (1) möchte. Rufe dann die passende Funktion über das Array auf und gib das Ergebnis aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Das Array: `int (*p_ops[2])(int, int) = {add, subtract};`. Der Aufruf: `result = p_ops[choice](num1, num2);`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>`qsort` für `structs`</strong><br>
+                    Definiere eine `struct` `Employee` mit `char name[50]` und `float salary`. Erstelle ein Array von drei Mitarbeitern. Schreibe eine `compare`-Funktion, die zwei Mitarbeiter anhand ihres Gehalts (`salary`) vergleicht. Nutze `qsort` und deine Funktion, um das Array zu sortieren und gib das Ergebnis aus. [vgl. 1117, 1126]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>In der `compare`-Funktion musst du die `void*`-Zeiger auf `const struct Employee*` casten. Greife dann mit dem Pfeiloperator `->` auf das Gehalt zu: `float salary_a = p_emp_a->salary;`.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Konzeptfrage zu verketteten Listen</strong><br>
+                    Erkläre in einem Kommentar, warum eine Funktion `void insertAtFront(Node** pp_anchor, Data d)` einen Zeiger-auf-Zeiger benötigt, während eine Funktion `void insertAtEnd(Node* p_anchor, Data d)` mit einem einfachen Zeiger auskommen könnte.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Beim Einfügen am Anfang muss der Anker-Zeiger selbst geändert werden, damit er auf das neue erste Element zeigt. Um eine Variable (hier: den Anker-Zeiger) in einer Funktion zu ändern, muss man ihre Adresse übergeben. Beim Einfügen am Ende wird der Anker-Zeiger selbst nie geändert; man hangelt sich nur an den `next`-Zeigern entlang.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- ZEIGER AUF ZEIGER ---
+// Deklaration
+Datentyp** pp_var;
+
+// Dereferenzierung
+*pp_var  // Ergibt den Zeiger (Typ*)
+**pp_var // Ergibt den Wert (Typ)
+
+// --- FUNKTIONSZEIGER ---
+// Deklaration eines Zeigers 'pf'
+Rueckgabetyp (*pf)(ParameterTyp1, ParameterTyp2);
+
+// Zuweisung einer passenden Funktion 'func'
+pf = func;
+
+// Aufruf der Funktion über den Zeiger
+pf(arg1, arg2);
+
+// --- ANWENDUNGSBEISPIELE ---
+// Array von Funktionszeigern
+Rueckgabetyp (*p_array[3])(void);
+p_array[0] = func1;
+p_array[0](); // Ruft func1 auf
+
+// Callback für qsort
+// void qsort(void* base, size_t nitems, size_t size, int (*compar)(const void*, const void*));
+int my_compare(const void* a, const void* b) {
+    // ... casten und vergleichen ...
+    // return <0, 0, oder >0
+}
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

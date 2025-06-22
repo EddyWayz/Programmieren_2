@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 9: Dateiverarbeitung und Präprozessor</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 9: Dateiverarbeitung und Präprozessor</h1>
+        <p>Daten dauerhaft speichern und den Code vor der Kompilierung steuern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit kannst du C-Programme schreiben, die Daten <strong>persistent</strong> machen, indem sie Textdateien lesen und schreiben.  Du beherrschst den sicheren Zyklus der Dateiverarbeitung: Öffnen mit <code>fopen_s</code>, Lesen/Schreiben mit <code>fgets</code> und <code>fprintf</code> und Schließen mit <code>fclose</code>.  Weiterhin verstehst du die Rolle des <strong>C-Präprozessors</strong>. Du kannst seine Direktiven nutzen, um Header einzubinden (<code>#include</code>), symbolische Konstanten und Makros zu definieren (<code>#define</code>) und Code-Teile mittels <strong>bedingter Kompilierung</strong> (<code>#ifdef</code>) für verschiedene Szenarien anzupassen. 
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Bisher waren all unsere Daten und Ergebnisse "transient", also flüchtig – nach dem Programmende war alles weg.  Die <strong>Dateiverarbeitung</strong> ist der Schlüssel, um Daten dauerhaft (persistent) zu speichern. Ob Konfigurationen, Spielstände, Log-Nachrichten oder Messwerte – fast jede ernsthafte Anwendung muss Daten lesen oder schreiben können.
+            </p>
+            <p>
+                Der <strong>Präprozessor</strong> ist ein mächtiges, aber oft unsichtbares Werkzeug. Er läuft noch vor dem eigentlichen Compiler und modifiziert unseren Quellcode nach Anweisung.  Er fügt Bibliotheken ein, ersetzt Konstanten und kann ganze Code-Blöcke ein- oder ausblenden. Dies ist essenziell für die Organisation großer Projekte und um Code für verschiedene Plattformen (z.B. Windows vs. Linux) oder Konfigurationen (z.B. Debug- vs. Release-Version) anzupassen. 
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Persistenz</h4>
+                <p>Die Eigenschaft von Daten, die Beendigung des Programms zu überdauern, typischerweise durch Speicherung in einer Datei. </p>
+            </div>
+            <div class="definition">
+                <h4>Datei-Handle (<code>FILE*</code>)</h4>
+                <p>Ein Zeiger vom speziellen Typ <code>FILE</code>, der nach dem erfolgreichen Öffnen einer Datei als "Griff" oder Referenz auf diese Datei dient. Alle Lese- und Schreiboperationen benötigen diesen Zeiger.</p>
+            </div>
+            <div class="definition">
+                <h4>Präprozessor</h4>
+                <p>Ein Programm, das den C-Quellcode als reinen Text verarbeitet, bevor der Compiler ihn sieht. Es führt Direktiven aus, die mit einem `#`-Symbol beginnen. </p>
+            </div>
+            <div class="definition">
+                <h4>Präprozessor-Direktive</h4>
+                <p>Ein Befehl an den Präprozessor, z.B. <code>#include</code>, <code>#define</code> oder <code>#ifdef</code>. </p>
+            </div>
+             <div class="definition">
+                <h4>Makro</h4>
+                <p>Ein Code-Fragment, dem durch <code>#define</code> ein Name zugewiesen wurde. Der Präprozessor ersetzt jede Erwähnung des Namens durch den Inhalt des Makros. Dies ist eine reine Textersetzung und birgt viele Fehlerquellen.</p>
+            </div>
+            <div class="definition">
+                <h4>Bedingte Kompilierung</h4>
+                <p>Die Technik, Code-Abschnitte nur unter bestimmten Bedingungen zu kompilieren. Dies wird meist über <code>#ifdef / #endif</code> Blöcke gesteuert. </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Der Lebenszyklus der Dateiverarbeitung</h3>
+            <p>Das Arbeiten mit Dateien folgt immer einem klaren, sicheren Zyklus.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;errno.h&gt; // Für errno_t
+
+int main(void) {
+    FILE* p_file = NULL; // 1. FILE-Zeiger deklarieren und auf NULL setzen.
+    errno_t err;
+
+    // 2. Datei öffnen (hier: zum Schreiben).
+    // fopen_s ist sicherer als das alte fopen.
+    err = fopen_s(&p_file, "meine_datei.txt", "w"); // "w" für write (schreiben)
+
+    // 3. Erfolg prüfen! KRITISCH!
+    if (err != 0 || p_file == NULL) {
+        printf("Fehler: Datei konnte nicht geoeffnet werden!\n");
+        return 1; // Fehler anzeigen und beenden
+    }
+
+    // 4. In die Datei schreiben (funktioniert wie printf).
+    fprintf(p_file, "Hallo Welt, dies ist eine Zeile.\n");
+    fprintf(p_file, "Dies ist Zeile %d.\n", 2);
+
+    // 5. Datei schließen! WICHTIG!
+    fclose(p_file);
+    p_file = NULL; // Zeiger aus Sicherheitsgründen zurücksetzen
+
+    printf("Daten erfolgreich in die Datei geschrieben.\n");
+    return 0;
+}
+</code></pre>
+            <p><strong>Wichtige Dateimodi für <code>fopen_s</code>:</strong></p>
+            <ul>
+                <li><code>"r"</code>: Read – Öffnet eine existierende Datei zum Lesen. </li>
+                <li><code>"w"</code>: Write – Öffnet eine Datei zum Schreiben. Ist sie vorhanden, wird ihr Inhalt gelöscht! Ist sie nicht da, wird sie erstellt. </li>
+                <li><code>"a"</code>: Append – Öffnet eine Datei, um Daten am Ende anzuhängen. Erstellt die Datei, falls sie nicht existiert. </li>
+            </ul>
+
+            <h3>2. Der Präprozessor und seine Direktiven</h3>
+            <p><strong><code>#include</code>:</strong> Kopiert den Inhalt einer anderen Datei an diese Stelle. </p>
+            <pre><code>#include &lt;stdio.h&gt;   // Mit <> sucht der Präprozessor in System-Verzeichnissen.
+#include "meine_header.h" // Mit "" sucht er zuerst im Projektverzeichnis.
+</code></pre>
+
+            <p><strong><code>#define</code>:</strong> Für Konstanten und einfache Makros.</p>
+            <pre><code>#define PI 3.14159
+#define BUFFER_SIZE 256
+
+// Fehleranfälliges Funktionsmakro. Klammern sind extrem wichtig!
+#define SQUARE(x) ((x) * (x))
+
+// Verwendung
+double kreis_umfang = 2 * PI * radius;
+char mein_puffer[BUFFER_SIZE];
+int a = SQUARE(5); // wird zu ((5) * (5))
+</code></pre>
+
+            <p><strong>Bedingte Kompilierung:</strong> Code für Debugging-Zwecke ein- oder ausblenden.</p>
+            <pre><code>// Definieren wir ein Debug-Symbol
+#define DEBUG_MODE
+
+// ... später im Code ...
+#ifdef DEBUG_MODE
+    // Dieser printf wird nur kompiliert, wenn DEBUG_MODE definiert ist.
+    printf("Debug: Variable x hat den Wert %d\n", x);
+#endif
+</code></pre>
+
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramm 1: Ein einfaches Tagebuch</h2>
+            <p>Dieses Programm öffnet eine Datei `tagebuch.txt` im "Append"-Modus, fragt den Benutzer nach einem Eintrag, schreibt ihn in die Datei und gibt dann den gesamten Inhalt der Datei aus.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;errno.h&gt;
+#define MAX_LINE_LENGTH 256
+
+int main(void) {
+    FILE* p_tagebuch = NULL;
+    errno_t err;
+    char buffer[MAX_LINE_LENGTH];
+
+    // --- TEIL 1: Schreiben ---
+    err = fopen_s(&p_tagebuch, "tagebuch.txt", "a"); // 'a' für append/anhängen
+    if (err == 0 && p_tagebuch != NULL) {
+        printf("Bitte neuen Tagebucheintrag eingeben: ");
+        fgets(buffer, MAX_LINE_LENGTH, stdin); // Eintrag von Konsole lesen
+        fprintf(p_tagebuch, "%s", buffer);     // Eintrag in Datei schreiben
+        fclose(p_tagebuch);
+    }
+
+    // --- TEIL 2: Lesen und Ausgeben ---
+    printf("\n--- Inhalt des Tagebuchs ---\n");
+    err = fopen_s(&p_tagebuch, "tagebuch.txt", "r"); // 'r' für read/lesen
+    if (err == 0 && p_tagebuch != NULL) {
+        // Lese Zeile für Zeile, bis fgets NULL zurückgibt (Dateiende)
+        while (fgets(buffer, MAX_LINE_LENGTH, p_tagebuch) != NULL) {
+            printf("%s", buffer); // Gib die gelesene Zeile aus
+        }
+        fclose(p_tagebuch);
+    }
+    
+    return 0;
+}
+</code></pre>
+
+            <h2>Beispielprogramm 2: Makro für bedingtes Kompilieren</h2>
+            <p>Dieses Programm zeigt, wie man durch einfaches Ändern einer `#define`-Anweisung unterschiedlichen Code erzeugen kann.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// Schalter für die Version. Setze auf 1, 2, oder etwas anderes.
+#define VERSION 2
+
+// Ein Makro für eine Berechnung
+#define ADD_TEN(val) ((val) + 10)
+
+int main(void) {
+    #if VERSION == 1
+        printf("Dies ist die Standard-Version.\n");
+    #elif VERSION == 2
+        printf("Dies ist die PRO-Version mit mehr Features!\n");
+    #else
+        printf("Dies ist eine unbekannte Version.\n");
+    #endif
+
+    int x = 5;
+    printf("%d plus 10 ist %d\n", x, ADD_TEN(x));
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Datei-Inhalt anzeigen</strong><br>
+                    Erstelle manuell eine Textdatei `info.txt` mit ein paar Zeilen Inhalt. Schreibe ein C-Programm, das den Benutzer nach dem Dateinamen fragt, diese Datei im Lesemodus öffnet und ihren gesamten Inhalt auf der Konsole ausgibt. [vgl. 2696, 2697]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Verwende eine `while`-Schleife und `fgets`, um die Datei Zeile für Zeile zu lesen, bis `fgets` `NULL` zurückgibt.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>In eine Log-Datei schreiben</strong><br>
+                    Schreibe ein Programm, das eine Datei `log.txt` im "Append"-Modus (`"a"`) öffnet. Schreibe drei Zeilen mit `fprintf` in die Datei, z.B. "Programm gestartet.", "Daten verarbeitet.", "Programm beendet.". Schließe die Datei und überprüfe ihren Inhalt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Der Kern ist der `fopen_s`-Aufruf mit dem Modus `"a"`, gefolgt von drei `fprintf`-Aufrufen und einem `fclose`.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Einfaches CSV lesen</strong><br>
+                    Erstelle eine Datei `data.csv` mit dem Inhalt:<br><code>Max;Mustermann;25<br>Erika;Musterfrau;30</code><br>Schreibe ein Programm, das die Datei Zeile für Zeile liest und für jede Zeile die drei Tokens (Vorname, Nachname, Alter) getrennt ausgibt. [vgl. 2700, 2701, 2702]
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Nachdem du eine Zeile mit `fgets` gelesen hast, kannst du die Funktion `strtok_s` verwenden, um die Zeile am Semikolon zu trennen. Dies ist eine fortgeschrittene Funktion, eine Recherche dazu ist Teil der Übung.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Funktionsmakro für das Minimum</strong><br>
+                    Schreibe ein Funktionsmakro `MIN(a, b)`, das den kleineren von zwei Werten zurückgibt. Achte darauf, alle Parameter und den gesamten Ausdruck zu klammern, um die typischen Makro-Fehler zu vermeiden. Teste es mit `MIN(10, 20)` und `10 * MIN(2, 3)`.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Das Makro sollte so aussehen: `#define MIN(a, b) (((a) < (b)) ? (a) : (b))`. Der ternäre Operator `?:` eignet sich hierfür hervorragend.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Include-Guard manuell erstellen</strong><br>
+                    Erstelle eine Headerdatei `my_math.h`. Schreibe einen "Include-Guard" um den gesamten Inhalt, um eine Mehrfacheinbindung zu verhindern. Deklariere innerhalb des Guards eine einfache Funktion, z.B. `int add(int a, int b);`.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Der Guard sieht so aus: `#ifndef MY_MATH_H_` am Anfang, `#define MY_MATH_H_` direkt danach, und `#endif` ganz am Ende. Der Name `MY_MATH_H_` ist dabei frei wählbar, sollte aber einzigartig sein.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- DATEIVERARBEITUNGS-ZYKLUS ---
+#include &lt;stdio.h&gt;
+#include &lt;errno.h&gt;
+
+FILE* p_f = NULL;
+errno_t err = fopen_s(&p_f, "file.txt", "w"); // "r", "w", "a"
+if (err == 0 && p_f != NULL) {
+    // Lesen / Schreiben
+    fprintf(p_f, "Zahl: %d", 42); // Schreiben
+    char line[100];
+    fgets(line, 100, p_f);      // Lesen
+
+    // Schließen
+    fclose(p_f);
+    p_f = NULL;
+}
+
+// --- PRÄPROZESSOR-DIREKTIVEN ---
+// Header einbinden
+#include &lt;system_header.h&gt;
+#include "mein_header.h"
+
+// Symbolische Konstante
+#define MAX_ELEMENTS 100
+
+// Funktionsmakro (mit Klammern!)
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+// Bedingte Kompilierung
+#define IS_PRO_VERSION
+#ifdef IS_PRO_VERSION
+    // dieser Code wird kompiliert
+#else
+    // dieser Code wird ignoriert
+#endif
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

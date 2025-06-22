@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 1: Einführung in C</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 1: Einführung in C: Datentypen, Variablen & Konstanten</h1>
+        <p>Der Grundstein für dein Verständnis der C-Programmierung.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Am Ende dieser Einheit bist du in der Lage, einfache C-Programme zu schreiben, die die grundlegenden Datentypen verwenden. Du kannst Variablen und Konstanten korrekt definieren, ihnen Werte zuweisen (initialisieren) und diese Werte formatiert auf der Konsole ausgeben. Du verstehst, warum Datentypen essenziell sind und wie C im Speicher mit Daten umgeht.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Warum C lernen? C ist die Grundlage vieler moderner Systeme. Betriebssysteme wie Windows, Linux und macOS sind in ihren Kernkomponenten in C geschrieben. Auch in der Welt der "Embedded Systems" – also winzigen Computern in Autos, Waschmaschinen oder medizinischen Geräten – ist C die dominierende Sprache.
+            </p>
+            <p>
+                Dieses Thema ist das absolute Fundament. Ohne ein solides Verständnis von Datentypen, Variablen und Konstanten ist keine sinnvolle Programmierung möglich. Alles, was du später lernst (Schleifen, Funktionen, Pointer), baut auf diesem Wissen auf. Die hier gelernten Konzepte zur Datenspeicherung sind zudem eine wichtige Vorbereitung für das Verständnis von Klassen und Objekten in C++.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Datentyp</h4>
+                <p>Ein Datentyp legt zwei Dinge fest: einen <strong>Wertebereich</strong> (z.B. ganze Zahlen von -128 bis 127) und die darauf erlaubten <strong>Operationen</strong> (z.B. Addition, Subtraktion). C ist eine typisierte Sprache, was bedeutet, dass jede Variable genau einen Typ haben muss.</p>
+            </div>
+            <div class="definition">
+                <h4>Variable</h4>
+                <p>Eine Variable ist ein symbolischer <strong>Name für einen Speicherbereich</strong> im Computer. Über diesen Namen können wir Daten ablegen und wieder abrufen. In C müssen Variablen vor ihrer Verwendung <strong>definiert</strong> werden, wodurch der Name bekannt gemacht und Speicher reserviert wird. Das erstmalige Zuweisen eines Wertes nennt man <strong>Initialisierung</strong>.</p>
+            </div>
+            <div class="definition">
+                <h4>Konstante</h4>
+                <p>Eine Konstante ist ein Wert, der sich zur Laufzeit des Programms nicht ändern kann. Man unterscheidet:</p>
+                <ul>
+                    <li><strong>Literale Konstanten</strong>: Fest im Code geschriebene Werte wie <code>42</code>, <code>3.1415</code> oder <code>"Hallo Welt"</code>.</li>
+                    <li><strong>Konstante Variablen (<code>const</code>)</strong>: Variablen, die mit dem Schlüsselwort <code>const</code> deklariert werden und nach ihrer Initialisierung nicht mehr verändert werden können.</li>
+                    <li><strong>Symbolische Konstanten (<code>#define</code>)</strong>: Werden vom Präprozessor vor der eigentlichen Kompilierung durch literale Konstanten ersetzt.</li>
+                </ul>
+            </div>
+             <div class="definition">
+                <h4><code>sizeof</code>-Operator</h4>
+                <p>Ein spezieller Operator in C, der die Größe eines Datentyps oder einer Variablen in Bytes zurückgibt. Dies ist extrem nützlich, um die Portabilität von Code zu gewährleisten, da die Größe von Datentypen je nach System variieren kann.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>Die Grundstruktur eines C-Programms</h3>
+            <p>Jedes C-Konsolenprogramm hat einen ähnlichen Aufbau:</p>
+            <pre><code>// 1. Präprozessor-Anweisung: Bindet die Standard-Bibliothek für Input/Output ein
+#include &lt;stdio.h&gt;
+
+// 2. Die main-Funktion: Der Einstiegspunkt des Programms
+int main(void) 
+{
+    // 3. Anweisungen des Programms kommen hier hinein
+    
+    printf("Hello World!\n"); // Beispiel: Ausgabe auf der Konsole
+
+    // 4. Rückgabewert: 0 signalisiert dem Betriebssystem "alles ok"
+    return 0;
+}</code></pre>
+
+            <h3>Variablen definieren und initialisieren</h3>
+            <p>Die Syntax lautet immer: <code>Datentyp Variablenname;</code> oder direkt mit Initialisierung: <code>Datentyp Variablenname = Wert;</code>.</p>
+            <pre><code>// Definition ohne Initialisierung
+int anzahl_aepfel; 
+
+// Wertzuweisung nach der Definition
+anzahl_aepfel = 10;
+
+// Definition und Initialisierung in einem Schritt (bevorzugt!)
+double preis_pro_apfel = 0.55; 
+
+// Definition einer Konstante
+const int TAGE_PRO_WOCHE = 7;</code></pre>
+            
+            <h3>Die wichtigsten Basisdatentypen</h3>
+            <p>C stellt mehrere grundlegende Datentypen zur Verfügung. Für den Anfang konzentrieren wir uns auf die wichtigsten, ausgehend von einem 32-Bit-System.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Datentyp</th>
+                        <th>Größe (in Byte)</th>
+                        <th>Beschreibung & Beispiel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>char</code></td>
+                        <td>1 </td>
+                        <td>Speichert ein einzelnes Zeichen (Buchstabe, Ziffer, Symbol). Beispiel: <code>char buchstabe = 'A';</code> </td>
+                    </tr>
+                    <tr>
+                        <td><code>int</code></td>
+                        <td>4 </td>
+                        <td>Der Standard-Datentyp für ganze Zahlen. Beispiel: <code>int anzahl = -100;</code> </td>
+                    </tr>
+                     <tr>
+                        <td><code>float</code></td>
+                        <td>4 </td>
+                        <td>Gleitkommazahl mit einfacher Genauigkeit. Beispiel: <code>float pi_einfach = 3.1415F;</code> </td>
+                    </tr>
+                    <tr>
+                        <td><code>double</code></td>
+                        <td>8 </td>
+                        <td>Gleitkommazahl mit doppelter Genauigkeit. Beispiel: <code>double pi_genau = 3.14159265;</code> </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Diese Typen können mit <strong>Modifizierern</strong> wie <code>short</code>, <code>long</code> und <code>unsigned</code> (vorzeichenlos) kombiniert werden, um den Wertebereich anzupassen. Zum Beispiel speichert <code>unsigned int</code> nur positive Zahlen, kann dafür aber doppelt so hohe Werte erreichen.</p>
+            
+            <h3>Werte mit <code>printf</code> ausgeben</h3>
+            <p>Um den Wert einer Variablen auszugeben, verwendet man <strong>Format-Platzhalter</strong> im Text. Die Funktion ersetzt diese dann durch die Werte der übergebenen Variablen.</p>
+            <pre><code>int alter = 30;
+printf("Ich bin %d Jahre alt.\n", alter); // %d ist der Platzhalter für ein int
+
+double groesse = 1.85;
+printf("Meine Größe ist %f Meter.\n", groesse); // %f ist der Platzhalter für float/double</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramme</h2>
+
+            <h3>Beispiel 1: Datentypen und ihre Größen</h3>
+            <p>Dieses Programm deklariert Variablen der wichtigsten Typen, initialisiert sie und gibt ihre Werte sowie ihre Größe im Speicher aus. Es kombiniert die Ideen aus Aufgabe 2 und 3 des Übungsblatts.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Definition und Initialisierung verschiedener Variablen
+    char initial = 'M';
+    int anzahl_studenten = 150;
+    unsigned int bewohner_stadt = 45000; // Für große, nur positive Zahlen
+    float durchschnittsnote = 2.3F; // 'F' am Ende kennzeichnet ein float-Literal
+    double pi = 3.1415926535;
+    
+    // Ausgabe der Werte mit passenden Format-Platzhaltern
+    printf("Initial: %c\n", initial);
+    printf("Anzahl Studenten: %d\n", anzahl_studenten);
+    printf("Einwohnerzahl: %u\n", bewohner_stadt); // %u für unsigned int
+    printf("Durchschnittsnote: %f\n", durchschnittsnote);
+    printf("Pi: %f\n", pi); // %f kann auch für double verwendet werden
+    printf("-----\n");
+
+    // Ausgabe der Speichergröße mit dem sizeof-Operator
+    printf("Größe von char: %zu Byte\n", sizeof(char));
+    printf("Größe von int: %zu Byte\n", sizeof(int));
+    printf("Größe von unsigned int: %zu Byte\n", sizeof(unsigned int));
+    printf("Größe von float: %zu Byte\n", sizeof(float));
+    printf("Größe von double: %zu Byte\n", sizeof(double));
+    // Hinweis: %zu ist der korrekte Format-Platzhalter für das Ergebnis von sizeof.
+
+    return 0;
+}
+</code></pre>
+
+            <h3>Beispiel 2: Variable vs. Konstante</h3>
+            <p>Dieses Beispiel zeigt den Unterschied im Umgang mit einer veränderbaren Variable und einer unveränderlichen Konstante.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Eine konstante Variable für die Mehrwertsteuer
+    const float MWST_SATZ = 0.19F;
+
+    // Eine normale Variable für einen Nettopreis
+    double netto_preis = 250.0;
+
+    printf("Nettopreis: %.2f Euro\n", netto_preis);
+    printf("Mehrwertsteuersatz: %.2f%%\n", MWST_SATZ * 100); // %% gibt ein einzelnes %-Zeichen aus
+
+    // Berechnung durchführen
+    double mwst_betrag = netto_preis * MWST_SATZ;
+    double brutto_preis = netto_preis + mwst_betrag;
+
+    printf("Bruttopreis: %.2f Euro\n", brutto_preis);
+    printf("-----\n");
+    
+    // Der Wert einer normalen Variable kann geändert werden
+    netto_preis = 300.0;
+    printf("Neuer Nettopreis: %.2f Euro\n", netto_preis);
+
+    // Der folgende Code würde einen Compiler-Fehler erzeugen!
+    // Eine Konstante kann nicht geändert werden.
+    // MWST_SATZ = 0.07F; // --> FEHLER: assignment of read-only variable
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>"Hello World" in der IDE</strong><br>
+                    Richte, wie in Aufgabe 1 des Übungsblatts beschrieben, ein neues C-Projekt in deiner IDE (z.B. Visual Studio) ein. Erstelle eine `main.c` und schreibe ein Programm, das "Hello World!" auf der Konsole ausgibt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Das Grundgerüst mit <code>#include &lt;stdio.h&gt;</code> und <code>int main(void)</code> ist dein Startpunkt. Die Funktion, die du brauchst, ist <code>printf("Dein Text hier\n");</code>.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Der Datentyp-Inspektor</strong><br>
+                    Schreibe ein Programm, das für <em>alle</em> in Aufgabe 2 des Übungsblatts genannten Ganzzahl- und Gleitkomma-Datentypen (<code>char</code>, <code>short int</code>, <code>int</code>, <code>long int</code>, <code>long long int</code>, <code>float</code>, <code>double</code>, etc.) die jeweilige Größe in Bytes auf dem Bildschirm ausgibt.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Verwende für jeden Datentyp eine Zeile wie: <code>printf("Größe von short int: %zu Bytes\n", sizeof(short int));</code>. Vergiss nicht die <code>unsigned</code>-Varianten.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Variablen-Karussell</strong><br>
+                    Definiere fünf Variablen für die folgenden Informationen: dein Alter (ganze Zahl), dein Lieblingsbuchstabe (Zeichen), die Körpergröße einer Person in Metern (Gleitkommazahl), die Einwohnerzahl deines Heimatortes (große, vorzeichenlose Ganzzahl) und den Preis eines Kaffees (Gleitkommazahl). Initialisiere sie mit passenden Werten und gib alle Werte in einem einzigen <code>printf</code>-Aufruf schön formatiert aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Wähle die passenden Datentypen (<code>int</code>, <code>char</code>, <code>double</code>, <code>unsigned long</code>, <code>float</code>). Du kannst mehrere Variablen an <code>printf</code> übergeben: <code>printf("Alter: %d, Buchstabe: %c ...", alter, buchstabe, ...);</code></p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Der unantastbare Wert</strong><br>
+                    Definiere eine konstante Variable vom Typ <code>int</code>, aber weise ihr bei der Definition absichtlich keinen Wert zu. Was meldet der Compiler?  Behebe den Fehler. Versuche danach, den Wert der Konstante in einer neuen Zeile zu ändern. Was passiert jetzt? 
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Der Compiler wird sich beschweren, dass eine Konstante initialisiert werden muss. Nachdem du das behoben hast (z.B. <code>const int MEINE_KONSTANTE = 100;</code>), wird er einen weiteren Fehler melden, wenn du versuchst, ihr einen neuen Wert zuzuweisen (z.B. <code>MEINE_KONSTANTE = 200;</code>), da sie "read-only" ist.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Mini-Taschenrechner</strong><br>
+                    Deklariere zwei Variablen vom Typ <code>int</code>, `a` und `b`, und initialisiere sie mit den Werten 15 und 4. Deklariere drei weitere <code>int</code>-Variablen: `summe`, `differenz` und `produkt`. Berechne die entsprechenden Werte und speichere sie in diesen Variablen. Gib zum Schluss alle Ergebnisse in klar beschrifteten Zeilen aus (z.B. "15 + 4 = 19").
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Berechnungen sind einfach: <code>summe = a + b;</code> etc. Für die Ausgabe kannst du die Variablen mehrfach verwenden: <code>printf("%d + %d = %d\n", a, b, summe);</code>.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- GRUNDGERÜST ---
+#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Dein Code hier
+    return 0;
+}
+
+// --- VARIABLEN & KONSTANTEN ---
+// Definition         | Initialisierung
+int anzahl;           | anzahl = 10;
+char zeichen = 'A';   // Definition & Initialisierung
+const double PI = 3.14159; // Konstante
+
+// --- WICHTIGE DATENTYPEN ---
+// Ganze Zahlen
+char          // 1 Byte
+short int     // 2 Bytes
+int           // 4 Bytes
+long long int // 8 Bytes
+// Füge 'unsigned' hinzu für nur-positive Werte (z.B. unsigned int)
+
+// Gleitkommazahlen
+float   // 4 Bytes, mit F am Ende: 2.5F
+double  // 8 Bytes
+
+// --- GRÖSSE ERMITTELN ---
+size_t groesse = sizeof(int); // ergibt 4 (auf 32-Bit System)
+
+// --- AUSGABE MIT PRINTF ---
+printf("Text...");
+// Format-Platzhalter:
+// %d : int (signed)
+// %u : unsigned int
+// %c : char
+// %f : float / double
+// %zu: size_t (für sizeof)
+// \n : Zeilenumbruch
+// %% : Ein %-Zeichen ausgeben
+</code></pre>
+        </section>
+
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

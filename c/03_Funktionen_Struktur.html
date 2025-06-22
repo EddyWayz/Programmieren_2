@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 3: Funktionen</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 3: Funktionen: Struktur, Gültigkeit & Wiederverwendung</h1>
+        <p>Code in logische, wiederverwendbare Blöcke gliedern.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit bist du in der Lage, C-Code mithilfe von Funktionen logisch zu strukturieren. Du verstehst den Unterschied zwischen <strong>Deklaration, Definition und Aufruf</strong> einer Funktion und kannst dieses Wissen anwenden.  Du kannst Daten mittels Parametern an Funktionen übergeben und Ergebnisse per Rückgabewert erhalten. Du kannst den <strong>Gültigkeitsbereich (Scope)</strong> von Variablen (lokal vs. global) erklären und die Speicherklassen <code>auto</code> und <code>static</code> gezielt einsetzen.  Schließlich weißt du, wie man Funktionen aus Standardbibliotheken wie <code>math.h</code> einbindet und nutzt.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Stell dir vor, du baust ein Auto. Du gießt nicht das gesamte Fahrzeug aus einem einzigen Stück Metall. Stattdessen fertigst du einzelne, getestete Komponenten – Motor, Räder, Karosserie – und fügst sie zusammen.  In der Programmierung sind Funktionen genau das: kleine, spezialisierte und wiederverwendbare Bauteile. 
+            </p>
+            <p>
+                Dieses Prinzip nennt sich <strong>"Don't Repeat Yourself" (DRY)</strong>.  Anstatt denselben Code-Abschnitt immer wieder zu kopieren (und damit auch Fehler mitzukopieren), lagerst du ihn einmal in eine Funktion aus.  Diese Funktion kann dann beliebig oft aufgerufen werden.  Das macht deinen Code nicht nur kürzer und übersichtlicher, sondern auch einfacher zu warten: Eine Änderung oder Fehlerbehebung muss nur an einer einzigen Stelle erfolgen. 
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Funktion</h4>
+                <p>Ein eigenständiger, benannter Code-Block, der eine spezifische Aufgabe erfüllt. Man kann sie sich als "Black-Box" vorstellen: Sie erhält eine Eingabe (Input), verarbeitet sie und liefert eine Ausgabe (Output). </p>
+            </div>
+            <div class="definition">
+                <h4>Deklaration (Prototyp)</h4>
+                <p>Stellt eine Funktion dem Compiler vor, bevor sie verwendet wird.  Sie legt den Namen, den Rückgabetyp und die Typen der Parameter fest. Die Deklaration endet mit einem Semikolon. Beispiel: <code>double CalcArea(double r);</code></p>
+            </div>
+            <div class="definition">
+                <h4>Definition</h4>
+                <p>Die vollständige Implementierung einer Funktion. Sie enthält den Code, der ausgeführt wird, wenn die Funktion aufgerufen wird.  Hier werden auch die Anweisungen im Funktionskörper platziert.</p>
+            </div>
+            <div class="definition">
+                <h4>Parameter & Argument</h4>
+                <p><strong>Parameter</strong> sind die Variablen in der Funktionsdeklaration/-definition (z.B. <code>double r</code>).  <strong>Argumente</strong> sind die tatsächlichen Werte, die beim Aufruf an die Funktion übergeben werden (z.B. <code>CalcArea(10.5);</code>).</p>
+            </div>
+            <div class="definition">
+                <h4>Gültigkeitsbereich (Scope)</h4>
+                <p>Der Bereich im Code, in dem eine Variable sichtbar und nutzbar ist.  Man unterscheidet hauptsächlich:</p>
+                <ul>
+                    <li><strong>Lokaler Scope</strong>: Die Variable ist nur innerhalb des Code-Blocks <code>{...}</code> gültig, in dem sie definiert wurde. </li>
+                    <li><strong>Globaler Scope</strong>: Die Variable wurde außerhalb aller Funktionen definiert und ist im gesamten Programm zugänglich.  (Sollte vermieden werden!)</li>
+                </ul>
+            </div>
+             <div class="definition">
+                <h4>Speicherklasse</h4>
+                <p>Gibt Auskunft über die Lebensdauer und Sichtbarkeit einer Variable.  Die wichtigsten sind:</p>
+                 <ul>
+                    <li><strong><code>auto</code></strong>: Die Standard-Speicherklasse für lokale Variablen.  Sie wird bei jedem Eintritt in ihren Block neu erstellt (mit zufälligem Wert) und am Ende zerstört. </li>
+                    <li><strong><code>static</code></strong>: Eine lokale `static`-Variable wird nur einmal initialisiert (mit 0) und behält ihren Wert zwischen den Funktionsaufrufen. </li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>Der Lebenszyklus einer Funktion: Deklarieren, Definieren, Aufrufen</h3>
+            <p>Für eine saubere Programmstruktur folgt man einem klaren Muster:</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// 1. DEKLARATION (Prototyp)
+// Sagt dem Compiler: "Es gibt eine Funktion namens AddValues, sie erwartet zwei int und gibt ein int zurück."
+int AddValues(int iA, int iB);
+
+// Die main-Funktion kann AddValues jetzt schon aufrufen.
+int main(void) {
+    int val1 = 10;
+    int summe;
+
+    // 3. AUFRUF
+    // Die Argumente 5 und 13 werden in die Parameter iA und iB kopiert.
+    summe = AddValues(5, 13);
+    
+    printf("Die Summe ist: %d\n", summe);
+    return 0;
+}
+
+// 2. DEFINITION (Implementierung)
+// Hier steht, was die Funktion tatsächlich tut.
+int AddValues(int iA, int iB) {
+    int iResult = iA + iB;
+    return iResult; // Gibt das Ergebnis an den Aufrufer (main) zurück.
+}
+</code></pre>
+
+            <h3>Die vier Grundformen von Funktionen</h3>
+            <p>Funktionen können in vier Kombinationen von Parametern und Rückgabewerten auftreten: </p>
+            <ol>
+                <li><strong>Ohne Parameter, ohne Rückgabewert</strong>: Führt eine feste Aktion aus. <code>void PrintGreeting(void);</code> </li>
+                <li><strong>Mit Parametern, ohne Rückgabewert</strong>: Bekommt Daten, führt damit eine Aktion aus. <code>void PrintNumber(int num);</code> </li>
+                <li><strong>Ohne Parameter, mit Rückgabewert</strong>: Liefert einen Wert aus einer internen Quelle. <code>int GetRandomNumber(void);</code> </li>
+                <li><strong>Mit Parametern, mit Rückgabewert</strong>: Der häufigste Fall. Verarbeitet Eingaben zu einer Ausgabe. <code>int AddValues(int a, int b);</code> </li>
+            </ol>
+            
+            <h3>Scope: Wer sieht was?</h3>
+            <p>Eine lokale Variable "überschattet" immer eine globale Variable mit demselben Namen.</p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+int iVar = 42; // Globale Variable
+
+void TestScope(void) {
+    int iVar = 72; // Lokale Variable mit gleichem Namen
+    printf("In TestScope: iVar ist %d\n", iVar); // Greift auf die LOKALE Variable zu!
+}
+
+int main(void) {
+    printf("In main (vorher): iVar ist %d\n", iVar); // Greift auf die GLOBALE Variable zu
+    TestScope();
+    printf("In main (nachher): iVar ist %d\n", iVar); // Greift immer noch auf die GLOBALE zu
+    return 0;
+}
+// Ausgabe: 42, 72, 42
+</code></pre>
+            <p class="warning">Regel: Bei Namenskonflikten wird immer die Variable mit dem "näheren" Gültigkeitsbereich verwendet. </p>
+            
+            <h3><code>static</code> vs. <code>auto</code>: Das Gedächtnis einer Funktion</h3>
+            <p>Der Unterschied wird bei wiederholten Aufrufen deutlich:</p>
+            <pre><code>void Counter() {
+    auto int normalCounter = 0;
+    static int staticCounter = 0; // Wird nur beim allerersten Aufruf initialisiert!
+    
+    normalCounter++;
+    staticCounter++;
+    
+    printf("Auto: %d, Static: %d\n", normalCounter, staticCounter);
+}
+
+int main(void) {
+    Counter(); // Ausgabe: Auto: 1, Static: 1
+    Counter(); // Ausgabe: Auto: 1, Static: 2
+    Counter(); // Ausgabe: Auto: 1, Static: 3
+    return 0;
+}
+</code></pre>
+            <p>Die <code>auto</code>-Variable wird bei jedem Aufruf auf 0 zurückgesetzt, während die <code>static</code>-Variable ihren Wert behält. </p>
+        </section>
+
+        <section>
+            <h2>5. Beispielprogramme</h2>
+
+            <h3>Beispiel 1: Geometrie-Rechner mit Funktionen</h3>
+            <p>Dieses Programm löst Aufgabe 1 des Übungsblatts, indem es die Berechnungen für Kugelvolumen und Kreisfläche in eigene Funktionen auslagert. </p>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// Globale Konstante für PI [vgl. 1470]
+const double PI = 3.1415926535;
+
+// --- Deklarationen ---
+double CalcVolumeSphere(double radius);
+double CalcAreaCircle(double radius);
+
+int main(void) {
+    double r = 10.0; // Lokale Variable für den Radius [vgl. 1471]
+
+    // Funktionen aufrufen und Ergebnisse in lokalen Variablen speichern [vgl. 1472]
+    double volume = CalcVolumeSphere(r);
+    double area = CalcAreaCircle(r);
+
+    // Ergebnisse ausgeben [vgl. 1473]
+    printf("Radius: %.2f\n", r);
+    printf("Kugelvolumen: %.4f\n", volume);
+    printf("Kreisflaeche: %.4f\n", area);
+    
+    return 0;
+}
+
+// --- Definitionen ---
+// Berechnet das Volumen einer Kugel [vgl. 1475]
+double CalcVolumeSphere(double radius) {
+    return (4.0 / 3.0) * PI * radius * radius * radius;
+}
+
+// Berechnet die Fläche eines Kreises [vgl. 1475]
+double CalcAreaCircle(double radius) {
+    return PI * radius * radius;
+}
+</code></pre>
+
+            <h3>Beispiel 2: Quadratwurzel mit der Mathe-Bibliothek</h3>
+            <p>Dieses Programm löst Aufgabe 4 des Übungsblatts.  Es zeigt, wie man recherchiert, welche Funktion man braucht (<code>sqrt</code>), die passende Bibliothek einbindet (<code>math.h</code>) und mit möglichen Fehlern umgeht. </p>
+            <pre><code>// math.h für die sqrt-Funktion einbinden
+#include &lt;math.h&gt; 
+#include &lt;stdio.h&gt;
+
+int main(void) {
+    double value;
+    
+    printf("Geben Sie eine Zahl ein, um die Wurzel zu ziehen: ");
+    scanf("%lf", &value);
+
+    // Prüfung, ob die Eingabe gültig ist [vgl. 1522]
+    if (value < 0) {
+        printf("Fehler: Die Wurzel aus einer negativen Zahl ist nicht definiert.\n");
+    } else {
+        double result = sqrt(value);
+        printf("Die Wurzel aus %.4f ist %.4f.\n", value, result);
+    }
+    
+    // Test mit negativem Wert, der zu 'nan' (Not a Number) führt [vgl. 1523]
+    printf("\nTest: sqrt(-9.0) ergibt: %f\n", sqrt(-9.0));
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section>
+            <h2>6. Übungsaufgaben</h2>
+            <ol>
+                <li>
+                    <strong>Einfacher Gruß</strong><br>
+                    Schreibe eine Funktion <code>void PrintGreeting(void)</code>, die einfach "Hallo aus meiner ersten Funktion!" auf der Konsole ausgibt. Deklariere sie über <code>main</code>, definiere sie darunter und rufe sie in <code>main</code> auf.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Funktion hat leere Klammern <code>(void)</code> und den Rückgabetyp <code>void</code>. Ihr einziger Inhalt ist ein <code>printf</code>-Aufruf.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Rechteck-Rechner</strong><br>
+                    Implementiere eine Funktion <code>double CalcRectangleArea(double width, double height)</code>, die die Fläche eines Rechtecks berechnet und zurückgibt. Frage in <code>main</code> den Benutzer nach Breite und Höhe, rufe die Funktion auf und gib das Ergebnis aus.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die Funktion benötigt zwei <code>double</code>-Parameter. Die Definition ist kurz: <code>return width * height;</code>. In <code>main</code> brauchst du <code>scanf</code> und <code>printf</code>.</p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Scope-Detektiv</strong><br>
+                    Schreibe ein Programm wie in Aufgabe 2 des Übungsblatts: Definiere eine globale Variable <code>int myVar = 100;</code>. Definiere in `main` eine lokale Variable <code>int myVar = 200;</code>. Gib den Wert von `myVar` in `main` aus. Was wird angezeigt und warum?
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Es wird `200` ausgegeben. Die lokale Variable in `main` "überschattet" die globale Variable. Der Compiler wählt immer den nächstgelegenen, gültigen Scope. </p>
+                    </details>
+                </li>
+                 <li>
+                    <strong>Statischer Zähler</strong><br>
+                    Schreibe eine Funktion <code>void CountMyCalls(void)</code>, die eine lokale <code>static int</code>-Variable enthält. Bei jedem Aufruf soll die Variable um 1 erhöht und ihr neuer Wert ausgegeben werden. Rufe die Funktion in <code>main</code> drei Mal hintereinander auf.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Code innerhalb der Funktion: <code>static int counter = 0; counter++; printf("Aufruf Nummer: %d\n", counter);</code>. Die Ausgabe sollte "Aufruf Nummer: 1", "... 2", "... 3" sein.</p>
+                    </details>
+                </li>
+                <li>
+                    <strong>Finde das Maximum</strong><br>
+                    Implementiere eine Funktion <code>int GetMax(int a, int b)</code>. Sie soll den größeren der beiden übergebenen Integer-Werte zurückgeben. Teste die Funktion in <code>main</code> mit verschiedenen Werten.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Innerhalb der Funktion kannst du eine einfache if-else-Struktur verwenden: <code>if (a > b) { return a; } else { return b; }</code>.</p>
+                    </details>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. Zusammenfassung & Spickzettel</h2>
+            <pre><code>// --- SYNTAX & MUSTER ---
+// Deklaration (Prototyp) - kommt vor die erste Verwendung
+Rückgabetyp Funktionsname(Typ1 Param1, Typ2 Param2);
+
+// Aufruf - passiert meist in main() oder anderen Funktionen
+ergebnis_variable = Funktionsname(Argument1, Argument2);
+
+// Definition - die eigentliche Logik
+Rückgabetyp Funktionsname(Typ1 Param1, Typ2 Param2) {
+    // ... Anweisungen ...
+    return wert; // 'wert' muss vom Typ 'Rückgabetyp' sein
+}
+
+// --- VOID ---
+// Kein Rückgabewert
+void DoSomething(int param);
+// Keine Parameter
+int GetSomething(void);
+// Weder noch
+void DoSomethingSimple(void);
+
+// --- GÜLTIGKEIT (SCOPE) ---
+int g_myGlobal; // Global: Überall sichtbar, vermeiden!
+
+void func() {
+    int myLocal; // Lokal: Nur in func() sichtbar
+}
+
+// --- SPEICHERKLASSEN (LOKAL) ---
+void anotherFunc() {
+    auto int temp = 0; // Standard. Wird bei jedem Aufruf neu erstellt.
+    static int persistent = 0; // Behält Wert zwischen Aufrufen.
+}
+
+// --- STANDARD-BIBLIOTHEK EINBINDEN ---
+#include &lt;math.h&gt; // Für sqrt(), pow(), sin(), etc.
+</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+
+</body>
+</html>

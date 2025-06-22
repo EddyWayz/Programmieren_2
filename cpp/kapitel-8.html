@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapitel 8: Templates</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kapitel 8: Templates</h1>
+        <p>Schreiben Sie typsicheren, wiederverwendbaren Code mit der Mächtigkeit der generischen Programmierung.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Lernziel</h2>
+            <p>
+                Nach dieser Einheit können Sie <strong>Funktions-Templates</strong> und <strong>Klassen-Templates</strong> erstellen und anwenden. Sie verstehen, wie Templates es ermöglichen, Algorithmen und Datenstrukturen zu definieren, die mit beliebigen Datentypen arbeiten können, solange diese die benötigten Operationen unterstützen. Sie kennen die Syntax mit <code>template &lt;typename T&gt;</code> und verstehen, wie der Compiler aus einem Template durch <strong>Instanziierung</strong> konkreten Code erzeugt. Sie können Templates mit mehreren Typ-Parametern sowie mit Nicht-Typ-Parametern (z.B. konstanten Integern) umsetzen.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Motivation & Kontext</h2>
+            <p>
+                Stellen Sie sich vor, Sie benötigen eine Funktion, die das Maximum zweier Werte zurückgibt. Sie müssten sie einmal für <code>int</code>, einmal für <code>double</code> und vielleicht noch einmal für <code>float</code> schreiben. Der Code wäre jedes Mal praktisch identisch, nur der Datentyp würde sich ändern. Das ist mühsam und fehleranfällig.
+            </p>
+            <p>
+                Ähnlich verhält es sich mit Datenstrukturen: Eine Klasse für einen Stapel (Stack) von <code>int</code>-Werten ist strukturell identisch mit einem Stack für <code>string</code>-Objekte. Templates lösen dieses Problem elegant. Sie definieren eine Art "Schablone" für eine Funktion oder eine Klasse. Der Compiler füllt diese Schablone dann bei Bedarf automatisch mit den konkreten Datentypen aus, die Sie verwenden. Die gesamte C++ Standard Template Library (STL), die wir im nächsten Kapitel kennenlernen, basiert auf diesem Prinzip.
+            </p>
+        </section>
+
+        <section>
+            <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Template (Schablone)</h4>
+                <p>Eine Vorlage für eine Funktion oder Klasse in C++, die generische Programmierung ermöglicht. Sie definiert einen Algorithmus oder eine Datenstruktur, ohne sich auf einen bestimmten Datentyp festzulegen.</p>
+            </div>
+            <div class="definition">
+                <h4>Funktions-Template</h4>
+                <p>Eine Schablone für eine Funktion, die mit verschiedenen Datentypen arbeiten kann. Der Compiler erzeugt für jeden verwendeten Datentyp eine eigene Version der Funktion.</p>
+            </div>
+            <div class="definition">
+                <h4>Klassen-Template</h4>
+                <p>Eine Schablone für eine Klasse. Damit können generische Container (wie Listen, Stacks, Queues) oder andere Klassen erstellt werden, deren Member-Datentypen flexibel sind.</p>
+            </div>
+            <div class="definition">
+                <h4>Typ-Parameter (<code>typename T</code>)</h4>
+                <p>Ein Platzhalter für einen Datentyp innerhalb einer Template-Definition. <code>T</code> ist eine Konvention, jeder andere gültige Bezeichner ist ebenfalls möglich. <code>template &lt;class T&gt;</code> ist eine ältere, aber synonyme Schreibweise.</p>
+            </div>
+             <div class="definition">
+                <h4>Instanziierung</h4>
+                <p>Der Prozess, bei dem der Compiler aus einem Template (der Schablone) und einem konkreten Datentyp (z.B. <code>int</code>) eine reguläre Funktion oder Klasse erzeugt. Dies geschieht automatisch, wenn das Template mit einem Typ verwendet wird.</p>
+            </div>
+             <div class="definition">
+                <h4>Nicht-Typ-Parameter</h4>
+                <p>Ein Template kann neben Typ-Parametern auch Parameter für konstante Werte annehmen, z.B. einen Integer, um die Größe eines Arrays zur Compile-Zeit festzulegen.</p>
+                <pre><code class="language-cpp">template &lt;typename T, int SIZE&gt; class MyArray { /* ... */ };</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Schritt-für-Schritt-Erklärung</h2>
+            
+            <h3>1. Ein Funktions-Template erstellen</h3>
+            <p>Die Definition beginnt mit <code>template &lt;typename T&gt;</code>. Danach folgt die Funktionsdefinition, wobei <code>T</code> als Platzhalter für den Datentyp verwendet wird.</p>
+            <pre><code class="language-cpp">// Ein Template für eine 'swap'-Funktion
+#include &lt;iostream&gt;
+
+template &lt;typename T&gt;
+void swap_values(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+int main() {
+    int i = 5, j = 10;
+    swap_values(i, j); // Compiler instanziiert swap_values&lt;int&gt;
+    std::cout << "i: " << i << ", j: " << j << std::endl;
+
+    double x = 3.14, y = 2.71;
+    swap_values(x, y); // Compiler instanziiert swap_values&lt;double&gt;
+    std::cout << "x: " << x << ", y: " << y << std::endl;
+}
+</code></pre>
+
+            <h3>2. Ein Klassen-Template erstellen</h3>
+            <p>Analog zu Funktions-Templates wird die Klassendefinition mit <code>template &lt;...&gt;</code> eingeleitet. Wichtig: Bei der Definition von Methoden außerhalb der Klassendeklaration muss die Template-Signatur wiederholt werden.</p>
+            <pre><code class="language-cpp">// Pair.h - Eine Klasse, die ein Paar von Werten speichern kann
+template &lt;typename T1, typename T2&gt; // Template mit zwei Typ-Parametern
+class Pair {
+private:
+    T1 first_;
+    T2 second_;
+public:
+    Pair(const T1& first, const T2& second);
+    T1 getFirst() const;
+    void setFirst(const T1& value);
+    // ... Methoden für second_
+};
+
+// Wichtig: Template-Signatur bei externer Definition wiederholen
+template &lt;typename T1, typename T2&gt;
+Pair&lt;T1, T2&gt;::Pair(const T1& first, const T2& second) 
+: first_(first), second_(second) {}
+
+template &lt;typename T1, typename T2&gt;
+T1 Pair&lt;T1, T2&gt;::getFirst() const {
+    return first_;
+}
+
+// ...
+</code></pre>
+            
+            <h3>3. Ein Klassen-Template verwenden</h3>
+            <p>Bei der Instanziierung eines Klassen-Templates müssen die konkreten Typen in spitzen Klammern angegeben werden.</p>
+            <pre><code class="language-cpp">#include "Pair.h"
+#include &lt;string&gt;
+
+int main() {
+    // Instanziiere ein Paar aus int und double
+    Pair&lt;int, double&gt; p1(1, 3.14);
+    
+    // Instanziiere ein Paar aus string und bool
+    Pair&lt;std::string, bool&gt; p2("Test", true);
+    
+    std::cout << p1.getFirst() << std::endl;
+    std::cout << p2.getFirst() << std::endl;
+}
+</code></pre>
+            <p><strong>Wichtiger Hinweis:</strong> Die Implementierung von Templates (sowohl Deklaration als auch Definition) gehört in der Regel komplett in die Header-Datei. Da der Compiler zur Instanziierung den gesamten Code der Schablone benötigt, würde ein traditionelles Trennen in .h und .cpp zu Linker-Fehlern führen.</p>
+        </section>
+
+        <section>
+            <h2>5. Übungsaufgaben aus KE08</h2>
+            <ol>
+                <li>
+                    <strong>Generische `max()`-Funktion:</strong> Schreiben Sie ein Funktions-Template für eine Funktion `max`, die zwei Argumente eines beliebigen Typs entgegennimmt und das größere der beiden zurückgibt. Testen Sie Ihre Funktion mit <code>int</code>, <code>double</code> und <code>std::string</code>. Welche Voraussetzung muss der Datentyp <code>T</code> erfüllen, damit der Code kompiliert? (Antwort: Der `>`-Operator muss für den Typ definiert sein).
+                </li>
+                <li>
+                    <strong>Generischer Stack:</strong> Implementieren Sie ein Klassen-Template für eine `Stack`-Klasse. Der Stack soll intern ein Array zur Speicherung der Elemente nutzen. Verwenden Sie einen Nicht-Typ-Parameter für die Größe des Arrays (z.B. <code>template &lt;typename T, int MAX_SIZE&gt; class Stack</code>). Die Klasse soll Methoden wie `push()`, `pop()`, `top()` und `isEmpty()` haben.
+                </li>
+                 <li>
+                    <strong>Typen explizit angeben:</strong> Schreiben Sie ein Funktions-Template, das einen Wert eines Typs `T` entgegennimmt und ihn in einen Typ `U` umwandelt und zurückgibt. (<code>template &lt;typename U, typename T&gt; U convert(const T& value)</code>). Warum muss man beim Aufruf dieser Funktion die Typ-Parameter explizit angeben (z.B. <code>convert&lt;int, double&gt;(5.5)</code>), während es bei der `swap_values`-Funktion nicht nötig war?
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
+        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+    </footer>
+</body>
+</html>
