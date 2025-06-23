@@ -82,3 +82,14 @@ footer {
     font-size: 0.8em;
     color: #777;
 }
+
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.chapter-nav a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
