@@ -2,13 +2,15 @@
 :root {
     --primary-color: #005A9C; /* Ein sattes Blau */
     --secondary-color: #E6F0F6; /* Ein helles Hintergrundblau */
+    --accent-color: #FF6B35; /* markante Akzentfarbe */
+    --background-gradient: linear-gradient(120deg, #f0f4fa, #e6ebf0);
     --text-color: #333;
     --border-color: #DDD;
     --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
     background-color: #f9f9f9;
     color: var(--text-color);
@@ -28,6 +30,8 @@ header {
     text-align: center;
     border-bottom: 2px solid var(--border-color);
     margin-bottom: 30px;
+    padding: 40px 20px;
+    background: var(--background-gradient);
 }
 
 header h1 {
@@ -58,11 +62,12 @@ main h2 {
     text-decoration: none;
     color: var(--text-color);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 #chapter-list li a:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px var(--shadow-color);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
 #chapter-list h3 {
@@ -92,4 +97,26 @@ footer {
 .chapter-nav a {
     color: var(--primary-color);
     text-decoration: none;
+}
+
+/* Hauptnavigation */
+#main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    background: var(--primary-color);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+#main-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#main-nav a:hover {
+    text-decoration: underline;
 }
