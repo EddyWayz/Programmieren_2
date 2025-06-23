@@ -42,6 +42,44 @@ def build_section(directory, heading):
     return '\n'.join(lines)
 
 
+def write_sub_index(directory, heading):
+    items = build_list(directory)
+    header = f"""<!DOCTYPE html>
+<html lang=\"de\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>{heading}</title>
+    <link rel=\"stylesheet\" href=\"../style.css\">
+</head>
+<body>
+<header>
+    <h1>{heading}</h1>
+</header>
+<main>
+  <ul id=\"chapter-list\">
+"""
+    footer = """
+  </ul>
+  <p><a href=\"../index.html\">&larr; Zurück zur Übersicht</a></p>
+</main>
+</body>
+</html>
+"""
+    lines = [header]
+    for fname, title, desc in items:
+        lines.append('    <li>')
+        lines.append(f'      <a href="{fname}">')
+        lines.append(f'        <h3>{title}</h3>')
+        if desc:
+            lines.append(f'        <p>{desc}</p>')
+        lines.append('      </a>')
+        lines.append('    </li>')
+    lines.append(footer)
+    with open(os.path.join(directory, 'index.html'), 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines))
+
+
 def main():
     header = """<!DOCTYPE html>
 <html lang=\"de\">
@@ -76,6 +114,8 @@ def main():
     content = header + '\n'.join(sections) + footer
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(content)
+    write_sub_index('c', 'C Kapitel')
+    write_sub_index('cpp', 'C++ Kapitel')
 
 
 if __name__ == '__main__':
