@@ -20,7 +20,7 @@ def build_list(directory):
 
     items = []
     for filename in sorted(os.listdir(directory), key=sort_key):
-        if filename.endswith(".html"):
+        if filename.endswith(".html") and filename != "index.html":
             title, desc = parse_file(os.path.join(directory, filename))
             items.append((filename, title, desc))
     return items
