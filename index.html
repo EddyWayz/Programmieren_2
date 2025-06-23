@@ -7,183 +7,178 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <header>
-        <h1>Programmieren 2</h1>
-        <p>Dein interaktiver Lernpfad für C und C++</p>
-    </header>
-
-    <main>
-        <section id="table-of-contents-c">
-            <h2>Themenübersicht - Teil 1: C</h2>
-            <ul id="chapter-list">
-                <li>
-                    <a href="c/01_Einfuehrung_Datentypen_Variablen.html">
-                        <h3>Kapitel 1: Einführung, Datentypen, Variablen & Konstanten</h3>
-                        <p>Lerne die Grundlagen von C, definiere Variablen sowie Konstanten und gib sie formatiert auf der Konsole aus.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/02_Operatoren_und_formatierte_IO.html">
-                        <h3>Kapitel 2: Operatoren und formatierte Ein-/Ausgabe</h3>
-                        <p>Beherrsche arithmetische, relationale und logische Operationen und lerne, mit `printf` und `scanf` sicher mit dem Benutzer zu interagieren.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/03_Funktionen_Struktur.html">
-                        <h3>Kapitel 3: Funktionen: Struktur, Gültigkeit & Wiederverwendung</h3>
-                        <p>Gliedere deinen Code in logische, wiederverwendbare Blöcke, verstehe den Gültigkeitsbereich von Variablen und nutze Funktionen aus Bibliotheken.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/04_Kontrollstrukturen_Logik.html">
-                        <h3>Kapitel 4: Kontrollstrukturen: Logik, Schleifen & Rekursion</h3>
-                        <p>Steuere den Programmablauf mit `if-else`, `switch` und Schleifen (`for`, `while`) und verstehe den Unterschied zwischen iterativen und rekursiven Lösungen.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/05_Komplexe_Datentypen.html">
-                        <h3>Kapitel 5: Komplexe Datentypen: Arrays, Structs & Enums</h3>
-                        <p>Modelliere und verwalte zusammengehörige Daten mit Arrays, Strukturen und Enumerationen, um die Realität im Code abzubilden.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/06_Zeiger_Grundlagen.html">
-                        <h3>Kapitel 6: Zeiger (Teil 1) - Adressen und Referenzen</h3>
-                        <p>Verstehe das Konzept von Zeigern als Adressvariablen und meistere die Operatoren `&` und `*`, um zwischen "Call by Value" und "Call by Reference" zu unterscheiden.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/07_Zeiger.Arithmetik_Dynamik.html">
-                        <h3>Kapitel 7: Zeiger (Teil 2) - Zeigerarithmetik & Dynamischer Speicher</h3>
-                        <p>Navigiere mit Zeigerarithmetik durch Arrays und lerne, mit `malloc()` und `free()` Speicher zur Laufzeit auf dem Heap sicher zu verwalten.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/08_Zeiger_Fortgeschritten.html">
-                        <h3>Kapitel 8: Zeiger (Teil 3) - Zeiger auf Zeiger & Funktionszeiger</h3>
-                        <p>Meistere fortgeschrittene Konzepte wie Zeiger auf Zeiger (`**`) und Funktionszeiger, um flexible Architekturen und Callback-Funktionen zu implementieren.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/09_Dateiverwaltung_Praeprozessor.html">
-                        <h3>Kapitel 9: Dateiverarbeitung und Präprozessor</h3>
-                        <p>Mache Daten persistent, indem du Dateien liest und schreibst, und steuere den Code vor der Kompilierung mit `#include`, `#define` und `#ifdef`.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/10_Modulare_Programmierung_Kommandozeile.html">
-                        <h3>Kapitel 10: Modulare Programmierung & Kommandozeilenparameter</h3>
-                        <p>Strukturiere Projekte professionell in Module (`.h`/`.c`) und lerne, dein Programm über Kommandozeilenargumente (`argc`, `argv`) von außen zu steuern.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/11_Die_C-Standardbibliothek.html">
-                        <h3>Kapitel 11: Die C-Standardbibliothek</h3>
-                        <p>Setze den professionellen Werkzeugkasten von C für String-Manipulation (`string.h`), Mathematik (`math.h`) und Zeitmessung (`time.h`) ein.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/12_Threads.html">
-                        <h3>Kapitel 12: Parallele Programmierung mit Threads</h3>
-                        <p>Nutze die Leistung von Multi-Core-Prozessoren, erkenne die Gefahr von Race Conditions und schütze kritische Abschnitte mit Mutexen.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="c/13_Problemloesung_und_Tipps.html">
-                        <h3>Kapitel 13: Fortgeschrittene Problemlösung & Praktische Tipps</h3>
-                        <p>Vertiefe rekursive Denkmuster wie "Teile und Herrsche" und meistere häufige Praxisfallen wie den `scanf`-Eingabepuffer.</p>
-                    </a>
-                </li>
-            </ul>
-        </section>
-        
-        <section id="table-of-contents-cpp">
-            <h2>Themenübersicht - Teil 2: C++</h2>
-            <ul id="chapter-list">
-                <li>
-                    <a href="cpp/kapitel-1.html">
-                        <h3>Kapitel 1: Von C zu C++ (Super-C Features)</h3>
-                        <p>Entdecke Streams, Namespaces, Referenzen, Funktionsüberladung und `auto` – die direkten Verbesserungen gegenüber C.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-2.html">
-                        <h3>Kapitel 2: Klassen und Objekte</h3>
-                        <p>Der Einstieg in die Objektorientierung: Kapsle Daten und Verhalten in eigenen, wiederverwendbaren Datentypen mit `public`/`private` und Konstruktoren.</p>
-                    </a>
-                </li>
-                 <li>
-                    <a href="cpp/kapitel-3.html">
-                        <h3>Kapitel 3: Ressourcenmanagement & Kopiersemantik</h3>
-                        <p>Lerne, dynamische Ressourcen sicher mit Konstruktor/Destruktor zu verwalten und meistere die "Regel der Drei", um tiefe Kopien zu implementieren.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-4.html">
-                        <h3>Kapitel 4: Klassen - Fortgeschrittene Konzepte</h3>
-                        <p>Meistere `const`-Korrektheit, statische Member für klassenweite Daten und das `friend`-Konzept für klarere und robustere Klassenstrukturen.</p>
-                    </a>
-                </li>
-                 <li>
-                    <a href="cpp/kapitel-5.html">
-                        <h3>Kapitel 5: Vererbung - Grundlagen</h3>
-                        <p>Erstelle Klassenhierarchien, um Code wiederzuverwenden, "ist-ein"-Beziehungen abzubilden und lerne den `protected`-Zugriffsmodifizierer kennen.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-6.html">
-                        <h3>Kapitel 6: Polymorphie und virtuelle Funktionen</h3>
-                        <p>Schreibe flexiblen Code, der zur Laufzeit entscheidet, welche Methode aufgerufen wird, und definiere Interfaces mit abstrakten Klassen.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-7.html">
-                        <h3>Kapitel 7: Operatoren überladen</h3>
-                        <p>Ermögliche es deinen eigenen Klassen, mit den Standard-Operatoren von C++ wie `+`, `==` oder `<<` intuitiv zu arbeiten.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-8.html">
-                        <h3>Kapitel 8: Templates</h3>
-                        <p>Schreibe typsicheren, wiederverwendbaren Code mit der Mächtigkeit der generischen Programmierung für Funktionen und Klassen.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-9.html">
-                        <h3>Kapitel 9: Die Standard Template Library (STL)</h3>
-                        <p>Nutze die mächtigen und effizienten Container (vector, list, map), Iteratoren und Algorithmen der C++ Standardbibliothek.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-10.html">
-                        <h3>Kapitel 10: Nützliche Werkzeuge (Utilities)</h3>
-                        <p>Schreibe sicheren, modernen und ausdrucksstarken C++-Code mit Smart Pointern (unique_ptr, shared_ptr) und Lambda-Ausdrücken.</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="cpp/kapitel-11.html">
-                        <h3>Kapitel 11: Design Patterns (Entwurfsmuster)</h3>
-                        <p>Lerne bewährte Schablonen wie Singleton, Factory und Observer zur Lösung wiederkehrender Entwurfsprobleme in der OOP.</p>
-                    </a>
-                </li>
-                 <li>
-                    <a href="cpp/kapitel-12.html">
-                        <h3>Kapitel 12: Sonstiges (Odds & Ends)</h3>
-                        <p>Runde dein C++-Wissen mit Ausnahmebehandlung (try, catch, throw), sicheren Cast-Operatoren und der Organisation von Code in Namensräumen ab.</p>
-                    </a>
-                </li>
-            </ul>
-        </section>
-        <section id="pdf-downloads">
-            <h2>PDF-Materialien</h2>
-            <p>Alle Foliensätze und Übungsblätter findest du im <a href="material/">Ordner material</a>.</p>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
-    </footer>
-
+<header>
+    <h1>Programmieren 2</h1>
+    <p>Dein interaktiver Lernpfad für C und C++</p>
+</header>
+<main>
+<section id="toc-c">
+  <h2>Themenübersicht - Teil 1: C</h2>
+  <ul>
+    <li>
+      <a href="c/01_Einfuehrung_Datentypen_Variablen.html">
+        <h3>Kapitel 1: Einführung in C: Datentypen, Variablen & Konstanten</h3>
+        <p>Der Grundstein für dein Verständnis der C-Programmierung.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/02_Operatoren_und_formatierte_IO.html">
+        <h3>Kapitel 2: Operatoren und formatierte Ein-/Ausgabe</h3>
+        <p>Rechnen, vergleichen und mit dem Benutzer interagieren.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/03_Funktionen_Struktur.html">
+        <h3>Kapitel 3: Funktionen: Struktur, Gültigkeit & Wiederverwendung</h3>
+        <p>Code in logische, wiederverwendbare Blöcke gliedern.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/04_Kontrollstrukturen_Logik.html">
+        <h3>Kapitel 4: Kontrollstrukturen: Logik, Schleifen & Rekursion</h3>
+        <p>Den Programmablauf mit Verzweigungen und Wiederholungen steuern.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/05_Komplexe_Datentypen.html">
+        <h3>Kapitel 5: Komplexe Datentypen: Arrays, Structs & Enums</h3>
+        <p>Daten strukturieren und die Realität im Code abbilden.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/06_Zeiger_Grundlagen.html">
+        <h3>Kapitel 6: Zeiger (Teil 1) - Adressen und Referenzen</h3>
+        <p>Das mächtigste Konzept in C: Direkter Zugriff auf den Speicher.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/07_Zeiger.Arithmetik_Dynamik.html">
+        <h3>Kapitel 7: Zeiger (Teil 2) - Zeigerarithmetik & Dynamischer Speicher</h3>
+        <p>Den Speicher navigieren und zur Laufzeit verwalten.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/08_Zeiger_Fortgeschritten.html">
+        <h3>Kapitel 8: Zeiger (Teil 3) - Zeiger auf Zeiger & Funktionszeiger</h3>
+        <p>Die Königsdisziplin der C-Programmierung meistern.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/09_Dateiverwaltung_Praeprozessor.html">
+        <h3>Kapitel 9: Dateiverarbeitung und Präprozessor</h3>
+        <p>Daten dauerhaft speichern und den Code vor der Kompilierung steuern.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/10_Modulare_Programmierung_Kommandozeile.html">
+        <h3>Kapitel 10: Modulare Programmierung & Kommandozeilenparameter</h3>
+        <p>Projekte strukturieren und von außen steuern.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/11_Die_C-Standardbibliothek.html">
+        <h3>Kapitel 11: Die C-Standardbibliothek</h3>
+        <p>Den professionellen Werkzeugkasten von C meisterhaft einsetzen.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/12_Threads.html">
+        <h3>Kapitel 12: Einführung in die Parallele Programmierung mit Threads</h3>
+        <p>Die Leistung von Multi-Core-Prozessoren nutzen und typische Fallstricke meistern.</p>
+      </a>
+    </li>
+    <li>
+      <a href="c/13_Problemloesung_und_Tipps.html">
+        <h3>Kapitel 13: Fortgeschrittene Problemlösung & Praktische Tipps</h3>
+        <p>Rekursive Denkmuster vertiefen und häufige Praxisfallen meistern.</p>
+      </a>
+    </li>
+  </ul>
+</section>
+<section id="toc-cpp">
+  <h2>Themenübersicht - Teil 2: C++</h2>
+  <ul>
+    <li>
+      <a href="cpp/kapitel-1.html">
+        <h3>Kapitel 1: Von C zu C++ (Super-C Features)</h3>
+        <p>Entdecke die direkten prozeduralen Verbesserungen, die C++ bietet.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-2.html">
+        <h3>Kapitel 2: Klassen und Objekte</h3>
+        <p>Der Einstieg in die Objektorientierte Programmierung (OOP).</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-3.html">
+        <h3>Kapitel 3: Ressourcenmanagement & Kopiersemantik</h3>
+        <p>Eigene Klassen intuitiv bedienbar machen und Speicher sicher verwalten.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-4.html">
+        <h3>Kapitel 4: Klassen - Fortgeschrittene Konzepte</h3>
+        <p>Meistern Sie <code>const</code>-Korrektheit, statische Member und das <code>friend</code>-Konzept für robustere und klarere Klassenstrukturen.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-5.html">
+        <h3>Kapitel 5: Vererbung - Grundlagen</h3>
+        <p>Erstellen Sie Klassenhierarchien, um Code wiederzuverwenden und logische "ist-ein"-Beziehungen abzubilden.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-6.html">
+        <h3>Kapitel 6: Polymorphie und virtuelle Funktionen</h3>
+        <p>Schreiben Sie flexiblen Code, der mit einer ganzen Familie von verwandten Objekten umgehen kann, ohne deren genauen Typ zu kennen.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-7.html">
+        <h3>Kapitel 7: Operatoren überladen</h3>
+        <p>Ermöglichen Sie es Ihren eigenen Klassen, mit den Standard-Operatoren von C++ intuitiv und natürlich zu arbeiten.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-8.html">
+        <h3>Kapitel 8: Templates</h3>
+        <p>Schreiben Sie typsicheren, wiederverwendbaren Code mit der Mächtigkeit der generischen Programmierung.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-9.html">
+        <h3>Kapitel 9: Die Standard Template Library (STL)</h3>
+        <p>Nutzen Sie die mächtigen und effizienten Container, Iteratoren und Algorithmen der C++ Standardbibliothek.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-10.html">
+        <h3>Kapitel 10: Nützliche Werkzeuge (Utilities)</h3>
+        <p>Schreiben Sie sicheren, modernen und ausdrucksstarken C++-Code mit Smart Pointern und Lambda-Ausdrücken.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-11.html">
+        <h3>Kapitel 11: Design Patterns (Entwurfsmuster)</h3>
+        <p>Lernen Sie bewährte Schablonen zur Lösung wiederkehrender Entwurfsprobleme in der objektorientierten Programmierung.</p>
+      </a>
+    </li>
+    <li>
+      <a href="cpp/kapitel-12.html">
+        <h3>Kapitel 12: Sonstiges (Odds & Ends)</h3>
+        <p>Runden Sie Ihr C++-Wissen mit wichtigen Konzepten wie Fehlerbehandlung, expliziter Typumwandlung und Namensräumen ab.</p>
+      </a>
+    </li>
+  </ul>
+</section>
+    <section id="pdf-downloads">
+        <h2>PDF-Materialien</h2>
+        <p>Alle Foliensätze und Übungsblätter findest du im <a href="material/">Ordner material</a>.</p>
+    </section>
+</main>
+<footer>
+    <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
+</footer>
 </body>
 </html>

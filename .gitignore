@@ -11,3 +11,13 @@
 
 # Ignore JetBrains IDE settings
 .idea/
+
+# Node.js und Python Caches
+node_modules/
+npm-debug.log*
+__pycache__/
+
+# Kompilierte Artefakte
+*.o
+*.out
+a.out
