@@ -1,0 +1,13 @@
+# Ignore macOS Finder files
+.DS_Store
+
+# Ignore Visual Studio Code workspace settings
+.vscode/
+
+# Ignore general editor swap files
+*.swp
+*.swo
+*~
+
+# Ignore JetBrains IDE settings
+.idea/
