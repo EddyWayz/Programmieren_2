@@ -123,6 +123,14 @@ footer {
 #main-nav a:hover {
     text-decoration: underline;
 }
+
+#theme-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+}
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
     body {
@@ -143,4 +151,25 @@ footer {
     a {
         color: #9cd2ff;
     }
+}
+
+body.dark {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+body.dark header,
+body.dark main,
+body.dark footer {
+    background-color: #1e1e1e;
+}
+body.dark #chapter-list li a,
+body.dark .chapter-list li a {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+body.dark #main-nav {
+    background: #333;
+}
+body.dark a {
+    color: #9cd2ff;
 }

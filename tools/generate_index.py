@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 import os
 import re
+import datetime
+from string import Template
+
+
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
+
+
+def load_template(name: str) -> Template:
+    with open(os.path.join(TEMPLATE_DIR, name), encoding="utf-8") as f:
+        return Template(f.read())
 
 
 def parse_file(path):
@@ -28,7 +38,7 @@ def build_list(directory):
 
 def build_section(directory, heading):
     items = build_list(directory)
-    lines = [f'<section id="toc-{directory}">', f'  <h2>{heading}</h2>', '  <ul>']
+    lines = [f'<section id="toc-{directory}">', f'  <h2>{heading}</h2>', '  <ul class="chapter-list">']
     for fname, title, desc in items:
         lines.append('    <li>')
         lines.append(f'      <a href="{directory}/{fname}">')
@@ -44,76 +54,31 @@ def build_section(directory, heading):
 
 def write_sub_index(directory, heading):
     items = build_list(directory)
-    header = f"""<!DOCTYPE html>
-<html lang=\"de\">
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>{heading}</title>
-    <link rel=\"stylesheet\" href=\"../style.css\">
-</head>
-<body>
-<header>
-    <h1>{heading}</h1>
-</header>
-<main>
-  <ul id=\"chapter-list\">
-"""
-    footer = """
-  </ul>
-  <p><a href=\"../index.html\">&larr; Zurück zur Übersicht</a></p>
-</main>
-</body>
-</html>
-"""
-    lines = [header]
+    li_lines = []
     for fname, title, desc in items:
-        lines.append('    <li>')
-        lines.append(f'      <a href="{fname}">')
-        lines.append(f'        <h3>{title}</h3>')
+        li_lines.append('    <li>')
+        li_lines.append(f'      <a href="{fname}">')
+        li_lines.append(f'        <h3>{title}</h3>')
         if desc:
-            lines.append(f'        <p>{desc}</p>')
-        lines.append('      </a>')
-        lines.append('    </li>')
-    lines.append(footer)
+            li_lines.append(f'        <p>{desc}</p>')
+        li_lines.append('      </a>')
+        li_lines.append('    </li>')
+
+    tpl = load_template('sub_index.html')
+    html = tpl.substitute(heading=heading, items='\n'.join(li_lines))
     with open(os.path.join(directory, 'index.html'), 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
+        f.write(html)
 
 
 def main():
-    header = """<!DOCTYPE html>
-<html lang=\"de\">
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>Lernplan: Programmieren 2 (C & C++)</title>
-    <link rel=\"stylesheet\" href=\"style.css\">
-</head>
-<body>
-<header>
-    <h1>Programmieren 2</h1>
-    <p>Dein interaktiver Lernpfad für C und C++</p>
-</header>
-<main>
-"""
-    footer = """
-    <section id=\"pdf-downloads\">
-        <h2>PDF-Materialien</h2>
-        <p>Alle Foliensätze und Übungsblätter findest du im <a href=\"material/\">Ordner material</a>.</p>
-    </section>
-</main>
-<footer>
-    <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
-</footer>
-</body>
-</html>
-"""
     sections = []
     sections.append(build_section('c', 'Themenübersicht - Teil 1: C'))
     sections.append(build_section('cpp', 'Themenübersicht - Teil 2: C++'))
-    content = header + '\n'.join(sections) + footer
+    tpl = load_template('index.html')
+    year = datetime.date.today().year
+    html = tpl.substitute(sections='\n'.join(sections), year=year)
     with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(content)
+        f.write(html)
     write_sub_index('c', 'C Kapitel')
     write_sub_index('cpp', 'C++ Kapitel')
 

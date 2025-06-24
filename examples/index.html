@@ -20,6 +20,7 @@
 <header>
     <h1>Interaktive Beispiele</h1>
     <p>Code kopieren und auf <a href="https://godbolt.org/" target="_blank">Compiler Explorer</a> einfügen.</p>
+    <button id="theme-toggle" aria-label="Theme umschalten">🌓</button>
 </header>
 <main>
     <section>
@@ -45,6 +46,38 @@ int main() {
 }
         </pre>
     </section>
+    <section>
+        <h2>Array-Summe (C)</h2>
+        <button onclick="copy('#array-code')">Code kopieren</button>
+        <pre id="array-code">
+#include <stdio.h>
+
+int main(void) {
+    int arr[] = {1, 2, 3, 4, 5};
+    int sum = 0;
+    for (int i = 0; i < 5; ++i) {
+        sum += arr[i];
+    }
+    printf("Summe: %d\n", sum);
+    return 0;
+}
+        </pre>
+    </section>
+    <section>
+        <h2>Vector-Summe (C++)</h2>
+        <button onclick="copy('#vector-code')">Code kopieren</button>
+        <pre id="vector-code">
+#include <iostream>
+#include <vector>
+#include <numeric>
+
+int main() {
+    std::vector<int> v{1,2,3,4,5};
+    int sum = std::accumulate(v.begin(), v.end(), 0);
+    std::cout << "Summe: " << sum << std::endl;
+}
+        </pre>
+    </section>
 </main>
 <script>
 function copy(sel){
@@ -53,5 +86,6 @@ function copy(sel){
     alert('In die Zwischenablage kopiert!');
 }
 </script>
+<script src="../toggleTheme.js"></script>
 </body>
 </html>
