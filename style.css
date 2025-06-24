@@ -173,3 +173,25 @@ body.dark #main-nav {
 body.dark a {
     color: #9cd2ff;
 }
+body.light {
+    background-color: #f9f9f9;
+    color: var(--text-color);
+}
+body.light header {
+    background: var(--background-gradient);
+}
+body.light main,
+body.light footer {
+    background-color: transparent;
+}
+body.light #chapter-list li a,
+body.light .chapter-list li a {
+    background-color: #fff;
+    border-color: var(--border-color);
+}
+body.light #main-nav {
+    background: var(--primary-color);
+}
+body.light a {
+    color: var(--primary-color);
+}
