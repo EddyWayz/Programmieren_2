@@ -22,6 +22,8 @@ class LinkCollector(HTMLParser):
 
 def iter_html_files(root: str):
     for dirpath, _, filenames in os.walk(root):
+        if 'tools/templates' in dirpath:
+            continue
         for name in filenames:
             if name.endswith(".html"):
                 yield os.path.join(dirpath, name)
