@@ -32,3 +32,16 @@ def test_write_sub_index(tmp_path):
     assert "Heading" in index
     assert "01.html" in index
 
+
+def test_parse_file_missing_tags(tmp_path):
+    p = tmp_path / "x.html"
+    p.write_text("<p>Only desc</p>", encoding="utf-8")
+    title, desc = generate_index.parse_file(p)
+    assert title == "x.html"
+    assert desc == ""
+
+    q = tmp_path / "y.html"
+    q.write_text("<h1>Head</h1>", encoding="utf-8")
+    title, desc = generate_index.parse_file(q)
+    assert title == "Head"
+    assert desc == ""
