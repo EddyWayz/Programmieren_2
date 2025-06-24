@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('theme');
     if (saved === 'dark') {
         document.body.classList.add('dark');
-    } else if (saved === 'light') {
+    } else {
         document.body.classList.add('light');
     }
     btn.addEventListener('click', () => {
