@@ -38,10 +38,14 @@ http-server -p 8000
 
 Das Repository enthält keine Abhängigkeiten und benötigt auch keine Build-Schritte.
 
+Zur Qualitätssicherung kannst du optional `tools/check_links.py` ausführen. Das
+Skript prüft alle HTML-Dateien auf defekte lokale Links.
+
 ## Interaktive Beispiele
 Die Programme im Ordner `examples/` lassen sich direkt im Browser ausprobieren.
-Ein praktisches Werkzeug dafür ist [Compiler Explorer](https://godbolt.org/).
-Einfach den jeweiligen Quelltext dort einfügen und ausführen.
+Rufe dazu die Seite [`examples/index.html`](examples/index.html) auf. Dort kannst du den
+Beispielcode per Knopfdruck in die Zwischenablage kopieren und anschließend in
+einen Online-Compiler wie [Compiler Explorer](https://godbolt.org/) einfügen.
 
 ## Hosting auf GitHub Pages
 Wenn du die Slides online bereitstellen möchtest, kannst du GitHub Pages nutzen:

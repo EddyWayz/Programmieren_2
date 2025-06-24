@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beispiele ausprobieren</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+    pre {
+        background:#f0f0f0;
+        padding:1em;
+        overflow:auto;
+    }
+    button {
+        margin-bottom:1em;
+    }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Interaktive Beispiele</h1>
+    <p>Code kopieren und auf <a href="https://godbolt.org/" target="_blank">Compiler Explorer</a> einfügen.</p>
+</header>
+<main>
+    <section>
+        <h2>Hello C</h2>
+        <button onclick="copy('#c-code')">Code kopieren</button>
+        <pre id="c-code">
+#include <stdio.h>
+
+int main(void) {
+    printf("Hello, C!\n");
+    return 0;
+}
+        </pre>
+    </section>
+    <section>
+        <h2>Hello C++</h2>
+        <button onclick="copy('#cpp-code')">Code kopieren</button>
+        <pre id="cpp-code">
+#include <iostream>
+
+int main() {
+    std::cout << "Hello, C++!" << std::endl;
+}
+        </pre>
+    </section>
+</main>
+<script>
+function copy(sel){
+    const code=document.querySelector(sel).innerText;
+    navigator.clipboard.writeText(code);
+    alert('In die Zwischenablage kopiert!');
+}
+</script>
+</body>
+</html>
