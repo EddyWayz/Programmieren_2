@@ -47,12 +47,14 @@ main h2 {
 }
 
 /* Kapitel-Liste */
-#chapter-list {
+#chapter-list,
+.chapter-list {
     list-style-type: none;
     padding: 0;
 }
 
-#chapter-list li a {
+#chapter-list li a,
+.chapter-list li a {
     display: block;
     background-color: #fff;
     border: 1px solid var(--border-color);
@@ -65,16 +67,17 @@ main h2 {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-#chapter-list li a:hover {
+#chapter-list li a:hover,
+.chapter-list li a:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
-
+.chapter-list h3,
 #chapter-list h3 {
     margin: 0 0 5px 0;
     color: var(--primary-color);
 }
-
+.chapter-list p,
 #chapter-list p {
     margin: 0;
     font-size: 0.9em;
