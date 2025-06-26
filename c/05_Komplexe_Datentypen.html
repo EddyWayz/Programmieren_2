@@ -141,6 +141,52 @@ kurs_prog2[0].matrikelnummer = 54321;
 // Zugriff auf den zweiten Studenten
 kurs_prog2[1].matrikelnummer = 54322;
 </code></pre>
+        <section>
+            <h3>Klausurfokus: Einen 'Fahrzeug'-Datentyp definieren</h3>
+            <pre><code>#include &lt;stdio.h&gt;
+
+// 1. Mit enum die Fahrzeugtypen als lesbare Konstanten definieren
+typedef enum {
+    CAR,      // Intern 0
+    TRUCK,    // Intern 1
+    MOTORBIKE // Intern 2
+} VehicleType_t;
+
+// 2. Mit struct die Daten bündeln
+typedef struct {
+    char acProducer[50];
+    char acModel[50];
+    VehicleType_t eType; // enum als Member verwenden
+    unsigned int uiHorsePower;
+} sVehicle_t;
+
+// 3. (Optional aber empfohlen) Typedef für einen Zeiger auf die Struktur
+typedef sVehicle_t* psVehicle_t;
+
+// Funktion zur Ausgabe der Fahrzeugdaten (demonstriert die Nutzung)
+void printVehicle(psVehicle_t pVehicle) {
+    if (pVehicle != NULL) {
+        printf("Hersteller: %s, Modell: %s, Leistung: %u PS, Typ: ",
+            pVehicle->acProducer, pVehicle->acModel, pVehicle->uiHorsePower);
+
+        // Lesbare Ausgabe dank enum
+        switch (pVehicle->eType) {
+            case CAR: printf("PKW\n"); break;
+            case TRUCK: printf("LKW\n"); break;
+            case MOTORBIKE: printf("Motorrad\n"); break;
+            default: printf("Unbekannt\n"); break;
+        }
+    }
+}
+
+int main(void) {
+    // Variable mit dem neuen, einfachen Typnamen definieren und initialisieren
+    sVehicle_t myCar = { "Volkswagen", "Golf", CAR, 150 };
+    printVehicle(&myCar);
+    return 0;
+}
+</code></pre>
+        </section>
         </section>
 
         <section>

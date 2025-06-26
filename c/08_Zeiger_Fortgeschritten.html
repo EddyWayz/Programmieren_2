@@ -282,6 +282,67 @@ int my_compare(const void* a, const void* b) {
 </code></pre>
         </section>
         <section>
+            <h2>5. Klausurrelevantes Beispiel: Array von Strukturen mit `qsort` sortieren</h2>
+            <p>Eine sehr häufige und anspruchsvolle Aufgabe in Klausuren ist das Sortieren eines Arrays, das aus Strukturen besteht. Dies verbindet alle fortgeschrittenen Zeiger-Konzepte: Zeiger auf Strukturen, `void*`-Casts und Funktionszeiger als Callback.</p>
+            <p>Das folgende Programm sortiert ein Array von Mitarbeitern (`struct Employee`) nach ihrem Gehalt (`salary`).</p>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt; // Für qsort
+
+// Die Struktur, die sortiert werden soll
+typedef struct {
+    char name[50];
+    int id;
+    float salary;
+} Employee_t;
+
+// Die Callback-Funktion für qsort. Sie muss IMMER diese Signatur haben.
+// Sie erhält zwei void-Zeiger auf die Elemente, die verglichen werden sollen.
+int compareEmployeesBySalary(const void* p1, const void* p2) {
+    // 1. Die void-Zeiger auf den korrekten Typ zurück-casten.
+    const Employee_t* p_emp1 = (const Employee_t*)p1;
+    const Employee_t* p_emp2 = (const Employee_t*)p2;
+
+    // 2. Die relevanten Werte (salary) aus den Strukturen extrahieren.
+    float salary1 = p_emp1->salary;
+    float salary2 = p_emp2->salary;
+
+    // 3. Logik für den Vergleich implementieren.
+    if (salary1 < salary2) {
+        return -1; // Element 1 kommt vor Element 2
+    } else if (salary1 > salary2) {
+        return 1;  // Element 1 kommt nach Element 2
+    } else {
+        return 0;  // Elemente sind gleichwertig
+    }
+}
+
+int main(void) {
+    Employee_t staff[] = {
+        {"Müller, Paul", 102, 52000.0f},
+        {"Schmidt, Anna", 101, 65000.0f},
+        {"Weber, Tom", 103, 48000.0f}
+    };
+
+    int num_employees = sizeof(staff) / sizeof(Employee_t);
+
+    printf("Unsortierte Liste:\n");
+    for (int i = 0; i < num_employees; i++) {
+        printf("ID: %d, Name: %s, Gehalt: %.2f\n", staff[i].id, staff[i].name, staff[i].salary);
+    }
+    
+    // Aufruf von qsort mit dem Array, der Anzahl, der Elementgröße und dem Funktionszeiger
+    qsort(staff, num_employees, sizeof(Employee_t), compareEmployeesBySalary);
+
+    printf("\nSortierte Liste (nach Gehalt):\n");
+    for (int i = 0; i < num_employees; i++) {
+        printf("ID: %d, Name: %s, Gehalt: %.2f\n", staff[i].id, staff[i].name, staff[i].salary);
+    }
+
+    return 0;
+}
+</code></pre>
+        </section>
+        <section>
             <h2>Material</h2>
             <p><a href="../material/c/KE08_IngInf_Zeiger3_V3.0.1.pdf" download>Folien herunterladen (PDF)</a></p>
             <p><a href="../material/c/Uebungen_Ing.-Inf._KE08_V3.0.2.pdf" download>Übungsblatt herunterladen (PDF)</a></p>

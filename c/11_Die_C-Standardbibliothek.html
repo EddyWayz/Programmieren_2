@@ -66,7 +66,7 @@
             <h3>1. <code>&lt;string.h&gt;</code> – Der Werkzeugkasten für Zeichenketten</h3>
             <ul>
                 <li><strong>Länge ermitteln:</strong> <code>size_t strlen(const char* str);</code> gibt die Anzahl der Zeichen <i>ohne</i> das `\0`-Zeichen zurück.</li>
-                <li><strong>Sicher kopieren:</strong> <code>errno_t strcpy_s(char* dest, size_t dest_size, const char* src);</code> kopiert einen String sicher in einen Puffer.</li>
+                <li><strong>Sicher kopieren:</strong> <code>errno_t strcpy_s(char* dest, rsize_t dest_size, const char* src);</code> kopiert einen String sicher in einen Puffer.</li>
                 <li><strong>Vergleichen:</strong> <code>int strcmp(const char* str1, const char* str2);</code> vergleicht zwei Strings lexikographisch. Gibt `< 0` (str1<str2), `0` (str1==str2) oder `> 0` (str1>str2) zurück.</li>
                 <li><strong>Suchen:</strong> <code>char* strchr(const char* str, int character);</code> findet das erste Vorkommen eines Zeichens in einem String.</li>
                 <li><strong>Zerlegen (Tokenizing):</strong> <code>char* strtok_s(char* str, const char* delimiters, char** context);</code> zerlegt einen String in Tokens.</li>
@@ -76,14 +76,13 @@
             <ul>
                 <li><strong>String-Konvertierung:</strong> <code>int atoi(const char* str);</code> (ASCII to integer), <code>double atof(const char* str);</code> (ASCII to float). Für eine robuste Konvertierung mit Fehlerprüfung ist `strtod` vorzuziehen. </li>
                 <li><strong>Zufallszahlen:</strong> <code>int rand(void);</code> gibt eine Zufallszahl zwischen 0 und `RAND_MAX` zurück. Muss vorher mit <code>void srand(unsigned int seed);</code> initialisiert werden.</li>
-                <li><strong>Sortieren:</strong> <code>void qsort(...);</code> ist die generische, schnelle Sortierfunktion (siehe Kapitel 8).</li>
+                <li><strong>Dynamischer Speicher:</strong> <code>void* malloc(size_t size);</code> und <code>void free(void* ptr);</code> sind fundamental für Aufgaben mit dynamischen Datenstrukturen.</li>
             </ul>
 
             <h3>3. <code>&lt;math.h&gt;</code> – Für Mathematiker</h3>
             <ul>
                 <li><strong>Potenz & Wurzel:</strong> <code>double pow(double base, double exponent);</code> (Potenz), <code>double sqrt(double x);</code> (Quadratwurzel).</li>
-                <li><strong>Trigonometrie:</strong> <code>double sin(double x);</code>, <code>double cos(double x);</code>. Für die Umrechnung von kartesischen in Polarkoordinaten ist <code>double atan2(double y, double x);</code> extrem nützlich, da sie den korrekten Quadranten berücksichtigt. </li>
-                <li><strong>Runden:</strong> <code>double floor(double x);</code> (abrunden), <code>double ceil(double x);</code> (aufrunden).</li>
+                <li><strong>Trigonometrie:</strong> <code>double sin(double x);</code>, <code>double cos(double x);</code>. Für die Umrechnung von kartesischen in Polarkoordinaten ist <code>double atan2(double y, double x);</code> extrem nützlich, da sie den korrekten Quadranten berücksichtigt.</li>
             </ul>
 
             <h3>4. <code>&lt;time.h&gt;</code> – Alles rund um die Zeit</h3>

@@ -135,7 +135,41 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 </code></pre>
-            <p><code>argv[0]</code> enthält immer den Namen des aufgerufenen Programms.  Die eigentlichen Parameter beginnen bei `argv[1]`. Alle Parameter werden als Text (Zeichenketten) übergeben und müssen bei Bedarf in Zahlen umgewandelt werden (z.B. mit `atoi` oder `atof`). </p>
+    <p><code>argv[0]</code> enthält immer den Namen des aufgerufenen Programms.  Die eigentlichen Parameter beginnen bei `argv[1]`. Alle Parameter werden als Text (Zeichenketten) übergeben und müssen bei Bedarf in Zahlen umgewandelt werden (z.B. mit `atoi` oder `atof`). </p>
+        </section>
+        <section>
+            <h4>Beispiel: Seitenlängen über die Kommandozeile einlesen</h4>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt; // Für atof
+
+// Aufruf z.B.: ./berechnung.exe 10.5 5.0
+int main(int argc, char* argv[]) {
+    // Schritt 1: Korrekte Anzahl der Parameter prüfen
+    // Erwartet: Programmname + breite + hoehe = 3 Argumente
+    if (argc != 3) {
+        printf("Fehler: Falsche Anzahl an Parametern.\n");
+        printf("Benutzung: %s &lt;breite&gt; &lt;hoehe&gt;\n", argv[0]);
+        return 1; // Programm mit Fehlercode beenden
+    }
+
+    // Schritt 2: Argumente von Text in Zahlen umwandeln
+    double breite = atof(argv[1]);
+    double hoehe = atof(argv[2]);
+
+    // Schritt 3: Eingaben auf Gültigkeit prüfen
+    if (breite <= 0 || hoehe <= 0) {
+        printf("Fehler: Seitenlaengen muessen positiv sein.\n");
+        return 1;
+    }
+
+    // Schritt 4: Berechnung und Ausgabe
+    double flaeche = breite * hoehe;
+    printf("Ein Rechteck mit der Breite %.2f und Hoehe %.2f hat die Flaeche %.2f.\n",
+        breite, hoehe, flaeche);
+    
+    return 0; // Erfolg
+}
+</code></pre>
         </section>
 
         <section>
