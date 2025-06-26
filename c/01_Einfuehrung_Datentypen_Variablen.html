@@ -20,6 +20,7 @@
     <header>
         <h1>Kapitel 1: Einführung in C: Datentypen, Variablen & Konstanten</h1>
         <p>Der Grundstein für dein Verständnis der C-Programmierung.</p>
+        <p>Basierend auf der Kurseinheit 1 der Ingenieur-Informatik.</p>
     </header>
 
     <main>
@@ -27,6 +28,9 @@
             <h2>1. Lernziel</h2>
             <p>
                 Am Ende dieser Einheit bist du in der Lage, einfache C-Programme zu schreiben, die die grundlegenden Datentypen verwenden. Du kannst Variablen und Konstanten korrekt definieren, ihnen Werte zuweisen (initialisieren) und diese Werte formatiert auf der Konsole ausgeben. Du verstehst, warum Datentypen essenziell sind und wie C im Speicher mit Daten umgeht.
+            </p>
+            <p>
+                Du lernst zudem, wie aus Quelltext ein ausführbares Programm entsteht und wie C Daten intern als Bits und Bytes verwaltet.
             </p>
         </section>
 
@@ -36,19 +40,49 @@
                 Warum C lernen? C ist die Grundlage vieler moderner Systeme. Betriebssysteme wie Windows, Linux und macOS sind in ihren Kernkomponenten in C geschrieben. Auch in der Welt der "Embedded Systems" – also winzigen Computern in Autos, Waschmaschinen oder medizinischen Geräten – ist C die dominierende Sprache.
             </p>
             <p>
+                Betriebssysteme sind außerdem häufig in C und C++ geschrieben, wobei die systemnahen Komponenten in C entstehen. Auch in Aufzügen, Heizungen oder medizinischen Geräten ist C allgegenwärtig.
+            </p>
+            <p>
                 Dieses Thema ist das absolute Fundament. Ohne ein solides Verständnis von Datentypen, Variablen und Konstanten ist keine sinnvolle Programmierung möglich. Alles, was du später lernst (Schleifen, Funktionen, Pointer), baut auf diesem Wissen auf. Die hier gelernten Konzepte zur Datenspeicherung sind zudem eine wichtige Vorbereitung für das Verständnis von Klassen und Objekten in C++.
             </p>
         </section>
 
         <section>
+            <h2>3. Wichtige Werkzeuge und Regeln</h2>
+            <div class="definition">
+                <h4>Entwicklungsumgebung (IDE)</h4>
+                <p>In der Lehrveranstaltung wird <strong>Microsoft Visual Studio (Community Edition)</strong> in der neuesten Version verwendet. Du solltest es auf deinem Rechner installieren und dabei die Workload "Desktopentwicklung mit C++" sowie das Sprachpaket "Englisch" auswählen. Im Labor kann nur für die englische Version Unterstützung gegeben werden.</p>
+            </div>
+            <div class="definition">
+                <h4>C-Coding Styleguide</h4>
+                <p>Der Styleguide legt fest, wie Programmcode exakt geschrieben werden muss. Die Einhaltung ist im Labortest und in der Prüfung verpflichtend (darf mitgebracht werden). Wichtige Regeln sind:</p>
+                <ul>
+                    <li>Der Code-Editor ist so zu konfigurieren, dass ein Tabulator durch <strong>drei Leerzeichen</strong> ersetzt wird.</li>
+                    <li>Sourcecode (Kommentare, Variablen- und Funktionsnamen) wird in <strong>englischer Sprache</strong> verfasst.</li>
+                    <li>Im Variablennamen ist jetzt auch der Datentyp (hier ui für unsigned int) zu hinterlegen.</li>
+                </ul>
+            </div>
+            <div class="definition">
+                <h4>E-Learning Modul</h4>
+                <p>Das wichtige Thema <strong>Informationsverarbeitung und Zahlendarstellung</strong> muss selbstständig in einem E-Learning-Modul erarbeitet werden! Der Inhalt wird im Labortest abgefragt! Das Modul ist auf Moodle verfügbar (zip-Datei, Release\zahlen_lernmodul) und kann direkt aus der VM gestartet werden.</p>
+            </div>
+        </section>
+
+        <section>
             <h2>3. Definitionen & Begriffe</h2>
+            <div class="definition">
+                <h4>Algorithmus</h4>
+                <p>Ein Algorithmus ist eine Folge von Anweisungen, die unter gleichen Ausgangswerten nach endlich vielen Schritten in einer endlichen Zeit das gesuchte Ergebnis ermitteln. Ein Programm realisiert einen Algorithmus in einer bestimmten Programmiersprache.</p>
+            </div>
             <div class="definition">
                 <h4>Datentyp</h4>
                 <p>Ein Datentyp legt zwei Dinge fest: einen <strong>Wertebereich</strong> (z.B. ganze Zahlen von -128 bis 127) und die darauf erlaubten <strong>Operationen</strong> (z.B. Addition, Subtraktion). C ist eine typisierte Sprache, was bedeutet, dass jede Variable genau einen Typ haben muss.</p>
+                <p>Ein Datentyp fasst also Wertebereich und Operationen zu einer Einheit zusammen. C ist dabei (schwach-) typisiert: Jede Variable muss genau einem Datentyp zugewiesen werden.</p>
             </div>
             <div class="definition">
                 <h4>Variable</h4>
                 <p>Eine Variable ist ein symbolischer <strong>Name für einen Speicherbereich</strong> im Computer. Über diesen Namen können wir Daten ablegen und wieder abrufen. In C müssen Variablen vor ihrer Verwendung <strong>definiert</strong> werden, wodurch der Name bekannt gemacht und Speicher reserviert wird. Das erstmalige Zuweisen eines Wertes nennt man <strong>Initialisierung</strong>.</p>
+                <p>Eine Definition stellt somit eine Deklaration dar, bei der zusätzlich Speicher bereitgestellt wird.</p>
             </div>
             <div class="definition">
                 <h4>Konstante</h4>
@@ -58,10 +92,11 @@
                     <li><strong>Konstante Variablen (<code>const</code>)</strong>: Variablen, die mit dem Schlüsselwort <code>const</code> deklariert werden und nach ihrer Initialisierung nicht mehr verändert werden können.</li>
                     <li><strong>Symbolische Konstanten (<code>#define</code>)</strong>: Werden vom Präprozessor vor der eigentlichen Kompilierung durch literale Konstanten ersetzt.</li>
                 </ul>
+                <p>Beispielhafte literale Konstanten sind <code>3.1415F</code> oder Zeichenketten wie <code>"Hello World\n"</code>.</p>
             </div>
              <div class="definition">
                 <h4><code>sizeof</code>-Operator</h4>
-                <p>Ein spezieller Operator in C, der die Größe eines Datentyps oder einer Variablen in Bytes zurückgibt. Dies ist extrem nützlich, um die Portabilität von Code zu gewährleisten, da die Größe von Datentypen je nach System variieren kann.</p>
+                <p>Ein Operator, der die Größe eines Datentyps oder einer Variablen in Bytes zurückliefert. Dies ist hilfreich, da die Größe von Datentypen (außer <code>char</code>) je nach Plattform und Compiler variieren kann.</p>
             </div>
         </section>
 
@@ -140,6 +175,108 @@ printf("Ich bin %d Jahre alt.\n", alter); // %d ist der Platzhalter für ein int
 
 double groesse = 1.85;
 printf("Meine Größe ist %f Meter.\n", groesse); // %f ist der Platzhalter für float/double</code></pre>
+        </section>
+
+        <section>
+            <h2>5. Vom Code zum Programm</h2>
+            <h3>Der Kompilierungsprozess</h3>
+            <p>Die Erzeugung eines ausführbaren Programms (<code>.exe</code>) aus dem Quellcode (<code>.c/.h</code>) erfolgt in mehreren Schritten, die von der IDE (Integrated Development Environment) meist automatisch ausgeführt werden:</p>
+            <ol>
+                <li><strong>Editor:</strong> Du schreibst den menschlich lesbaren Quellcode in einer <code>.c</code>-Datei.</li>
+                <li><strong>Präprozessor:</strong> Verarbeitet C-spezifische Anweisungen, die mit <code>#</code> beginnen (z.B. <code>#include</code>).</li>
+                <li><strong>Compiler:</strong> Übersetzt den gesamten Quellcode in eine Objekt-Datei (<code>.obj</code>). Ist ein Fehler vorhanden, wird keine Datei erzeugt.</li>
+                <li><strong>Linker:</strong> Bindet alle Objektdateien und Bibliotheken zu einer einzigen, ausführbaren Datei (<code>.exe</code>) zusammen.</li>
+            </ol>
+
+            <h3>Die Grundstruktur eines C-Programms</h3>
+            <pre><code>// 1. Präprozessor-Anweisung: Bindet die Standard-Bibliothek für Input/Output ein.
+#include &lt;stdio.h&gt;
+
+// 2. Die main-Funktion: Der Einstiegspunkt jedes C-Programms.
+int main(void)
+{ // Beginn des Funktionskörpers
+    // 3. Anweisung: Gibt einen Text auf der Konsole aus.
+    // \n ist ein "Escape-Sequenz" für einen Zeilenumbruch.
+    printf("Hello World\n");
+
+    // 4. Rückgabewert: 0 signalisiert dem Betriebssystem, dass das Programm
+    // fehlerfrei durchgelaufen ist.
+    return 0;
+} // Ende des Funktionskörpers</code></pre>
+
+            <h3>Variablen definieren und benennen</h3>
+            <p>Die Syntax lautet immer: <code>Datentyp Variablenname;</code> oder direkt mit Initialisierung: <code>Datentyp Variablenname = Wert;</code>.</p>
+            <p>Regeln für Variablennamen (Bezeichner):</p>
+            <ul>
+                <li>Beginnt immer mit einem Buchstaben oder Unterstrich.</li>
+                <li>Groß- und Kleinschreibung wird unterschieden (case-sensitive).</li>
+                <li>Umlaute und 'ß' sind nicht erlaubt.</li>
+                <li>Der C-Coding Styleguide gibt genaue Konventionen vor (z.B. `uiDayInMonth`).</li>
+            </ul>
+            <pre><code>// Definition und Initialisierung (bevorzugt!)
+unsigned int uiDayInMonth = 24U; // U ist ein Suffix für unsigned
+const float cfPi = 3.1415F;      // F ist ein Suffix für float</code></pre>
+
+            <h3>Die Basisdatentypen in C</h3>
+            <p>C (C89) enthält die folgenden Basisdatentypen. Für die Vorlesung wird von einem <strong>32-Bit System</strong> (genauer ILP32) ausgegangen.</p>
+
+            <h4>Zeichendatentypen</h4>
+            <table>
+                <thead>
+                    <tr><th>Datentyp</th><th>Größe</th><th>Wertebereich</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>char</code></td><td>1 Byte</td><td>Compiler-abhängig (entweder `signed` oder `unsigned`).</td></tr>
+                    <tr><td><code>signed char</code></td><td>1 Byte</td><td>-128 bis 127</td></tr>
+                    <tr><td><code>unsigned char</code></td><td>1 Byte</td><td>0 bis 255</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Ganzzahldatentypen (auf 32-Bit System)</h4>
+            <table>
+                 <thead>
+                    <tr><th>Datentyp</th><th>Größe</th><th>Wertebereich</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>short int</code></td><td>2 Byte</td><td>-32768 bis 32767</td></tr>
+                    <tr><td><code>unsigned short int</code></td><td>2 Byte</td><td>0 bis 65535</td></tr>
+                    <tr><td><code>int</code></td><td>4 Byte</td><td>-2147483648 bis 2147383647</td></tr>
+                    <tr><td><code>unsigned int</code></td><td>4 Byte</td><td>0 bis 4294967295</td></tr>
+                    <tr><td><code>long int</code></td><td>4 Byte</td><td>-2147483648 bis 2147383647</td></tr>
+                    <tr><td><code>long long int</code></td><td>8 Byte</td><td>$-2^{63}$ bis $2^{63}-1$</td></tr>
+                </tbody>
+            </table>
+            <p>Anmerkung: Wenn der Modifizierer <code>unsigned</code> nicht angegeben ist, handelt es sich standardmäßig um einen vorzeichenbehafteten (<code>signed</code>) Datentyp.</p>
+
+            <h4>Gleitkommadatentypen</h4>
+             <table>
+                 <thead>
+                    <tr><th>Datentyp</th><th>Größe</th><th>Wertebereich (ungefähr)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>float</code></td><td>4 Byte</td><td>$\pm1,18\cdot10^{-38}$ bis $\pm3,4\cdot10^{38}$</td></tr>
+                    <tr><td><code>double</code></td><td>8 Byte</td><td>$\pm2,23\cdot10^{-308}$ bis $\pm1,79\cdot10^{308}$</td></tr>
+                    <tr><td><code>long double</code></td><td>10, 12 oder 16 Byte</td><td>Abhängig von der Größe</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Werte mit <code>printf</code> ausgeben</h3>
+            <p>Um den Wert einer Variablen auszugeben, verwendet man <strong>Formatbezeichner</strong> im Text. Die Funktion ersetzt diese dann durch die Werte der übergebenen Variablen.</p>
+            <table>
+                <thead>
+                    <tr><th>Formatbezeichner</th><th>Verwendung für Datentyp</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>%d</code> oder <code>%i</code></td><td><code>int</code> (vorzeichenbehaftet)</td></tr>
+                    <tr><td><code>%u</code></td><td><code>unsigned int</code></td></tr>
+                    <tr><td><code>%c</code></td><td><code>char</code> (gibt das Zeichen aus)</td></tr>
+                    <tr><td><code>%f</code></td><td><code>float</code> und <code>double</code> (C89)</td></tr>
+                    <tr><td><code>%e</code> oder <code>%E</code></td><td><code>float</code> und <code>double</code> in Exponentialdarstellung</td></tr>
+                    <tr><td><code>%x</code> oder <code>%X</code></td><td>Ganzzahl als Hexadezimalzahl (klein/groß)</td></tr>
+                    <tr><td><code>%s</code></td><td>Zeichenkette</td></tr>
+                    <tr><td><code>%%</code></td><td>Gibt ein einzelnes %-Zeichen aus</td></tr>
+                </tbody>
+            </table>
         </section>
 
         <section>
@@ -300,11 +437,64 @@ printf("Text...");
 // %% : Ein %-Zeichen ausgeben
 </code></pre>
         </section>
+<pre><code>// --- GRUNDGERÜST ---
+#include &lt;stdio.h&gt;
+int main(void) { /* ... Code ... */ return 0; }
+
+// --- VARIABLEN & KONSTANTEN ---
+int iVar;                    // Definition
+iVar = 42;                   // Wertzuweisung
+double dVar = 3.14;          // Definition & Initialisierung
+const int CI_MAX = 100;      // Konstante Variable (muss initialisiert werden!)
+#define MAX_ELEMENTS 100     // Symbolische Konstante (Präprozessor)
+
+// --- LITERALE KONSTANTEN (Suffixe) ---
+47U;      // unsigned int
+2147483647L; // long
+4294967295UL; // unsigned long
+3.14F;    // float
+0xFE;     // Hexadezimal (Wert 254)
+'A';      // Zeichenkonstante
+"Text";   // Zeichenketten-Konstante
+
+// --- WICHTIGSTE DATENTYPEN (32-Bit-System) ---
+// Typ          Größe       Bezeichner-Präfix (Styleguide)
+char          // 1 Byte    c
+int           // 4 Bytes   i
+unsigned int  // 4 Bytes   ui
+float         // 4 Bytes   f
+double        // 8 Bytes   d
+// Modifizierer: short, long, signed, unsigned
+// Weitere Modifizierer: const, volatile, register
+
+// --- PLATTFORM-ABHÄNGIGKEIT ---
+// C-Standard garantiert nur:
+// 1 == sizeof(char) &lt;= sizeof(short) &lt;= sizeof(int) &lt;= sizeof(long) &lt;= sizeof(long long)
+
+// --- AUSGABE MIT PRINTF ---
+printf("Int: %d, Char: %c, Float: %f, Hex: %X\n", iVar, cVar, fVar, iVar);
+// %d, %i: int | %u: unsigned | %c: char | %f: float/double
+// %s: string | %x, %X: hex | %%: gibt % aus | \n: Zeilenumbruch | \t: Tabulator
+
+// --- SCHLÜSSELWÖRTER (Auswahl aus C89) ---
+// auto, break, case, char, const, continue, default, do, double,
+// else, enum, extern, float, for, goto, if, int, long, register,
+// return, short, signed, sizeof, static, struct, switch, typedef,
+// union, unsigned, void, volatile, while
+</code></pre>
 
         <section>
             <h2>Material</h2>
             <p><a href="../material/c/KE01_IngInf_EinfuehrungVariablenKonstanten_V3.0.3.pdf" download>Folien herunterladen (PDF)</a></p>
             <p><a href="../material/c/Uebungen_Ing.-Inf._KE01_V3.0.3.pdf" download>Übungsblatt herunterladen (PDF)</a></p>
+        </section>
+
+        <section>
+            <h2>Material und weiterführende Infos</h2>
+            <p><strong>Literatur:</strong></p>
+            <ul>
+                <li>[LUH17] C-Programmierung – Eine Einführung, Leibniz-Universität Hannover, 2017. Das Vorlesungsskript orientiert sich an diesem Dokument.</li>
+            </ul>
         </section>
     </main>
 

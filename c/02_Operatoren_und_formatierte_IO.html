@@ -26,7 +26,7 @@
         <section>
             <h2>1. Lernziel</h2>
             <p>
-                Nach dieser Einheit kannst du die verschiedenen Operatoren in C gezielt einsetzen, um Daten zu manipulieren. Du beherrschst arithmetische, relationale, logische und bitweise Operationen. Du bist in der Lage, Ausgaben mit <code>printf</code> präzise zu formatieren (z.B. Stellenanzahl, Nachkommastellen) und Benutzereingaben mit <code>scanf</code> sicher einzulesen, wobei du die typischen Fallstricke dieser Funktion kennst und vermeidest.
+                Nach dieser Einheit kannst du die verschiedenen Operatoren in C gezielt einsetzen, um Daten zu manipulieren. Du beherrschst arithmetische, relationale, logische und bitweise Operationen. Du bist in der Lage, Ausgaben mit <code>printf</code> präzise zu formatieren (z.B. Stellenanzahl, Nachkommastellen, Flags) und Benutzereingaben mit <code>scanf</code> sicher einzulesen, wobei du die typischen Fallstricke dieser Funktion kennst und vermeidest.
             </p>
         </section>
 
@@ -44,31 +44,32 @@
             <h2>3. Definitionen & Begriffe</h2>
             <div class="definition">
                 <h4>Operator</h4>
-                <p>Ein Symbol, das eine Operation auf einem, zwei oder drei Werten bzw. Variablen (den Operanden) ausführt. Man unterscheidet unäre (1 Operand, z.B. <code>-iVal</code>), binäre (2 Operanden, z.B. <code>iVal1 + iVal2</code>) und ternäre (3 Operanden) Operatoren.</p>
-            </div>
-            <div class="definition">
-                <h4>Ausdruck (Expression)</h4>
-                <p>Eine Kombination aus Operanden und Operatoren, die zu einem einzigen Wert ausgewertet wird. Beispiel: <code>(alter >= 18)</code> wird entweder zu <code>1</code> (wahr) oder <code>0</code> (falsch) ausgewertet.</p>
+                <p>Ein Symbol, das eine Operation auf Werten oder Variablen (den Operanden) ausführt. Man unterscheidet nach der Anzahl der Operanden:</p>
+                <ul>
+                    <li><strong>Unäre Operatoren:</strong> 1 Operand (z.B. <code>-iVal</code>, <code>!bFlag</code>)</li>
+                    <li><strong>Binäre Operatoren:</strong> 2 Operanden (z.B. <code>iVal1 + iVal2</code>)</li>
+                    <li><strong>Ternärer Operator:</strong> 3 Operanden (z.B. <code>(iVal < 10) ? 1 : 73</code>)</li>
+                </ul>
             </div>
             <div class="definition">
                 <h4>Integer-Division</h4>
-                <p>Eine Division zwischen zwei Ganzzahlen, bei der ein eventueller Nachkommaanteil einfach abgeschnitten (nicht gerundet) wird.  Beispiel: <code>int ergebnis = 7 / 3;</code> speichert den Wert <code>2</code> in <code>ergebnis</code>.</p>
+                <p>Eine Division zwischen zwei Ganzzahlen, bei der ein eventueller Nachkommaanteil einfach abgeschnitten (nicht gerundet) wird. Beispiel: <code>73 / 74</code> ergibt <code>0</code>.</p>
             </div>
             <div class="definition">
                 <h4>Modulo-Operator (<code>%</code>)</h4>
-                <p>Ein wichtiger Operator, der den ganzzahligen Rest einer Division zurückgibt. Beispiel: <code>7 % 3</code> ergibt <code>1</code>.</p>
+                <p>Ein in der Informatik sehr wichtiger Operator, der den ganzzahligen Rest einer Division zurückgibt. Beispiel: <code>7 % 3</code> ergibt <code>1</code>.</p>
             </div>
             <div class="definition">
                 <h4>Typumwandlung (Type Casting)</h4>
-                <p>Die Umwandlung eines Datentyps in einen anderen. Man unterscheidet:</p>
+                <p>Die Umwandlung eines Datentyps in einen anderen. Dies ist nötig, da Operationen nur auf gleichen Datentypen erfolgen können.</p>
                 <ul>
-                    <li><strong>Impliziter Cast</strong>: Der Compiler führt die Umwandlung automatisch durch, was fehleranfällig sein kann.</li>
-                    <li><strong>Expliziter Cast</strong>: Der Programmierer erzwingt die Umwandlung bewusst. Dies ist die empfohlene Methode. Syntax: <code>(neuer_datentyp)variable</code>.</li>
+                    <li><strong>Impliziter Cast</strong>: Der Compiler führt die Umwandlung automatisch durch, indem er Operanden zum "höheren" Typ umwandelt (z.B. `int` zu `double`). Dies ist fehleranfällig.</li>
+                    <li><strong>Expliziter Cast</strong>: Der Programmierer erzwingt die Umwandlung bewusst. Laut C-Coding Styleguide ist dies die einzig erlaubte Methode! Syntax: <code>(neuer_datentyp)variable</code>.</li>
                 </ul>
             </div>
              <div class="definition">
                 <h4><code>scanf()</code></h4>
-                <p>Die "Allround-Funktion" in C zur Realisierung einer formatierten Eingabe von der Konsole. Sie ist sehr mächtig, aber auch bekannt für ihre Fehleranfälligkeit.</p>
+                <p>Die "Allround-Funktion" in C zur Realisierung einer formatierten Eingabe von der Konsole. Sie ist sehr mächtig, aber auch bekannt für ihre Fehleranfälligkeit und gilt als "unsicher".</p>
             </div>
         </section>
 
@@ -76,74 +77,89 @@
             <h2>4. Schritt-für-Schritt-Erklärung</h2>
             
             <h3>Die Operator-Gruppen in C</h3>
-            <p>C teilt seine Operatoren in funktionale Gruppen ein. Hier sind die Wichtigsten:</p>
+            <p>C teilt seine Operatoren in funktionale Gruppen ein. Wichtig sind Priorität und Assoziativität, die im C-Coding Styleguide festgelegt sind.</p>
             
-            <h4>Arithmetische Operatoren </h4>
-            <p>Für mathematische Berechnungen.</p>
+            <h4>Arithmetische Operatoren</h4>
             <table>
                 <thead><tr><th>Operator</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
                 <tbody>
                     <tr><td><code>+</code></td><td>Addition</td><td><code>a + b</code></td></tr>
                     <tr><td><code>-</code></td><td>Subtraktion</td><td><code>a - b</code></td></tr>
                     <tr><td><code>*</code></td><td>Multiplikation</td><td><code>a * b</code></td></tr>
-                    <tr><td><code>/</code></td><td>Division (Achtung bei Integern!)</td><td><code>a / b</code></td></tr>
-                    <tr><td><code>%</code></td><td>Modulo (Rest der Division) </td><td><code>a % b</code></td></tr>
-                    <tr><td><code>++</code></td><td>Inkrement (erhöht um 1)</td><td><code>a++</code> oder <code>++a</code></td></tr>
-                    <tr><td><code>--</code></td><td>Dekrement (verringert um 1)</td><td><code>a--</code> oder <code>--a</code></td></tr>
+                    <tr><td><code>/</code></td><td>Division (Achtung: Integer-Division!)</td><td><code>a / b</code></td></tr>
+                    <tr><td><code>%</code></td><td>Modulo (ganzzahliger Rest)</td><td><code>a % b</code></td></tr>
+                    <tr><td><code>++</code></td><td>Inkrement (erhöht Wert um 1)</td><td><code>a++</code> (Post-Inkrement) oder <code>++a</code> (Pre-Inkrement)</td></tr>
+                    <tr><td><code>--</code></td><td>Dekrement (verringert Wert um 1)</td><td><code>a--</code> (Post-Dekrement) oder <code>--a</code> (Pre-Dekrement)</td></tr>
                 </tbody>
             </table>
             
-            <h4>Relationale Operatoren </h4>
+            <h4>Relationale Operatoren</h4>
             <p>Für Vergleiche. Das Ergebnis ist immer <code>1</code> (wahr) oder <code>0</code> (falsch).</p>
              <table>
                 <thead><tr><th>Operator</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
                 <tbody>
-                    <tr><td><code>==</code></td><td>Gleich </td><td><code>a == b</code></td></tr>
-                    <tr><td><code>!=</code></td><td>Ungleich </td><td><code>a != b</code></td></tr>
-                    <tr><td><code>&gt;</code></td><td>Größer als </td><td><code>a > b</code></td></tr>
-                    <tr><td><code>&lt;</code></td><td>Kleiner als </td><td><code>a < b</code></td></tr>
-                    <tr><td><code>&gt;=</code></td><td>Größer oder gleich </td><td><code>a >= b</code></td></tr>
-                    <tr><td><code>&lt;=</code></td><td>Kleiner oder gleich </td><td><code>a <= b</code></td></tr>
+                    <tr><td><code>==</code></td><td>Gleich</td><td><code>a == b</code></td></tr>
+                    <tr><td><code>!=</code></td><td>Ungleich</td><td><code>a != b</code></td></tr>
+                    <tr><td><code>&gt;</code></td><td>Größer als</td><td><code>a > b</code></td></tr>
+                    <tr><td><code>&lt;</code></td><td>Kleiner als</td><td><code>a < b</code></td></tr>
+                    <tr><td><code>&gt;=</code></td><td>Größer oder gleich</td><td><code>a >= b</code></td></tr>
+                    <tr><td><code>&lt;=</code></td><td>Kleiner oder gleich</td><td><code>a <= b</code></td></tr>
                 </tbody>
             </table>
 
-            <h4>Logische Operatoren </h4>
+            <h4>Logische Operatoren</h4>
             <p>Um relationale Ausdrücke zu verknüpfen. Das Ergebnis ist ebenfalls <code>1</code> oder <code>0</code>.</p>
             <table>
                 <thead><tr><th>Operator</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
                 <tbody>
-                    <tr><td><code>&&</code></td><td>Logisches UND </td><td><code>(a > 5) && (b < 10)</code></td></tr>
-                    <tr><td><code>||</code></td><td>Logisches ODER </td><td><code>(a > 5) || (b < 10)</code></td></tr>
-                    <tr><td><code>!</code></td><td>Logisches NICHT (negiert einen Ausdruck) </td><td><code>!(a == b)</code></td></tr>
+                    <tr><td><code>&&</code></td><td>Logisches UND</td><td><code>(a > 5) && (b < 10)</code></td></tr>
+                    <tr><td><code>||</code></td><td>Logisches ODER</td><td><code>(a > 5) || (b < 10)</code></td></tr>
+                    <tr><td><code>!</code></td><td>Logisches NICHT (negiert einen Ausdruck)</td><td><code>!(a == b)</code></td></tr>
                 </tbody>
             </table>
             
-            <h3>Das Problem der Integer-Division und die Lösung: Casts</h3>
-            <p>Stell dir vor, du willst das Volumen einer Kugel berechnen: <code>V = 4/3 * PI * r³</code>. In C würdest du schreiben:</p>
-            <pre><code>double volumen = 4 / 3 * 3.14 * r * r * r; // FALSCH!</code></pre>
-            <p>Das Problem: <code>4</code> und <code>3</code> sind Integers. Der Compiler berechnet <code>4 / 3</code> als Integer-Division, das Ergebnis ist <code>1</code>, nicht <code>1.333...</code>! Dein Ergebnis wird massiv verfälscht.
-            <br><strong>Lösungen:</strong></p>
-            <ol>
-                <li><strong>Literale anpassen</strong>: Sorge dafür, dass mindestens ein Operand eine Gleitkommazahl ist.<br><code>double volumen = 4.0 / 3 * 3.14 * r * r * r;</code></li>
-                <li><strong>Expliziter Cast</strong>: Wandle einen der Werte bewusst um. Das ist die sauberste Methode.<br><code>double volumen = (double)4 / 3 * 3.14 * r * r * r;</code></li>
-            </ol>
+            <h4>Bitoperatoren</h4>
+            <p>Für die direkte Manipulation einzelner Bits einer Ganzzahl. Empfehlung: Immer nur auf <code>unsigned</code>-Variablen anwenden.</p>
+            <table>
+                <thead><tr><th>Operator</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
+                <tbody>
+                    <tr><td><code>&</code></td><td>Bitweises UND</td><td><code>a & b</code></td></tr>
+                    <tr><td><code>|</code></td><td>Bitweises ODER</td><td><code>a | b</code></td></tr>
+                    <tr><td><code>^</code></td><td>Bitweises Exklusiv-ODER (XOR)</td><td><code>a ^ b</code></td></tr>
+                    <tr><td><code>~</code></td><td>Bitweises NICHT (Einerkomplement)</td><td><code>~a</code></td></tr>
+                    <tr><td><code>&lt;&lt;</code></td><td>Linksshift (entspricht oft Multiplikation mit 2)</td><td><code>a &lt;&lt; 2</code></td></tr>
+                    <tr><td><code>&gt;&gt;</code></td><td>Rechtsshift (entspricht oft Division durch 2)</td><td><code>a &gt;&gt; 1</code></td></tr>
+                </tbody>
+            </table>
 
             <h3>Formatierte Ein- und Ausgabe meistern</h3>
             <h4><code>printf</code> mit Format-Modus</h4>
-            <p>Du kannst die Ausgabe sehr genau steuern, indem du zwischen <code>%</code> und dem Formatbuchstaben (z.B. <code>f</code>) einen Modus angibst. Format: <code>%[breite].[präzision]f</code></p>
+            <p>Du kannst die Ausgabe sehr genau steuern, indem du zwischen <code>%</code> und dem Formatbuchstaben (z.B. <code>f</code>) Flags, Breite und Präzision angibst. Format: <code>%[flags][breite].[präzision]f</code></p>
             <pre><code>double dVal = 25.48973;
 printf("%f\n", dVal);     // Standard: 25.489730
 printf("%.2f\n", dVal);    // Präzision: 2 Nachkommastellen -> 25.49 
-printf("%10.2f\n", dVal); // Breite: Mindestens 10 Zeichen breit, rechtsbündig
-printf("%-10.2f\n", dVal);// Flag: '-' für linksbündig</code></pre>
+printf("%10.2f\n", dVal); // Breite: Mindestens 10 Zeichen, rechtsbündig
+printf("%-10.2f\n", dVal);// Flag '-': linksbündig
+printf("%+10.2f\n", dVal);// Flag '+': positives Vorzeichen anzeigen
+printf("%#X\n", 123);    // Flag '#': bei Hexadezimal '0X' voranstellen
+printf("%010d\n", 123);  // Flag '0': mit führenden Nullen auffüllen</code></pre>
+             <p>Zusätzlich können Steuersequenzen (Escape-Sequenzen) wie <code>\n</code> (Zeilenumbruch), <code>\t</code> (Tabulator) oder <code>\\</code> (Backslash) verwendet werden.</p>
+
 
             <h4><code>scanf</code> sicher verwenden</h4>
             <p><code>scanf</code> liest Werte von der Konsole ein. Die Syntax ist <code>scanf("format", &variable);</code>.</p>
-            <p class="warning"><strong>Wichtige Regeln für <code>scanf</code>:</strong></p>
+            <p class="warning"><strong>Wichtige Regeln und Tipps für <code>scanf</code>:</strong></p>
             <ul>
-                <li><strong>Das <code>&</code>-Zeichen</strong>: Vor dem Variablennamen ist das Adress-Operator-Zeichen <code>&</code> zwingend erforderlich. Es sagt <code>scanf</code>, *wo im Speicher* der Wert abgelegt werden soll.</li>
-                <li><strong>Unterschied bei <code>double</code></strong>: Zum Einlesen eines <code>double</code>-Wertes musst du den Formatbezeichner <code>%lf</code> verwenden, nicht <code>%f</code> (das ist für <code>float</code>).</li>
-                <li><strong>Tipp</strong>: Lies immer nur eine Variable pro <code>scanf</code>-Aufruf ein, um Fehler zu minimieren. Gib vorher mit <code>printf</code> aus, was der Benutzer tun soll.</li>
+                <li><strong>Das <code>&</code>-Zeichen</strong>: Vor dem Variablennamen ist der Adress-Operator <code>&</code> zwingend erforderlich. Er sagt <code>scanf</code>, *wo im Speicher* der Wert abgelegt werden soll.</li>
+                <li><strong>Unterschied bei <code>double</code></strong>: Zum Einlesen eines <code>double</code>-Wertes musst du den Formatbezeichner <code>%lf</code> verwenden. <code>%f</code> ist nur für <code>float</code>.</li>
+                <li><strong>Tipps zur Fehlervermeidung:</strong>
+                    <ul>
+                        <li>Immer nur eine Variable pro <code>scanf</code>-Aufruf einlesen.</li>
+                        <li>Vorher mit <code>printf</code> eine klare Eingabeaufforderung ausgeben.</li>
+                        <li>Das Einlesen eines <code>%c</code> hinterlässt einen Zeilenumbruch (CRLF) im Eingabepuffer. Dieser kann durch ein zusätzliches <code>getchar()</code> "konsumiert" werden.</li>
+                        <li>Für Visual Studio müssen ggf. die "SDL Checks" deaktiviert werden, da <code>scanf</code> als unsicher gilt.</li>
+                    </ul>
+                </li>
             </ul>
         </section>
 
@@ -184,11 +200,10 @@ int main(void) {
 </code></pre>
 
             <h3>Beispiel 2: Interaktiver Kugelvolumen-Rechner</h3>
-            <p>Dieses Programm kombiniert Arithmetik, explizites Casting und formatierte Ein-/Ausgabe, um die Aufgabe 2 des Übungsblatts zu lösen.</p>
+            <p>Dieses Programm kombiniert Arithmetik, explizites Casting und formatierte Ein-/Ausgabe.</p>
             <pre><code>#include &lt;stdio.h&gt;
 
 int main(void) {
-    // Konstante für PI definieren
     const double PI = 3.14159265;
     double radius = 0.0;
     double volumen = 0.0;
@@ -198,7 +213,7 @@ int main(void) {
     scanf("%lf", &radius); // %lf für double benutzen! 
 
     // 2. Verarbeitung: Das Volumen berechnen
-    //    Wichtig: (double)4/3, um Integer-Division zu vermeiden! 
+    // Wichtig: (double)4/3, um Integer-Division zu vermeiden! 
     volumen = (double)4 / 3 * PI * radius * radius * radius;
 
     // 3. Ausgabe: Das Ergebnis formatiert ausgeben 
@@ -215,10 +230,6 @@ int main(void) {
                 <li>
                     <strong>Arithmetische Grundlagen</strong><br>
                     Deklariere zwei <code>int</code>-Variablen `iX = 73` und `iY = 42`. Führe Addition, Subtraktion, Multiplikation, Division und die Modulo-Operation durch und gib die Ergebnisse jeweils in einer eigenen Zeile aus. Ist das Ergebnis der Division korrekt?
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Das Ergebnis von <code>73 / 42</code> wird <code>1</code> sein (Integer-Division). Der Code ist simpel: <code>printf("73 / 42 = %d\n", iX / iY);</code></p>
-                    </details>
                 </li>
                 <li>
                     <strong>Vergleichs-Ketten</strong><br>
@@ -226,34 +237,18 @@ int main(void) {
                     a) Ist <code>iX</code> ungleich <code>iY</code>? 
                     b) Ist <code>iX</code> größer als <code>iY</code> UND ist <code>iY</code> größer als 0? 
                     c) Ist <code>iX</code> kleiner als 10 ODER ist <code>iY</code> ungleich 42? 
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Kombiniere die Operatoren. Für b) wäre das: <code>int res = (iX > iY) && (iY > 0); printf("Ergebnis: %d\n", res);</code></p>
-                    </details>
                 </li>
                  <li>
                     <strong>Bit-Magie</strong><br>
                     Definiere zwei <code>unsigned char</code>-Variablen: <code>ucVal1 = 0x5A</code> und <code>ucVal2 = 0xA5</code>. Berechne das bitweise AND, OR und XOR und gib die Ergebnisse hexadezimal aus. Was ergibt die Operation <code>ucVal1 ^ ucVal2 ^ ucVal2</code> und warum? 
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Benutze den <code>%X</code> Format-Spezifizierer in <code>printf</code>. Die XOR-Operation <code>val ^ key ^ key</code> ergibt immer <code>val</code>. Das ist die Basis einfacher Verschlüsselungen.</p>
-                    </details>
                 </li>
                  <li>
                     <strong>Persönlicher Steckbrief</strong><br>
                     Schreibe ein interaktives Programm. Frage den Benutzer nacheinander nach seinem Alter (<code>int</code>) und seiner Körpergröße in Metern (<code>double</code>). Gib zum Schluss eine Zusammenfassung aus, bei der die Größe auf zwei Nachkommastellen formatiert ist.
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Denke an <code>printf</code> zur Aufforderung, <code>scanf</code> zum Einlesen (mit <code>&</code> und <code>%lf</code> für double) und <code>printf</code> zur formatierten Ausgabe (<code>%.2f</code>).</p>
-                    </details>
                 </li>
                 <li>
                     <strong>Der explizite Cast</strong><br>
                     Schreibe ein Programm, das eine Ganzzahl-Variable `punkte = 100` und eine weitere `anzahl = 3` hat. Berechne den Durchschnittswert und speichere ihn in einer `double`-Variable. Gib ihn aus. Sorge mit einem expliziten Cast dafür, dass das Ergebnis korrekt ist (33.333...) und nicht 33.0.
-                     <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Die falsche Berechnung wäre <code>double avg = punkte / anzahl;</code>. Die korrekte lautet: <code>double avg = (double)punkte / anzahl;</code>.</p>
-                    </details>
                 </li>
             </ol>
         </section>
@@ -267,34 +262,34 @@ int main(void) {
 // Bitweise:     & (UND), | (ODER), ^ (XOR), ~ (NOT), <<, >>
 // Zuweisung:    =, +=, -=, *=, /=, %= etc. 
 
-// --- EXPLIZITER CAST ---
+// --- EXPLIZITER CAST (SEHR WICHTIG!) ---
 int a = 4;
 int b = 3;
-double res = (double)a / b; // -> 1.333...
+double res = (double)a / b; // -> 1.333... statt 1.0
 
 // --- PRINTF FORMATIERUNG ---
+// %f   -> Standard float/double
 // %.2f -> 2 Nachkommastellen
-// %10d -> mind. 10 Zeichen breit, rechtsbündig
-// %-10d -> mind. 10 Zeichen breit, linksbündig
-// %#X  -> gibt 0X vor Hex-Zahl aus 
+// %10.2f -> mind. 10 breit, 2 Nachkommastellen
+// Flags: '-' (linksbündig), '+' (Vorzeichen), '#' (0x bei Hex), '0' (führende Nullen)
 
-// --- SCANF SYNTAX ---
+// --- SCANF SYNTAX (FEHLERANFÄLLIG!) ---
 int i;
 float f;
 double d;
 char c;
 
 printf("Eingabeaufforderung...");
-scanf("%d", &i);  // int
-scanf("%f", &f);  // float
-scanf("%lf", &d); // double -> %lf ist wichtig! 
-scanf(" %c", &c); // char (mit Leerzeichen davor, um Whitespace zu ignorieren)
+scanf("%d", &i);  // int -> & nicht vergessen!
+scanf("%f", &f);  // float -> & nicht vergessen!
+scanf("%lf", &d); // double -> %lf und & nicht vergessen! 
+scanf(" %c", &c); // char -> Leerzeichen davor, um Whitespace zu ignorieren!
 </code></pre>
         </section>
         <section>
             <h2>Material</h2>
-            <p><a href="../material/c/KE02_IngInf_OperatorenFormatiertedIO_V3.0.1.pdf" download>Folien herunterladen (PDF)</a></p>
-            <p><a href="../material/c/Uebungen_Ing.-Inf._KE02_V3.0.3.pdf" download>Übungsblatt herunterladen (PDF)</a></p>
+            <p><a href="../material/c/KE02_IngInf_OperatorenFormatiertedIO_V3.0.1.pdf" download>Folien: KE02 Operatoren sowie formatierte Ein- und Ausgabe (PDF)</a></p>
+            <p><a href="../material/c/Uebungen_Ing.-Inf._KE02_V3.0.3.pdf" download>Übungsblatt zu KE02 (PDF)</a></p>
         </section>
     </main>
 
