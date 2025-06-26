@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ignore macOS Finder files
 .DS_Store
 
@@ -21,3 +22,6 @@ __pycache__/
 *.o
 *.out
 a.out
+=======
+.DS_Store
+>>>>>>> 4230d9f (Füge .DS_Store zur .gitignore hinzu)
