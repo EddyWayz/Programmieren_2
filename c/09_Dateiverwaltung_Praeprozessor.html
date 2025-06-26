@@ -142,63 +142,76 @@ int a = SQUARE(5); // wird zu ((5) * (5))
         </section>
 
         <section>
-            <h2>5. Beispielprogramm 1: Ein einfaches Tagebuch</h2>
-            <p>Dieses Programm öffnet eine Datei `tagebuch.txt` im "Append"-Modus, fragt den Benutzer nach einem Eintrag, schreibt ihn in die Datei und gibt dann den gesamten Inhalt der Datei aus.</p>
+            <h2>5. Beispielprogramme</h2>
+
+            <h3>Beispiel 1: Eine Log-Datei schreiben</h3>
+            <p>Dieses Programm öffnet eine Datei namens <code>log.txt</code> im "Append"-Modus, um bei jedem Start eine neue Zeile hinzuzufügen, ohne den alten Inhalt zu löschen.</p>
             <pre><code>#include &lt;stdio.h&gt;
 #include &lt;errno.h&gt;
-#define MAX_LINE_LENGTH 256
+#include &lt;time.h&gt;
 
 int main(void) {
-    FILE* p_tagebuch = NULL;
+    FILE* p_logfile = NULL;
     errno_t err;
-    char buffer[MAX_LINE_LENGTH];
+    time_t now;
 
-    // --- TEIL 1: Schreiben ---
-    err = fopen_s(&p_tagebuch, "tagebuch.txt", "a"); // 'a' für append/anhängen
-    if (err == 0 && p_tagebuch != NULL) {
-        printf("Bitte neuen Tagebucheintrag eingeben: ");
-        fgets(buffer, MAX_LINE_LENGTH, stdin); // Eintrag von Konsole lesen
-        fprintf(p_tagebuch, "%s", buffer);     // Eintrag in Datei schreiben
-        fclose(p_tagebuch);
+    // 'a' steht für "append" (anhängen)
+    err = fopen_s(&p_logfile, "log.txt", "a");
+
+    if (err == 0 && p_logfile != NULL) {
+        time(&now); // Aktuelle Zeit holen
+        // Zeitstempel und eine Nachricht in die Datei schreiben
+        fprintf(p_logfile, "Log-Eintrag um %s", ctime(&now));
+        fclose(p_logfile);
+        printf("Log-Datei wurde aktualisiert.\n");
+    } else {
+        printf("Fehler beim Öffnen der Log-Datei.\n");
     }
 
-    // --- TEIL 2: Lesen und Ausgeben ---
-    printf("\n--- Inhalt des Tagebuchs ---\n");
-    err = fopen_s(&p_tagebuch, "tagebuch.txt", "r"); // 'r' für read/lesen
-    if (err == 0 && p_tagebuch != NULL) {
-        // Lese Zeile für Zeile, bis fgets NULL zurückgibt (Dateiende)
-        while (fgets(buffer, MAX_LINE_LENGTH, p_tagebuch) != NULL) {
-            printf("%s", buffer); // Gib die gelesene Zeile aus
-        }
-        fclose(p_tagebuch);
-    }
-    
     return 0;
 }
 </code></pre>
 
-            <h2>Beispielprogramm 2: Makro für bedingtes Kompilieren</h2>
-            <p>Dieses Programm zeigt, wie man durch einfaches Ändern einer `#define`-Anweisung unterschiedlichen Code erzeugen kann.</p>
+            <h3>Beispiel 2: Eine CSV-Datei lesen und verarbeiten</h3>
+            <p>Viele Klausuraufgaben erfordern das Einlesen und Verarbeiten von strukturierten Textdateien. Dieses Beispiel zeigt, wie man eine einfache CSV-Datei (Comma-separated values) liest, die Daten mit <code>strtok_s</code> zerlegt und ausgibt.</p>
+            <p><b>Inhalt der `studenten.csv`:</b></p>
+            <pre><code>Müller;Caroline;120111
+Weber;Klaus;120112
+Huber;Max;199999
+</code></pre>
+            <p><b>C-Code zum Einlesen:</b></p>
             <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;
 
-// Schalter für die Version. Setze auf 1, 2, oder etwas anderes.
-#define VERSION 2
-
-// Ein Makro für eine Berechnung
-#define ADD_TEN(val) ((val) + 10)
+#define MAX_LINE_LEN 256
 
 int main(void) {
-    #if VERSION == 1
-        printf("Dies ist die Standard-Version.\n");
-    #elif VERSION == 2
-        printf("Dies ist die PRO-Version mit mehr Features!\n");
-    #else
-        printf("Dies ist eine unbekannte Version.\n");
-    #endif
+    FILE* p_csv_file = NULL;
+    char line_buffer[MAX_LINE_LEN];
+    char* next_token = NULL;
+    char* token = NULL;
 
-    int x = 5;
-    printf("%d plus 10 ist %d\n", x, ADD_TEN(x));
+    if (fopen_s(&p_csv_file, "studenten.csv", "r") == 0 && p_csv_file != NULL) {
+        printf("--- Studentenliste ---\n");
+        // Lese die Datei Zeile für Zeile
+        while (fgets(line_buffer, MAX_LINE_LEN, p_csv_file) != NULL) {
+            // Erstes Token (Nachname) vor dem ersten ';'
+            token = strtok_s(line_buffer, ";", &next_token);
+            printf("Nachname: %-15s | ", token ? token : "N/A");
 
+            // Zweites Token (Vorname)
+            token = strtok_s(NULL, ";", &next_token);
+            printf("Vorname: %-15s | ", token ? token : "N/A");
+            
+            // Drittes Token (Matrikelnummer)
+            token = strtok_s(NULL, ";", &next_token);
+            printf("Matr.-Nr.: %s", token ? token : "N/A");
+        }
+        fclose(p_csv_file);
+    } else {
+        printf("Fehler: studenten.csv konnte nicht gefunden werden.\n");
+    }
     return 0;
 }
 </code></pre>
