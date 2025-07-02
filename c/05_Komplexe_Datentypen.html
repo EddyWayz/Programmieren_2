@@ -6,7 +6,7 @@
     <title>Kapitel 5: Komplexe Datentypen</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -263,6 +263,52 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Deklariere `enum StudyCourse { INF, WINF, MINF };`. Definiere eine Variable `enum StudyCourse choice;` und weise das Ergebnis der Benutzereingabe (nach einem Cast) zu. Die `switch`-Anweisung prüft dann `case INF:`, `case WINF:`, etc.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Definition der Enumeration für die Studiengänge
+// INF wird intern zu 0, WINF zu 1, MINF zu 2
+typedef enum {
+    INF, 
+    WINF, 
+    MINF
+} StudyCourse_t;
+
+int main(void) {
+    int userChoice;
+    StudyCourse_t selectedCourse;
+
+    printf("Bitte wählen Sie einen Studiengang:\n");
+    printf("0: Informatik\n");
+    printf("1: Wirtschaftsinformatik\n");
+    printf("2: Medieninformatik\n");
+    printf("Ihre Wahl: ");
+    scanf("%d", &userChoice);
+
+    // Cast der Benutzereingabe in den enum-Typ
+    selectedCourse = (StudyCourse_t)userChoice;
+
+    printf("\nIhre Wahl: ");
+    switch (selectedCourse) {
+        case INF:
+            printf("Informatik\n");
+            break;
+        case WINF:
+            printf("Wirtschaftsinformatik\n");
+            break;
+        case MINF:
+            printf("Medieninformatik\n");
+            break;
+        default:
+            printf("Ungültige Auswahl!\n");
+            break;
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Array füllen und lesen</strong><br>
@@ -270,6 +316,33 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die erste Schleife: <code>for (int i=0; i < 10; i++) { myArray[i] = i * 10; }</code>. Die zweite Schleife ist eine einfache `printf`-Schleife, die `myArray[i]` ausgibt.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+#define ARRAY_SIZE 10
+
+int main(void) {
+    // Definition des Arrays
+    int myArray[ARRAY_SIZE];
+
+    // 1. Schleife: Array füllen
+    printf("Fülle das Array...\n");
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        myArray[i] = i * 10;
+        printf("myArray[%d] = %d\n", i, myArray[i]);
+    }
+
+    // 2. Schleife: Array ausgeben
+    printf("\nInhalt des Arrays:\n");
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        printf("Element %d: %d\n", i, myArray[i]);
+    }
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -279,6 +352,44 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Denke daran, dass du bei `scanf_s` für Strings die Puffergröße angeben musst: <code>scanf_s("%s", myCar.hersteller, (unsigned)_countof(myCar.hersteller));</code>. Für `int` ist es normal: `scanf_s("%d", &myCar.baujahr);`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt; // Für strcpy
+
+// Deklaration der Struktur
+struct Car {
+    char hersteller[50];
+    char modell[50];
+    int baujahr;
+};
+
+int main(void) {
+    // Definition einer Variable vom Typ struct Car
+    struct Car meinAuto;
+
+    // Daten einlesen
+    printf("Bitte geben Sie den Hersteller ein: ");
+    // Sicherer Scan für Strings. Beachten Sie, dass dies in manchen Compilern
+    // scanf_s sein könnte. Standard-C ist hier fgets.
+    scanf("%49s", meinAuto.hersteller); 
+
+    printf("Bitte geben Sie das Modell ein: ");
+    scanf("%49s", meinAuto.modell);
+
+    printf("Bitte geben Sie das Baujahr ein: ");
+    scanf("%d", &meinAuto.baujahr);
+
+    // Daten ausgeben
+    printf("\n--- Eingegebenes Fahrzeug ---\n");
+    printf("Hersteller: %s\n", meinAuto.hersteller);
+    printf("Modell: %s\n", meinAuto.modell);
+    printf("Baujahr: %d\n", meinAuto.baujahr);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Verschachtelte Strukturen</strong><br>
@@ -287,6 +398,50 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die neue Struktur: <code>struct Car { ...; struct Engine motor; };</code>. Der Zugriff erfolgt über zwei Punkte: <code>myCar.motor.ps = 150;</code>.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+// Struktur für den Motor
+struct Engine {
+    int hubraum_ccm;
+    int ps;
+};
+
+// Struktur für das Auto, die eine Engine-Struktur enthält
+struct Car {
+    char hersteller[50];
+    char modell[50];
+    int baujahr;
+    struct Engine motor; // Verschachtelung
+};
+
+int main(void) {
+    struct Car meinAuto;
+
+    // Werte zuweisen
+    strcpy(meinAuto.hersteller, "Porsche");
+    strcpy(meinAuto.modell, "911");
+    meinAuto.baujahr = 2023;
+    
+    // Zugriff auf die verschachtelte Struktur
+    meinAuto.motor.hubraum_ccm = 2981;
+    meinAuto.motor.ps = 385;
+
+    // Alle Daten ausgeben
+    printf("--- Fahrzeugdaten ---\n");
+    printf("Hersteller: %s\n", meinAuto.hersteller);
+    printf("Modell: %s\n", meinAuto.modell);
+    printf("Baujahr: %d\n", meinAuto.baujahr);
+    printf("--- Motordaten ---\n");
+    printf("Hubraum: %d ccm\n", meinAuto.motor.hubraum_ccm);
+    printf("Leistung: %d PS\n", meinAuto.motor.ps);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Bubblesort</strong><br>
@@ -294,6 +449,50 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Du benötigst zwei geschachtelte `for`-Schleifen. Die innere Schleife vergleicht benachbarte Elemente `aiArr[j]` und `aiArr[j+1]` und vertauscht sie bei Bedarf mithilfe einer temporären Variable.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+#define SIZE 5
+
+// Hilfsfunktion zum Ausgeben des Arrays
+void printArray(int arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+int main(void) {
+    int numbers[SIZE] = {5, 1, 4, 2, 8};
+    int temp;
+
+    printf("Unsortiertes Array: ");
+    printArray(numbers, SIZE);
+
+    // Äußere Schleife: Bestimmt, wie oft das Array durchlaufen wird
+    for (int i = 0; i < SIZE - 1; i++) {
+        // Innere Schleife: Führt die Vergleiche und Tauschoperationen durch
+        // Mit jedem Durchlauf der äußeren Schleife "blubbert" das größte Element ans Ende,
+        // daher muss die innere Schleife nicht mehr bis ganz zum Ende laufen (SIZE - 1 - i).
+        for (int j = 0; j < SIZE - 1 - i; j++) {
+            // Wenn das linke Element größer als das rechte ist...
+            if (numbers[j] > numbers[j + 1]) {
+                // ...tausche die beiden Elemente.
+                temp = numbers[j];
+                numbers[j] = numbers[j + 1];
+                numbers[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("Sortiertes Array:   ");
+    printArray(numbers, SIZE);
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

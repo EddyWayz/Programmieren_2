@@ -3,260 +3,1825 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kapitel 11: Die C-Standardbibliothek</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <title>C Standard-Funktionen: Code-Beispiele</title>
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
-<nav id="main-nav">
-    <a href="../index.html">Start</a>
-    <a href="index.html">C</a>
-    <a href="../cpp/index.html">C++</a>
-    <a href="../material/index.html">Materialien</a>
-    <button id="theme-toggle" aria-label="Theme umschalten">🌓</button>
-</nav>
+    <div class="container">
+        <h1>C Standard-Funktionen: Code-Beispiele</h1>
 
-    <header>
-        <h1>Kapitel 11: Die C-Standardbibliothek</h1>
-        <p>Den professionellen Werkzeugkasten von C meisterhaft einsetzen.</p>
-    </header>
-
-    <main>
-        <section>
-            <h2>1. Lernziel</h2>
-            <p>
-                Am Ende dieser Einheit kennst und nutzt du die wichtigsten Funktionen der C-Standardbibliothek. Du kannst Zeichenketten sicher manipulieren (<strong><code>string.h</code></strong>), Zufallszahlen erzeugen und Strings in Zahlen umwandeln (<strong><code>stdlib.h</code></strong>), komplexe mathematische Berechnungen durchführen (<strong><code>math.h</code></strong>) und die Ausführungszeit von Codeabschnitten messen (<strong><code>time.h</code></strong>). Du verstehst, warum die Nutzung dieser Standardfunktionen der Neuerfindung des Rads vorzuziehen ist.
-            </p>
-        </section>
-
-        <section>
-            <h2>2. Motivation & Kontext</h2>
-            <p>
-                Ein guter Handwerker baut nicht jedes Mal seinen Hammer selbst – er hat einen Koffer mit erprobten, verlässlichen Werkzeugen. Die C-Standardbibliothek ist genau das: ein Satz von Header-Dateien und Funktionen, die für grundlegende Aufgaben wie String-Manipulation, mathematische Berechnungen oder Speicherverwaltung optimiert, getestet und auf jeder C-konformen Plattform verfügbar sind.
-            </p>
-            <p>
-                Die Kenntnis dieser Bibliotheken trennt den Anfänger vom fortgeschrittenen Programmierer. Sie ermöglicht es dir, dich auf die eigentliche Logik deines Problems zu konzentrieren, anstatt grundlegende Funktionalität immer wieder neu zu implementieren. Das Ergebnis ist kürzerer, lesbarerer, sichererer und portablerer Code.
-            </p>
-        </section>
-
-        <section>
-            <h2>3. Definitionen & Begriffe</h2>
-            <div class="definition">
-                <h4>Standardbibliothek</h4>
-                <p>Die Menge an vordefinierten Funktionen und Typen, die durch den C-Standard festgelegt und von jedem C-Compiler bereitgestellt werden muss.  Der Zugriff erfolgt durch das Inkludieren der entsprechenden Header-Datei (z.B. <code>&lt;string.h&gt;</code>).</p>
-            </div>
-            <div class="definition">
-                <h4>Tokenizing</h4>
-                <p>Der Prozess, eine Zeichenkette anhand eines oder mehrerer Trennzeichen (Delimiter) in eine Reihe von kleineren Teil-Zeichenketten (Tokens) zu zerlegen. Beispiel: Die Zeile "Max;Mustermann" wird mit dem Delimiter ";" in die Tokens "Max" und "Mustermann" zerlegt.</p>
-            </div>
-            <div class="definition">
-                <h4>Pseudo-Zufallszahl</h4>
-                <p>Eine Zahl, die von einem Algorithmus erzeugt wird und zufällig erscheint, aber bei gleichem Startwert (Seed) immer dieselbe Sequenz erzeugt.</p>
-            </div>
-             <div class="definition">
-                <h4>Seed (Startwert)</h4>
-                <p>Ein Initialwert für einen Zufallszahlengenerator. Um bei jedem Programmstart eine andere Zufallssequenz zu erhalten, wird oft die aktuelle Uhrzeit als Seed verwendet.</p>
-            </div>
-        </section>
-
-        <section>
-            <h2>4. Schritt-für-Schritt-Erklärung</h2>
-            
-            <h3>1. <code>&lt;string.h&gt;</code> – Der Werkzeugkasten für Zeichenketten</h3>
-            <ul>
-                <li><strong>Länge ermitteln:</strong> <code>size_t strlen(const char* str);</code> gibt die Anzahl der Zeichen <i>ohne</i> das `\0`-Zeichen zurück.</li>
-                <li><strong>Sicher kopieren:</strong> <code>errno_t strcpy_s(char* dest, rsize_t dest_size, const char* src);</code> kopiert einen String sicher in einen Puffer.</li>
-                <li><strong>Vergleichen:</strong> <code>int strcmp(const char* str1, const char* str2);</code> vergleicht zwei Strings lexikographisch. Gibt `< 0` (str1<str2), `0` (str1==str2) oder `> 0` (str1>str2) zurück.</li>
-                <li><strong>Suchen:</strong> <code>char* strchr(const char* str, int character);</code> findet das erste Vorkommen eines Zeichens in einem String.</li>
-                <li><strong>Zerlegen (Tokenizing):</strong> <code>char* strtok_s(char* str, const char* delimiters, char** context);</code> zerlegt einen String in Tokens.</li>
-            </ul>
-
-            <h3>2. <code>&lt;stdlib.h&gt;</code> – Allgemeine Hilfsmittel</h3>
-            <ul>
-                <li><strong>String-Konvertierung:</strong> <code>int atoi(const char* str);</code> (ASCII to integer), <code>double atof(const char* str);</code> (ASCII to float). Für eine robuste Konvertierung mit Fehlerprüfung ist `strtod` vorzuziehen. </li>
-                <li><strong>Zufallszahlen:</strong> <code>int rand(void);</code> gibt eine Zufallszahl zwischen 0 und `RAND_MAX` zurück. Muss vorher mit <code>void srand(unsigned int seed);</code> initialisiert werden.</li>
-                <li><strong>Dynamischer Speicher:</strong> <code>void* malloc(size_t size);</code> und <code>void free(void* ptr);</code> sind fundamental für Aufgaben mit dynamischen Datenstrukturen.</li>
-            </ul>
-
-            <h3>3. <code>&lt;math.h&gt;</code> – Für Mathematiker</h3>
-            <ul>
-                <li><strong>Potenz & Wurzel:</strong> <code>double pow(double base, double exponent);</code> (Potenz), <code>double sqrt(double x);</code> (Quadratwurzel).</li>
-                <li><strong>Trigonometrie:</strong> <code>double sin(double x);</code>, <code>double cos(double x);</code>. Für die Umrechnung von kartesischen in Polarkoordinaten ist <code>double atan2(double y, double x);</code> extrem nützlich, da sie den korrekten Quadranten berücksichtigt.</li>
-            </ul>
-
-            <h3>4. <code>&lt;time.h&gt;</code> – Alles rund um die Zeit</h3>
-            <ul>
-                <li><strong>Seed für Zufallszahlen:</strong> <code>time_t time(time_t* timer);</code> wird oft mit `NULL` aufgerufen, um die Sekunden seit dem 1.1.1970 zu erhalten – ein perfekter, sich ständig ändernder Seed: `srand((unsigned int)time(NULL));`</li>
-                <li><strong>Laufzeitmessung:</strong> <code>clock_t clock(void);</code> gibt die Anzahl der "CPU-Ticks" seit Programmstart zurück. Die Differenz zweier `clock()`-Aufrufe geteilt durch `CLOCKS_PER_SEC` ergibt die vergangene Zeit in Sekunden.</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>5. Beispielprogramm 1: Zufalls-Passwort-Generator</h2>
-            <p>Dieses Programm kombiniert <code>stdlib.h</code> und <code>time.h</code>, um ein zufälliges Passwort zu erzeugen.</p>
-            <pre><code>#include &lt;stdio.h&gt;
+        <h2>abs</h2>
+        <p class="function-description">Gibt den Absolutwert einer Ganzzahl zurück.</p>
+        <pre><code>
 #include &lt;stdlib.h&gt;
-#include &lt;time.h&gt;
+#include &lt;stdio.h&gt;
 
-int main(void) {
-    char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    char password[11]; // 10 Zeichen + Nullterminator
-    int charset_length = sizeof(charset) - 1;
-
-    // 1. Zufallsgenerator mit der aktuellen Zeit initialisieren
-    srand((unsigned int)time(NULL));
-
-    // 2. 10 zufällige Zeichen auswählen
-    for (int i = 0; i < 10; i++) {
-        int random_index = rand() % charset_length;
-        password[i] = charset[random_index];
-    }
-    // 3. String korrekt abschließen
-    password[10] = '\0';
-
-    printf("Ihr zufaelliges Passwort: %s\n", password);
-
+int main() {
+    int num = -123;
+    int absolute_value = abs(num);
+    printf("Der Absolutwert von %d ist %d\n", num, absolute_value); // Ausgabe: Der Absolutwert von -123 ist 123
     return 0;
 }
-</code></pre>
+        </code></pre>
 
-            <h2>Beispielprogramm 2: Laufzeit einer Schleife messen</h2>
-            <p>Dieses Programm nutzt `time.h`, um zu messen, wie lange eine rechenintensive Schleife zur Ausführung benötigt. [vgl. 5618, 5620]</p>
-            <pre><code>#include &lt;stdio.h&gt;
-#include &lt;time.h&gt;
-
-void long_running_task(void) {
-    long long sum = 0;
-    // Eine Schleife mit vielen Durchläufen, um die Zeitmessung sichtbar zu machen
-    for (int i = 0; i < 200000000; i++) {
-        sum += i;
-    }
-}
-
-int main(void) {
-    clock_t start, end;
-    double cpu_time_used;
-
-    // 1. Startzeitpunkt merken
-    start = clock();
-
-    // 2. Die zu messende Funktion aufrufen
-    long_running_task();
-
-    // 3. Endzeitpunkt merken
-    end = clock();
-
-    // 4. Differenz berechnen und in Sekunden umrechnen
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-
-    printf("Die Funktion benoetigte %f Sekunden CPU-Zeit.\n", cpu_time_used);
-
-    return 0;
-}
-</code></pre>
-        </section>
-
-        <section>
-            <h2>6. Übungsaufgaben</h2>
-            <ol>
-                <li>
-                    <strong>Text umkehren</strong><br>
-                    Frage den Benutzer nach einem Wort. Lies es mit `scanf_s` ein. Benutze `strlen` um die Länge zu ermitteln und gib das Wort dann mit einer `for`-Schleife, die rückwärts läuft, umgekehrt wieder auf der Konsole aus.
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Wenn die Länge `L` ist, läuft die Schleife von `i = L - 1` abwärts bis `0` und gibt `wort[i]` aus.</p>
-                    </details>
-                </li>
-                <li>
-                    <strong>Gleich oder nicht?</strong><br>
-                    Schreibe ein Programm, das den Benutzer nach seinem Passwort fragt. Vergleiche die Eingabe mit dem geheimen Passwort "topsecret" mittels `strcmp`. Gib aus, ob die Eingabe korrekt war oder nicht.
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>`strcmp` gibt `0` zurück, wenn die Strings identisch sind. Die Bedingung lautet also `if (strcmp(eingabe, "topsecret") == 0)`.</p>
-                    </details>
-                </li>
-                 <li>
-                    <strong>Abstand zweier Punkte</strong><br>
-                    Definiere eine `struct Point {double x; double y;}`. Frage den Benutzer nach den Koordinaten von zwei Punkten. Berechne den Abstand zwischen ihnen mit der Formel $\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}$. Verwende `sqrt` und `pow` aus `math.h`.
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Die Implementierung ist eine direkte Übersetzung der Formel: `distance = sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));`.</p>
-                    </details>
-                </li>
-                 <li>
-                    <strong>Robuster Zahlen-Input</strong><br>
-                    Schreibe ein Programm, das eine Zeile Text einliest. Verwende `strtod`, um zu versuchen, eine `double`-Zahl vom Anfang der Zeile zu konvertieren. Gib eine Fehlermeldung aus, wenn die Konvertierung fehlschlug oder wenn nach der Zahl noch weitere Zeichen (außer Leerzeichen) folgten. [vgl. 5615]
-                    <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>`strtod` nimmt einen `char**` als zweiten Parameter. Nach dem Aufruf zeigt dieser Zeiger auf das erste Zeichen nach der konvertierten Zahl. Du kannst prüfen, ob dieses Zeichen `\0` oder ein Leerzeichen ist.</p>
-                    </details>
-                </li>
-                <li>
-                    <strong>Würfel-Simulator</strong><br>
-                    Simuliere 100 Würfe eines sechsseitigen Würfels. Initialisiere den Zufallsgenerator mit `srand` und `time`. Generiere in einer Schleife 100 Zufallszahlen und bilde sie auf den Bereich 1-6 ab. Gib jeden Wurf aus.
-                     <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Die Formel für einen Würfelwurf ist `(rand() % 6) + 1`. Der Modulo-Operator `% 6` erzeugt Zahlen von 0-5, die Addition von 1 verschiebt den Bereich auf 1-6.</p>
-                    </details>
-                </li>
-            </ol>
-        </section>
-
-        <section>
-            <h2>7. Zusammenfassung & Spickzettel</h2>
-            <pre><code>// --- string.h ---
-#include &lt;string.h&gt;
-strlen(str);          // Länge
-strcmp(s1, s2);       // Vergleichen
-strcpy_s(d, sz, s);   // Kopieren
-strcat_s(d, sz, s);   // Anhängen
-strtok_s(s, d, &ctx); // Zerlegen
-
-// --- stdlib.h ---
-#include &lt;stdlib.h&gt;
-atoi(str);  // String zu int
-atof(str);  // String zu double
-srand(seed); // Zufallsgenerator initialisieren
-rand();     // Nächste Zufallszahl holen
-qsort(...); // Sortieren
-
-// --- math.h ---
-#define _USE_MATH_DEFINES // Für M_PI in MSVS
+        <h2>acos</h2>
+        <p class="function-description">Berechnet den Arkuskosinus (in Bogenmaß) eines Wertes.</p>
+        <pre><code>
 #include &lt;math.h&gt;
-pow(base, exp); // Potenz
-sqrt(val);      // Quadratwurzel
-sin(rad), cos(rad);
-atan2(y, x);    // Sicherer Arkustangens
-ceil(val), floor(val); // Auf-/Abrunden
+#include &lt;stdio.h&gt;
 
-// --- time.h ---
+int main() {
+    double x = 0.5;
+    double result = acos(x);
+    printf("acos(%.2f) = %f rad\n", x, result);
+    return 0;
+}
+        </code></pre>
+
+        <h2>asctime</h2>
+        <p class="function-description">Konvertiert eine `struct tm`-Zeitstruktur in eine lesbare Zeichenkette.</p>
+        <pre><code>
+#include &lt;stdio.h&gt;
 #include &lt;time.h&gt;
-// Seed für srand
-srand((unsigned int)time(NULL));
-// Laufzeitmessung
-clock_t start = clock();
-// ... code ...
-clock_t end = clock();
-double duration = ((double)(end-start))/CLOCKS_PER_SEC;
-</code></pre>
-        </section>
-        <section>
-            <h2>Material</h2>
-            <p><a href="../material/c/KE11_IngInf_Standardbibliothek_V3.0.1.pdf" download>Folien herunterladen (PDF)</a></p>
-            <p><a href="../material/c/Uebungen_Ing.-Inf._KE11_V3.0.2.pdf" download>Übungsblatt herunterladen (PDF)</a></p>
-        </section>
-    </main>
 
-    <footer>
-<nav class="chapter-nav">
-  <a href="10_Modulare_Programmierung_Kommandozeile.html">&larr; Vorheriges Kapitel</a>
-  <a href="12_Threads.html">Nächstes Kapitel &rarr;</a>
-</nav>
-<p><a href="../index.html">&larr; Zurück zur Übersicht</a></p>
-        <p>&copy; 2025 - Dein persönlicher Programmier-Tutor</p>
-    </footer>
+int main () {
+   time_t rawtime;
+   struct tm * timeinfo;
 
-<script src="../toggleTheme.js"></script>
+   time(&rawtime);
+   timeinfo = localtime(&rawtime);
+   printf("Die aktuelle lokale Zeit ist: %s", asctime(timeinfo));
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>asctime_s</h2>
+        <p class="function-description">Eine sicherere Version von `asctime`, die Pufferüberläufe verhindert.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+int main () {
+   struct tm newtime;
+   time_t long_time;
+   char buf[26];
+
+   time(&long_time);
+   localtime_s(&newtime, &long_time);
+
+   if (asctime_s(buf, sizeof(buf), &newtime) == 0) {
+       printf("Die aktuelle lokale Zeit ist: %s", buf);
+   } else {
+       printf("Fehler bei asctime_s\n");
+   }
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>asin</h2>
+        <p class="function-description">Berechnet den Arkussinus (in Bogenmaß) eines Wertes.</p>
+        <pre><code>
+#include &lt;math.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+    double x = 0.5;
+    double result = asin(x);
+    printf("asin(%.2f) = %f rad\n", x, result);
+    return 0;
+}
+        </code></pre>
+
+        <h2>atan</h2>
+        <p class="function-description">Berechnet den Arkustangens (in Bogenmaß) eines Wertes.</p>
+        <pre><code>
+#include &lt;math.h>
+#include &lt;stdio.h>
+
+int main() {
+    double x = 1.0;
+    double result = atan(x);
+    printf("atan(%.2f) = %f rad\n", x, result);
+    return 0;
+}
+        </code></pre>
+
+        <h2>atan2</h2>
+        <p class="function-description">Berechnet den Arkustangens von y/x unter Verwendung der Vorzeichen beider Argumente, um den Quadranten zu bestimmen.</p>
+        <pre><code>
+#include &lt;math.h>
+#include &lt;stdio.h>
+
+int main() {
+    double y = -1.0;
+    double x = -1.0;
+    double result = atan2(y, x);
+    printf("Der Winkel für (%.1f, %.1f) ist %f rad\n", x, y, result);
+    return 0;
+}
+        </code></pre>
+
+        <h2>atof</h2>
+        <p class="function-description">Konvertiert eine Zeichenkette in einen `double`-Wert.</p>
+        <pre><code>
+#include &lt;stdlib.h>
+#include &lt;stdio.h>
+
+int main() {
+    char str[] = "123.45";
+    double num = atof(str);
+    printf("Der String \"%s\" als double ist: %f\n", str, num);
+    return 0;
+}
+        </code></pre>
+
+        <h2>atoi</h2>
+        <p class="function-description">Konvertiert eine Zeichenkette in einen `int`-Wert.</p>
+        <pre><code>
+#include &lt;stdlib.h>
+#include &lt;stdio.h>
+
+int main() {
+    char str[] = "12345";
+    int num = atoi(str);
+    printf("Der String \"%s\" als int ist: %d\n", str, num);
+    return 0;
+}
+        </code></pre>
+
+        <h2>atol</h2>
+        <p class="function-description">Konvertiert eine Zeichenkette in einen `long int`-Wert.</p>
+        <pre><code>
+#include &lt;stdlib.h>
+#include &lt;stdio.h>
+
+int main() {
+    char str[] = "987654321";
+    long num = atol(str);
+    printf("Der String \"%s\" als long ist: %ld\n", str, num);
+    return 0;
+}
+        </code></pre>
+
+        <h2>ceil</h2>
+        <p class="function-description">Rundet eine Gleitkommazahl auf die nächste ganze Zahl auf.</p>
+        <pre><code>
+#include &lt;math.h>
+#include &lt;stdio.h>
+
+int main() {
+    double val1 = 2.3;
+    double val2 = -2.9;
+    printf("ceil(%.1f) = %.1f\n", val1, ceil(val1)); // Ausgabe: ceil(2.3) = 3.0
+    printf("ceil(%.1f) = %.1f\n", val2, ceil(val2)); // Ausgabe: ceil(-2.9) = -2.0
+    return 0;
+}
+        </code></pre>
+
+        <h2>clock</h2>
+        <p class="function-description">Gibt die seit dem Programmstart vergangene Prozessorzeit in Ticks zurück.</p>
+        <pre><code>
+#include &lt;time.h>
+#include &lt;stdio.h>
+
+void long_running_function() {
+    for(long i=0; i&lt;100000000; i++);
+}
+
+int main () {
+   clock_t start, end;
+   double cpu_time_used;
+
+   start = clock();
+   long_running_function();
+   end = clock();
+
+   cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+   printf("Die Funktion hat %f Sekunden Prozessorzeit benötigt.\n", cpu_time_used);
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>cos</h2>
+        <p class="function-description">Berechnet den Kosinus eines Winkels (in Bogenmaß).</p>
+        <pre><code>
+#include &lt;math.h>
+#include &lt;stdio.h>
+
+#define PI 3.14159265
+
+int main () {
+   double param, result;
+   param = 60.0; // 60 Grad
+   result = cos(param * PI / 180.0);
+   printf("Der Kosinus von %f Grad ist %f.\n", param, result);
+   return(0);
+}
+        </code></pre>
+
+        <h2>cosh</h2>
+        <p class="function-description">Berechnet den hyperbolischen Kosinus.</p>
+        <pre><code>
+#include &lt;math.h>
+#include &lt;stdio.h>
+
+int main () {
+   double x = 1.0;
+   double result = cosh(x);
+   printf("cosh(%f) = %f\n", x, result);
+   return(0);
+}
+        </code></pre>
+
+        <h2>ctime</h2>
+        <p class="function-description">Konvertiert einen `time_t`-Wert in eine lesbare Zeichenkette der Form "Www Mmm Dd hh:mm:ss yyyy".</p>
+        <pre><code>
+#include &lt;time.h>
+#include &lt;stdio.h>
+
+int main () {
+   time_t curtime;
+   time(&curtime);
+   printf("Aktuelle Zeit = %s", ctime(&curtime));
+   return(0);
+}
+        </code></pre>
+
+        <h2>difftime</h2>
+        <p class="function-description">Berechnet die Differenz in Sekunden zwischen zwei `time_t`-Werten.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;time.h>
+#include &lt;unistd.h>
+
+int main () {
+   time_t start, end;
+   double diff;
+
+   time(&start);
+   printf("Starte Timer...\n");
+   sleep(2); // Warte 2 Sekunden
+   time(&end);
+   diff = difftime(end, start);
+
+   printf("Vergangene Zeit: %.2f Sekunden.\n", diff);
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>exp</h2>
+        <p class="function-description">Berechnet die e-Funktion ($e^x$).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   double x = 1.0;
+   printf("Der Wert von e^%.2f ist %f\n", x, exp(x));
+   return(0);
+}
+        </code></pre>
+
+        <h2>fabs, fabsf, fabsl</h2>
+        <p class="function-description">Geben den Absolutwert einer Gleitkommazahl zurück (`double`, `float`, `long double`).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   double d = -100.5;
+   float f = -200.5f;
+
+   printf("fabs(%.1f) = %.1f\n", d, fabs(d));
+   printf("fabsf(%.1f) = %.1f\n", f, fabsf(f));
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>fclose</h2>
+        <p class="function-description">Schließt eine geöffnete Datei, die durch einen FILE-Zeiger repräsentiert wird.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   fp = fopen("test.txt", "w");
+   if (fp == NULL) {
+       perror("Fehler beim Öffnen der Datei");
+       return(-1);
+   }
+   fprintf(fp, "Datei wird gleich geschlossen.\n");
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+        
+        <h2>feof</h2>
+        <p class="function-description">Überprüft, ob das Dateiende-Kennzeichen für einen Stream gesetzt ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   int c;
+   fp = fopen("file.txt","r");
+   if(fp == NULL) {
+      perror("Error in opening file");
+      return(-1);
+   }
+   while(1) {
+      c = fgetc(fp);
+      if( feof(fp) ) { 
+         break ;
+      }
+      printf("%c", c);
+   }
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fflush</h2>
+        <p class="function-description">Leert den Ausgabepuffer eines Streams.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;unistd.h>
+
+int main() {
+   char buff[1024];
+   memset( buff, '\0', sizeof( buff ));
+   fprintf(stdout, "Going to set full buffering\n");
+   setvbuf(stdout, buff, _IOFBF, 1024);
+   fprintf(stdout, "This is tutorialspoint.com\n");
+   fprintf(stdout, "This output will go into buff\n");
+   fflush( stdout ); // Leert den Puffer und schreibt auf den Bildschirm
+   fprintf(stdout, "and this will appear when the program exits\n");
+   return(0);
+}
+        </code></pre>
+
+        <h2>fgetc</h2>
+        <p class="function-description">Liest das nächste Zeichen aus einem Stream und gibt es als `unsigned char` (in ein `int` umgewandelt) zurück.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   int c;
+   fp = fopen("file.txt","r");
+   if(fp == NULL) {
+      perror("Error in opening file");
+      return(-1);
+   }
+   printf("Lese Dateiinhalt:\n");
+   do {
+      c = fgetc(fp);
+      if(c != EOF) {
+         putchar(c);
+      }
+   } while(c != EOF);
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fgets</h2>
+        <p class="function-description">Liest eine Zeile aus dem angegebenen Stream und speichert sie in dem String, auf den `str` zeigt.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main() {
+   FILE *fp;
+   char str[60];
+
+   fp = fopen("file.txt" , "r");
+   if(fp == NULL) {
+      perror("Error opening file");
+      return(-1);
+   }
+   if( fgets (str, 60, fp)!=NULL ) {
+      puts(str); // Schreibt den Inhalt auf stdout
+   }
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>floor</h2>
+        <p class="function-description">Rundet eine Gleitkommazahl auf die nächste ganze Zahl ab.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   double val1 = 2.8;
+   double val2 = -2.3;
+   printf("floor(%.1f) = %.1f\n", val1, floor(val1)); // Ausgabe: floor(2.8) = 2.0
+   printf("floor(%.1f) = %.1f\n", val2, floor(val2)); // Ausgabe: floor(-2.3) = -3.0
+   return(0);
+}
+        </code></pre>
+
+        <h2>fmod</h2>
+        <p class="function-description">Gibt den Rest der Division von x/y zurück.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   printf("fmod(5.3, 2.0) = %f\n", fmod(5.3, 2.0));
+   printf("fmod(-5.3, 2.0) = %f\n", fmod(-5.3, 2.0));
+   return(0);
+}
+        </code></pre>
+
+        <h2>fopen</h2>
+        <p class="function-description">Öffnet die durch den Dateinamen angegebene Datei und ordnet ihr einen Stream zu.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   fp = fopen ("file.txt", "w+"); // Öffnet zum Lesen und Schreiben
+   if(fp == NULL) {
+       perror("Fehler beim Öffnen");
+       return -1;
+   }
+   fprintf(fp, "This is testing for fprintf...\n");
+   fputs("This is testing for fputs...\n", fp);
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fopen_s</h2>
+        <p class="function-description">Eine sicherere Version von `fopen`.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;stdio.h>
+
+int main(void) {
+    FILE* stream;
+    errno_t err;
+
+    err = fopen_s(&stream, "data.txt", "w");
+    if (err == 0) {
+        fprintf(stream, "File opened successfully.\n");
+        fclose(stream);
+        printf("data.txt was created.\n");
+    } else {
+        printf("Error opening file.\n");
+    }
+    return 0;
+}
+        </code></pre>
+
+        <h2>fprintf</h2>
+        <p class="function-description">Sendet formatierte Ausgabe an einen Stream.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   fp = fopen("file.txt", "w+");
+   if(fp == NULL) return -1;
+   
+   fprintf(fp, "Hallo Welt %d\n", 2024);
+   
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fputc</h2>
+        <p class="function-description">Schreibt ein Zeichen (ein `unsigned char`) in den angegebenen Stream.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   int ch;
+   fp = fopen("file.txt", "w+");
+   if(fp == NULL) return -1;
+
+   for( ch = 'A' ; ch <= 'Z' ; ch++ ) {
+      fputc(ch, fp);
+   }
+   
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fputs</h2>
+        <p class="function-description">Schreibt einen String in einen Stream, ohne das Null-Terminierungszeichen mitzuschreiben.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   fp = fopen("file.txt", "w+");
+   if(fp == NULL) return -1;
+   
+   fputs("This is a test string.\n", fp);
+   fputs("This is another test string.\n", fp);
+
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fread</h2>
+        <p class="function-description">Liest Daten aus dem gegebenen Stream in das Array, auf das `ptr` zeigt.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   char buffer[100];
+   fp = fopen("file.txt", "r");
+   if(fp == NULL) return -1;
+
+   // Lese 100 Bytes aus der Datei
+   if(fread(buffer, 1, 100, fp) > 0) {
+      printf("Gelesener Inhalt: %s\n", buffer);
+   }
+
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>free</h2>
+        <p class="function-description">Gibt einen zuvor mit `malloc`, `calloc` oder `realloc` reservierten Speicherblock frei.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main () {
+   int *ptr;
+   ptr = (int*) malloc(sizeof(int) * 5); // 5 Integer reservieren
+   if(ptr == NULL) return 1;
+
+   printf("Speicher erfolgreich reserviert.\n");
+
+   free(ptr); // Speicher wieder freigeben
+   printf("Speicher erfolgreich freigegeben.\n");
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>fseek</h2>
+        <p class="function-description">Setzt den Dateipositionsindikator für den Stream auf einen neuen Wert.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   fp = fopen("file.txt","w+");
+   if(fp == NULL) return -1;
+   
+   fputs("This is an example", fp);
+   
+   // Gehe zum 7. Byte vom Anfang der Datei
+   fseek( fp, 7, SEEK_SET );
+   fputs(" a new example", fp);
+   
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>ftell</h2>
+        <p class="function-description">Gibt die aktuelle Dateiposition des gegebenen Streams zurück.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   long len;
+   fp = fopen("file.txt","r");
+   if( fp == NULL ) {
+      perror("Error opening file");
+      return(-1);
+   }
+   fseek(fp, 0, SEEK_END); // Gehe zum Ende der Datei
+   len = ftell(fp); // Erfasse die Position (Dateigröße)
+   fclose(fp);
+   printf("Größe der Datei: %ld bytes\n", len);
+   return(0);
+}
+        </code></pre>
+
+        <h2>fwrite</h2>
+        <p class="function-description">Schreibt Daten aus dem Array, auf das `ptr` zeigt, in den gegebenen Stream.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   FILE *fp;
+   char buffer[] = "This is a test for fwrite.";
+   fp = fopen("file.txt", "w");
+   if(fp == NULL) return -1;
+   
+   // Schreibe den Inhalt von buffer in die Datei
+   fwrite(buffer, sizeof(buffer), 1, fp);
+   
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>getchar</h2>
+        <p class="function-description">Liest das nächste Zeichen von `stdin`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   int c;
+   printf("Gib ein Zeichen ein: ");
+   c = getchar();
+   printf("Du hast eingegeben: ");
+   putchar(c);
+   printf("\n");
+   return(0);
+}
+        </code></pre>
+
+        <h2>isalnum</h2>
+        <p class="function-description">Überprüft, ob das übergebene Zeichen alphanumerisch ist (Buchstabe oder Ziffer).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   char var1 = 'd';
+   char var2 = '2';
+   char var3 = ' ';
+   if( isalnum(var1) ) printf("var1 = |%c| ist alphanumerisch\n", var1);
+   if( isalnum(var2) ) printf("var2 = |%c| ist alphanumerisch\n", var2);
+   if( !isalnum(var3) ) printf("var3 = |%c| ist nicht alphanumerisch\n", var3);
+   return(0);
+}
+        </code></pre>
+
+        <h2>isalpha</h2>
+        <p class="function-description">Überprüft, ob das übergebene Zeichen ein Buchstabe ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = 'D';
+   int var2 = '2';
+   if( isalpha(var1) ) printf("var1 = |%c| ist ein Buchstabe\n", var1);
+   if( !isalpha(var2) ) printf("var2 = |%c| ist kein Buchstabe\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>iscntrl</h2>
+        <p class="function-description">Überprüft, ob das übergebene Zeichen ein Steuerzeichen ist (z.B. `\n`, `\t`).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int i = 0;
+   char str[] = "first line \n second line \t third line";
+   while(str[i]) {
+      if(iscntrl(str[i]))
+         printf("Steuerzeichen gefunden: %d\n", str[i]);
+      i++;
+   }
+   return(0);
+}
+        </code></pre>
+
+        <h2>isdigit</h2>
+        <p class="function-description">Überprüft, ob das übergebene Zeichen eine Ziffer (0-9) ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = '9';
+   int var2 = 'a';
+   if( isdigit(var1) ) printf("var1 = |%c| ist eine Ziffer\n", var1);
+   if( !isdigit(var2) ) printf("var2 = |%c| ist keine Ziffer\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>isgraph</h2>
+        <p class="function-description">Überprüft, ob das Zeichen ein druckbares Zeichen ist, das kein Leerzeichen ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = 'k';
+   int var2 = ' ';
+   if( isgraph(var1) ) printf("var1 = |%c| ist ein grafisches Zeichen\n", var1);
+   if( !isgraph(var2) ) printf("var2 = |%c| ist kein grafisches Zeichen\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>islower</h2>
+        <p class="function-description">Überprüft, ob das Zeichen ein Kleinbuchstabe ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = 'q';
+   int var2 = 'Q';
+   if( islower(var1) ) printf("var1 = |%c| ist ein Kleinbuchstabe\n", var1);
+   if( !islower(var2) ) printf("var2 = |%c| ist kein Kleinbuchstabe\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>isprint</h2>
+        <p class="function-description">Überprüft, ob das Zeichen druckbar ist (inklusive Leerzeichen).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = ' ';
+   int var2 = '\n';
+   if( isprint(var1) ) printf("var1 = |%c| ist druckbar\n", var1);
+   if( !isprint(var2) ) printf("var2 = (Newline) ist nicht druckbar\n");
+   return(0);
+}
+        </code></pre>
+
+        <h2>ispunct</h2>
+        <p class="function-description">Überprüft, ob das Zeichen ein Interpunktionszeichen ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = '.';
+   int var2 = 'a';
+   if( ispunct(var1) ) printf("var1 = |%c| ist ein Interpunktionszeichen\n", var1);
+   if( !ispunct(var2) ) printf("var2 = |%c| ist kein Interpunktionszeichen\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>isspace</h2>
+        <p class="function-description">Überprüft, ob das Zeichen ein Whitespace-Zeichen ist (Leerzeichen, Tabulator, Zeilenumbruch etc.).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = ' ';
+   int var2 = '\n';
+   int var3 = 'a';
+   if( isspace(var1) ) printf("var1 ist ein Whitespace-Zeichen\n");
+   if( isspace(var2) ) printf("var2 ist ein Whitespace-Zeichen\n");
+   if( !isspace(var3) ) printf("var3 ist kein Whitespace-Zeichen\n");
+   return(0);
+}
+        </code></pre>
+
+        <h2>isupper</h2>
+        <p class="function-description">Überprüft, ob das Zeichen ein Großbuchstabe ist.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   int var1 = 'Q';
+   int var2 = 'q';
+   if( isupper(var1) ) printf("var1 = |%c| ist ein Großbuchstabe\n", var1);
+   if( !isupper(var2) ) printf("var2 = |%c| ist kein Großbuchstabe\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>isxdigit</h2>
+        <p class="function-description">Überprüft, ob das Zeichen eine hexadezimale Ziffer ist (0-9, a-f, A-F).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+   char var1 = 'f';
+   char var2 = 'G';
+   if( isxdigit(var1) ) printf("var1 = |%c| ist eine Hex-Ziffer\n", var1);
+   if( !isxdigit(var2) ) printf("var2 = |%c| ist keine Hex-Ziffer\n", var2);
+   return(0);
+}
+        </code></pre>
+
+        <h2>labs</h2>
+        <p class="function-description">Gibt den Absolutwert einer `long int` Zahl zurück.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main () {
+   long int a = -1000000L;
+   long int b = labs(a);
+   printf("Der Absolutwert von %ld ist %ld\n", a, b);
+   return(0);
+}
+        </code></pre>
+
+        <h2>localtime</h2>
+        <p class="function-description">Konvertiert einen `time_t`-Wert in die lokale Zeit (als `struct tm`).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;time.h>
+
+int main () {
+   time_t rawtime;
+   struct tm *info;
+   time( &rawtime );
+   info = localtime( &rawtime );
+   printf("Aktuelle lokale Zeit und Datum: %s", asctime(info));
+   return(0);
+}
+        </code></pre>
+
+        <h2>localtime_s</h2>
+        <p class="function-description">Eine sicherere Version von `localtime`.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;time.h>
+#include &lt;stdio.h>
+
+int main(void) {
+    time_t t = time(NULL);
+    struct tm result;
+    char str[26];
+
+    if (localtime_s(&result, &t) == 0) {
+        asctime_s(str, sizeof str, &result);
+        printf("Die Zeit ist: %s\n", str);
+    }
+    return 0;
+}
+        </code></pre>
+
+        <h2>log</h2>
+        <p class="function-description">Berechnet den natürlichen Logarithmus (Basis e).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   double x = 2.718282; // Ungefähr e
+   printf("log(%.6f) = %f\n", x, log(x));
+   return(0);
+}
+        </code></pre>
+
+        <h2>log10</h2>
+        <p class="function-description">Berechnet den dekadischen Logarithmus (Basis 10).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   double x = 100.0;
+   printf("log10(%.1f) = %f\n", x, log10(x));
+   return(0);
+}
+        </code></pre>
+
+        <h2>malloc</h2>
+        <p class="function-description">Reserviert einen Speicherblock der angegebenen Größe in Bytes.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+#include &lt;string.h>
+
+int main () {
+   char *str;
+   str = (char *) malloc(15); // Reserviert 15 Bytes
+   if(str == NULL) return 1;
+
+   strcpy(str, "Hallo Welt");
+   printf("String = %s\n", str);
+   
+   free(str); // Speicher freigeben
+   return(0);
+}
+        </code></pre>
+
+        <h2>memchr</h2>
+        <p class="function-description">Sucht nach dem ersten Vorkommen des Zeichens `c` in den ersten `n` Bytes des Speicherblocks, auf den `ptr` zeigt.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   const char str[] = "http://www.example.com";
+   const char ch = '.';
+   char *ret;
+
+   ret = (char*) memchr(str, ch, strlen(str));
+   if (ret != NULL) {
+      printf("Zeichen '.' gefunden an Position: %ld\n", ret-str + 1);
+   }
+   return(0);
+}
+        </code></pre>
+
+        <h2>memcmp</h2>
+        <p class="function-description">Vergleicht die ersten `n` Bytes zweier Speicherblöcke.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char buffer1[] = "DWgaOtP12df0";
+   char buffer2[] = "DWGAOTP12DF0";
+   
+   int n = memcmp(buffer1, buffer2, sizeof(buffer1));
+   
+   if(n > 0) printf("'%s' ist gr��ßer als '%s'.\n", buffer1, buffer2);
+   else if(n < 0) printf("'%s' ist kleiner als '%s'.\n", buffer1, buffer2);
+   else printf("'%s' ist gleich '%s'.\n", buffer1, buffer2);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>memcpy</h2>
+        <p class="function-description">Kopiert `n` Bytes vom Speicherbereich `src` in den Speicherbereich `dest`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   const char src[50] = "Dies ist die Quelle";
+   char dest[50];
+   
+   memcpy(dest, src, strlen(src)+1); // +1 für das Null-Terminierungszeichen
+   printf("Ziel: %s\n", dest);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>memmove</h2>
+        <p class="function-description">Kopiert `n` Bytes von `src` nach `dest`. Die Speicherbereiche dürfen sich überlappen.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char str[100] = "Dieser String wird verschoben.";
+   
+   // Verschiebe die ersten 12 Zeichen um 7 Positionen nach rechts
+   memmove(str + 7, str, 12);
+   printf("%s\n", str);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>memset</h2>
+        <p class="function-description">Füllt die ersten `n` Bytes des Speicherbereichs, auf den `ptr` zeigt, mit dem konstanten Byte `value`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char str[50];
+   strcpy(str,"This is string.h library function");
+   puts(str);
+   
+   // Fülle die ersten 7 Zeichen mit '$'
+   memset(str, '$', 7);
+   puts(str);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>mktime</h2>
+        <p class="function-description">Konvertiert eine `struct tm`-Struktur in einen `time_t`-Wert.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;time.h>
+
+int main () {
+   time_t rawtime;
+   struct tm * timeinfo;
+
+   time ( &rawtime );
+   timeinfo = localtime ( &rawtime );
+   timeinfo->tm_year = 2000 - 1900; // Jahr 2000
+   timeinfo->tm_mon = 0; // Januar
+   timeinfo->tm_mday = 1; // 1. Tag
+
+   mktime ( timeinfo );
+   printf ("Der 1. Januar 2000 war ein: %s", asctime(timeinfo));
+
+   return 0;
+}
+        </code></pre>
+
+        <h2>pow</h2>
+        <p class="function-description">Potenziert eine Basis mit einem Exponenten ($basis^{exponent}$).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   printf("Wert 3^4 ist %f\n", pow(3, 4));
+   printf("Wert 2.5^3 ist %f\n", pow(2.5, 3));
+   return(0);
+}
+        </code></pre>
+
+        <h2>printf</h2>
+        <p class="function-description">Schreibt formatierte Ausgabe nach `stdout`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main() {
+   int number = 10;
+   char ch = 'A';
+   printf("Die Zahl ist %d und der Buchstabe ist %c.\n", number, ch);
+   return 0;
+}
+        </code></pre>
+
+        <h2>putchar</h2>
+        <p class="function-description">Schreibt ein Zeichen nach `stdout`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   char ch = 'H';
+   putchar(ch);
+   putchar('\n');
+   return(0);
+}
+        </code></pre>
+
+        <h2>puts</h2>
+        <p class="function-description">Schreibt einen String nach `stdout` und fügt am Ende ein Newline-Zeichen an.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   char str[] = "Hallo Welt!";
+   puts(str);
+   return(0);
+}
+        </code></pre>
+
+        <h2>qsort</h2>
+        <p class="function-description">Sortiert ein Array.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int compare (const void * a, const void * b) {
+   return ( *(int*)a - *(int*)b );
+}
+
+int main () {
+   int values[] = { 40, 10, 100, 90, 20, 25 };
+   int n;
+   qsort (values, 6, sizeof(int), compare);
+   for (n=0; n&lt;6; n++) {
+      printf ("%d ", values[n]);
+   }
+   printf("\n");
+   return(0);
+}
+        </code></pre>
+
+        <h2>rand</h2>
+        <p class="function-description">Gibt eine Pseudo-Zufallszahl zwischen 0 und `RAND_MAX` zurück.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+#include &lt;time.h>
+
+int main () {
+   // Initialisiere den Zufallszahlengenerator
+   srand(time(NULL));
+   
+   printf("Zufallszahl: %d\n", rand());
+   printf("Zufallszahl zwischen 1 und 10: %d\n", (rand() % 10) + 1);
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>realloc</h2>
+        <p class="function-description">Ändert die Größe eines zuvor reservierten Speicherblocks.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main () {
+   char *str;
+   str = (char *) malloc(15);
+   strcpy(str, "Hallo");
+   printf("String = %s,  Adresse = %p\n", str, str);
+
+   str = (char *) realloc(str, 25);
+   strcat(str, " Welt");
+   printf("String = %s,  Adresse = %p\n", str, str);
+   
+   free(str);
+   return(0);
+}
+        </code></pre>
+
+        <h2>remove</h2>
+        <p class="function-description">Löscht eine Datei.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   // Erstelle zuerst eine Datei zum Löschen
+   FILE *fp = fopen("todelete.txt", "w");
+   if(fp) {
+      fputs("Diese Datei wird gelöscht.", fp);
+      fclose(fp);
+   }
+
+   if( remove("todelete.txt") == 0 ) {
+      printf("Datei erfolgreich gelöscht.\n");
+   } else {
+      perror("Fehler beim Löschen der Datei");
+   }
+   return(0);
+}
+        </code></pre>
+
+        <h2>rename</h2>
+        <p class="function-description">Benennt eine Datei um.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   // Erstelle zuerst eine Datei zum Umbenennen
+   FILE *fp = fopen("oldname.txt", "w");
+   if(fp) {
+      fclose(fp);
+   }
+
+   if( rename("oldname.txt", "newname.txt") == 0 ) {
+      printf("Datei erfolgreich umbenannt.\n");
+   } else {
+      perror("Fehler beim Umbenennen der Datei");
+   }
+   return(0);
+}
+        </code></pre>
+
+        <h2>rewind</h2>
+        <p class="function-description">Setzt den Dateipositionsindikator auf den Anfang des Streams zurück.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   char str[100];
+   FILE *fp;
+   fp = fopen("file.txt", "w+");
+   fputs("this is a test", fp);
+   
+   rewind(fp); // Gehe zum Anfang
+   
+   fgets(str, 100, fp);
+   printf("Gelesener Inhalt: %s\n", str);
+   
+   fclose(fp);
+   return(0);
+}
+        </code></pre>
+
+        <h2>scanf</h2>
+        <p class="function-description">Liest formatierte Eingabe von `stdin`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   char str[100];
+   int i;
+
+   printf("Geben Sie einen Namen und eine Zahl ein: ");
+   scanf("%s %d", str, &i);
+
+   printf("Sie haben eingegeben: %s und %d \n", str, i);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>scanf_s</h2>
+        <p class="function-description">Eine sicherere Version von `scanf`, die zusätzliche Argumente zur Angabe der Puffergröße erfordert.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;stdio.h>
+
+int main(void) {
+    char name[20];
+    int age;
+    
+    printf("Geben Sie Ihren Namen (max 19 Zeichen) und Ihr Alter ein: ");
+    scanf_s("%19s %d", name, (rsize_t)sizeof(name), &age);
+    
+    printf("Hallo %s, Sie sind %d Jahre alt.\n", name, age);
+    return 0;
+}
+        </code></pre>
+
+        <h2>sin</h2>
+        <p class="function-description">Berechnet den Sinus eines Winkels (in Bogenmaß).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+#define PI 3.14159265
+
+int main () {
+   double param, result;
+   param = 30.0;
+   result = sin(param * PI / 180);
+   printf("Der Sinus von %f Grad ist %f.\n", param, result);
+   return(0);
+}
+        </code></pre>
+
+        <h2>sinh</h2>
+        <p class="function-description">Berechnet den hyperbolischen Sinus.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   double x = 1.0;
+   double result = sinh(x);
+   printf("sinh(%f) = %f\n", x, result);
+   return(0);
+}
+        </code></pre>
+
+        <h2>sizeof</h2>
+        <p class="function-description">Gibt die Größe eines Datentyps oder einer Variablen in Bytes zurück. (Ist ein Operator, keine Funktion).</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main() {
+   printf("Größe von int: %zu Bytes\n", sizeof(int));
+   printf("Größe von char: %zu Bytes\n", sizeof(char));
+   printf("Größe von double: %zu Bytes\n", sizeof(double));
+   return 0;
+}
+        </code></pre>
+
+        <h2>sprintf</h2>
+        <p class="function-description">Schreibt formatierte Daten in einen String.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main () {
+   char buffer[50];
+   int a = 10, b = 20, c;
+   c = a + b;
+   sprintf(buffer, "Summe von %d und %d ist %d", a, b, c);
+   printf("%s\n", buffer);
+   return(0);
+}
+        </code></pre>
+
+        <h2>sprintf_s</h2>
+        <p class="function-description">Eine sicherere Version von `sprintf`, die die Puffergröße überprüft.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;stdio.h>
+
+int main(void) {
+    char buffer[50];
+    int value = 123;
+    int ret;
+
+    ret = sprintf_s(buffer, sizeof(buffer), "Der Wert ist %d.", value);
+    if (ret > 0) {
+        puts(buffer);
+    }
+    return 0;
+}
+        </code></pre>
+
+        <h2>sqrt</h2>
+        <p class="function-description">Berechnet die Quadratwurzel einer Zahl.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+   printf("Quadratwurzel von 16 ist %f\n", sqrt(16));
+   printf("Quadratwurzel von 50 ist %f\n", sqrt(50));
+   return(0);
+}
+        </code></pre>
+
+        <h2>srand</h2>
+        <p class="function-description">Initialisiert den Pseudo-Zufallszahlengenerator, der von `rand()` verwendet wird.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+#include &lt;time.h>
+
+int main () {
+   int i, n;
+   time_t t;
+   
+   n = 5;
+   
+   // Initialisiere den Generator mit der aktuellen Zeit
+   srand((unsigned) time(&t));
+
+   printf("%d zufällige Zahlen:\n", n);
+   for( i = 0 ; i < n ; i++ ) {
+      printf("%d\n", rand() % 50);
+   }
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>sscanf</h2>
+        <p class="function-description">Liest formatierte Daten aus einem String.</p>
+        <pre><code>
+#include &lt;stdio.h>
+
+int main() {
+    char* str = "Max Mustermann 25";
+    char name[20], surname[20];
+    int age;
+
+    sscanf(str, "%s %s %d", name, surname, &age);
+    
+    printf("Name: %s\n", name);
+    printf("Nachname: %s\n", surname);
+    printf("Alter: %d\n", age);
+    
+    return 0;
+}
+        </code></pre>
+
+        <h2>strcat</h2>
+        <p class="function-description">Hängt den String `src` an den String `dest` an.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char dest[50] = "Dies ist ";
+   char src[] = "ein Test.";
+   
+   strcat(dest, src);
+   printf("Endergebnis: %s\n", dest);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strchr</h2>
+        <p class="function-description">Sucht nach dem ersten Vorkommen des Zeichens `c` im String `str`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   const char str[] = "http://www.example.com";
+   const char ch = '.';
+   char *ret;
+
+   ret = strchr(str, ch);
+
+   printf("String nach '%c' ist: %s\n", ch, ret);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strcmp</h2>
+        <p class="function-description">Vergleicht zwei Strings lexikographisch.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char str1[] = "Apfel";
+   char str2[] = "Banane";
+   int ret = strcmp(str1, str2);
+   
+   if(ret < 0) printf("str1 ist kleiner als str2\n");
+   else if(ret > 0) printf("str2 ist kleiner als str1\n");
+   else printf("str1 ist gleich str2\n");
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strcpy</h2>
+        <p class="function-description">Kopiert den String `src` (inklusive Null-Terminierungszeichen) in den String `dest`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char src[40] = "Dies ist die Quelle.";
+   char dest[100];
+   
+   strcpy(dest, src);
+   printf("Finaler String: %s\n", dest);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strcpy_s</h2>
+        <p class="function-description">Eine sicherere Version von `strcpy`, die die Puffergröße überprüft.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;string.h>
+#include &lt;stdio.h>
+ 
+int main(void) {
+    char dest[10];
+    const char* src = "Hallo";
+    errno_t err = strcpy_s(dest, sizeof dest, src);
+    if(err == 0) {
+        printf("Kopierter String: %s\n", dest);
+    }
+    return 0;
+}
+        </code></pre>
+
+        <h2>strcspn</h2>
+        <p class="function-description">Ermittelt die Länge des initialen Segments von `str1`, das vollständig aus Zeichen besteht, die nicht in `str2` enthalten sind.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   int len;
+   const char str1[] = "ABCDEF4960910";
+   const char str2[] = "0123456789";
+
+   len = strcspn(str1, str2);
+   printf("Erstes passendes Zeichen an Position: %d\n", len + 1);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strlen</h2>
+        <p class="function-description">Berechnet die Länge eines Strings (ohne das Null-Terminierungszeichen).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char str[50] = "Dies ist ein Test";
+   printf("Länge des Strings: %zu\n", strlen(str));
+   return(0);
+}
+        </code></pre>
+
+        <h2>strncat</h2>
+        <p class="function-description">Hängt die ersten `n` Zeichen des Strings `src` an den String `dest` an.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char dest[20] = "Hallo ";
+   char src[] = "Welt, wie gehts?";
+   
+   strncat(dest, src, 5); // Hänge nur "Welt," an
+   printf("Finaler String: %s\n", dest);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strncmp</h2>
+        <p class="function-description">Vergleicht die ersten `n` Zeichen von zwei Strings.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char str1[] = "apfelkuchen";
+   char str2[] = "apfelsaft";
+   
+   if(strncmp(str1, str2, 5) == 0) {
+      printf("Die ersten 5 Zeichen sind gleich.\n");
+   } else {
+      printf("Die ersten 5 Zeichen sind unterschiedlich.\n");
+   }
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strncpy</h2>
+        <p class="function-description">Kopiert bis zu `n` Zeichen vom String `src` in den String `dest`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char src[40] = "Dies ist die Quelle.";
+   char dest[10];
+   
+   strncpy(dest, src, 9);
+   dest[9] = '\0'; // Manuell Null-terminieren!
+   
+   printf("Finaler String: %s\n", dest);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strncpy_s</h2>
+        <p class="function-description">Eine sicherere Version von `strncpy`.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;string.h>
+#include &lt;stdio.h>
+ 
+int main(void) {
+    char dest[10];
+    const char* src = "Eine lange Zeichenkette";
+    strncpy_s(dest, sizeof dest, src, 5); // Kopiere 5 Zeichen
+    printf("dest: %s\n", dest);
+    return 0;
+}
+        </code></pre>
+
+        <h2>strpbrk</h2>
+        <p class="function-description">Findet das erste Zeichen im String `str1`, das mit einem der Zeichen im String `str2` übereinstimmt.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   const char str1[] = "abcde2fghi3jk4l";
+   const char str2[] = "34";
+   char *ret;
+
+   ret = strpbrk(str1, str2);
+   if(ret) {
+      printf("Erstes passendes Zeichen: %c\n", *ret);
+   }
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strrchr</h2>
+        <p class="function-description">Sucht nach dem letzten Vorkommen des Zeichens `c` im String `str`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char str[] = "Dies ist ein Test. Dies ist ein Satz.";
+   char *ret;
+   
+   ret = strrchr(str, '.');
+   if(ret) {
+      printf("Letzter Punkt gefunden bei: %s\n", ret);
+   }
+
+   return(0);
+}
+        </code></pre>
+
+        <h2>strspn</h2>
+        <p class="function-description">Ermittelt die Länge des initialen Segments von `str1`, das vollständig aus Zeichen besteht, die in `str2` enthalten sind.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   int len;
+   const char str1[] = "12345ABCDEF";
+   const char str2[] = "1234567890";
+
+   len = strspn(str1, str2);
+   printf("Länge des initialen Zahlen-Segments: %d\n", len);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strstr</h2>
+        <p class="function-description">Findet das erste Vorkommen des Substrings `needle` im String `haystack`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+   char haystack[20] = "Hallo Welt";
+   char needle[10] = "Welt";
+   char *ret;
+
+   ret = strstr(haystack, needle);
+   
+   printf("Der Substring ist: %s\n", ret);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strtod</h2>
+        <p class="function-description">Konvertiert einen String in einen `double`.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main () {
+   char str[] = "123.45 ist eine Zahl";
+   char *end;
+   double d;
+   
+   d = strtod(str, &end);
+   printf("Der double-Wert ist %f\n", d);
+   printf("Restlicher String: %s\n", end);
+   
+   return(0);
+}
+        </code></pre>
+
+        <h2>strtok</h2>
+        <p class="function-description">Teilt einen String in eine Reihe von Tokens auf, basierend auf einem Trennzeichen.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+  char str[] = "Apfel,Banane,Kirsche";
+  char *token = strtok(str, ",");
+  
+  while (token != NULL) {
+    printf("%s\n", token);
+    token = strtok(NULL, ",");
+  }
+  
+  return(0);
+}
+        </code></pre>
+
+        <h2>strtok_s</h2>
+        <p class="function-description">Eine sicherere Version von `strtok`, die einen zusätzlichen Zeiger zur Speicherung des Kontexts verwendet.</p>
+        <pre><code>
+#define __STDC_WANT_LIB_EXT1__ 1
+#include &lt;stdio.h>
+#include &lt;string.h>
+
+int main () {
+  char str[] = "Apfel,Banane,Kirsche";
+  char * context = NULL;
+  char * token = strtok_s(str, ",", &context);
+
+  while (token != NULL) {
+    printf("%s\n", token);
+    token = strtok_s(NULL, ",", &context);
+  }
+
+  return(0);
+}
+        </code></pre>
+
+        <h2>strtol</h2>
+        <p class="function-description">Konvertiert den Anfangsteil einer Zeichenkette in einen `long int`-Wert entsprechend einer gegebenen Basis.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main () {
+  char str[] = "1a Pass-Wort";
+  char * pEnd;
+  long int li;
+
+  li = strtol(str, &pEnd, 16); // Basis 16 (Hexadezimal)
+  printf("Der numerische Wert ist %ld.\n", li);
+  printf("Der Rest des Strings ist: %s\n", pEnd);
+
+  return(0);
+}
+        </code></pre>
+
+        <h2>strtoul</h2>
+        <p class="function-description">Konvertiert den Anfangsteil einer Zeichenkette in einen `unsigned long int`-Wert entsprechend einer gegebenen Basis.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main () {
+  char str[] = "101101 binary";
+  char * pEnd;
+  unsigned long int uli;
+
+  uli = strtoul(str, &pEnd, 2); // Basis 2 (Binär)
+  printf("Der numerische Wert ist %lu.\n", uli);
+  printf("Der Rest des Strings ist: %s\n", pEnd);
+
+  return(0);
+}
+        </code></pre>
+
+        <h2>tan</h2>
+        <p class="function-description">Berechnet den Tangens eines Winkels (in Bogenmaß).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+#define PI 3.14159265
+
+int main () {
+  double param, result;
+  param = 45.0; // 45 Grad
+  result = tan(param * PI / 180.0);
+  printf("Der Tangens von %f Grad ist %f.\n", param, result);
+  return(0);
+}
+        </code></pre>
+
+        <h2>tanh</h2>
+        <p class="function-description">Berechnet den hyperbolischen Tangens.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;math.h>
+
+int main () {
+  double x = 1.0;
+  double result = tanh(x);
+  printf("tanh(%f) = %f\n", x, result);
+  return(0);
+}
+        </code></pre>
+
+        <h2>time</h2>
+        <p class="function-description">Gibt die aktuelle Kalenderzeit als `time_t`-Wert zurück (typischerweise Sekunden seit dem 1. Jan 1970 UTC).</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;time.h>
+
+int main () {
+  time_t seconds;
+  seconds = time(NULL);
+  printf("Sekunden seit dem 1. Jan 1970: %ld\n", seconds);
+  return(0);
+}
+        </code></pre>
+
+        <h2>tolower</h2>
+        <p class="function-description">Konvertiert einen Großbuchstaben in den entsprechenden Kleinbuchstaben.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+  char c = 'A';
+  printf("%c -> %c\n", c, tolower(c));
+  return 0;
+}
+        </code></pre>
+
+        <h2>toupper</h2>
+        <p class="function-description">Konvertiert einen Kleinbuchstaben in den entsprechenden Großbuchstaben.</p>
+        <pre><code>
+#include &lt;stdio.h>
+#include &lt;ctype.h>
+
+int main () {
+  char c = 'a';
+  printf("%c -> %c\n", c, toupper(c));
+  return 0;
+}
+        </code></pre>
+
+    </div>
 </body>
 </html>

@@ -6,7 +6,7 @@
     <title>Kapitel 4: Kontrollstrukturen</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -221,6 +221,30 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Struktur: <code>if (temp < 10) { ... } else if (temp <= 25) { ... } else { ... }</code>.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    double temperatur;
+
+    printf("Bitte geben Sie die aktuelle Temperatur in °C ein: ");
+    scanf("%lf", &temperatur);
+
+    if (temperatur < 10.0) {
+        printf("Es ist kalt.\n");
+    } else if (temperatur <= 25.0) {
+        // Dieser Block wird nur erreicht, wenn temp >= 10.0 ist.
+        printf("Es ist moderat.\n");
+    } else {
+        // Dieser Block wird nur erreicht, wenn temp > 25.0 ist.
+        printf("Es ist heiß.\n");
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Countdown</strong><br>
@@ -228,6 +252,26 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die `for`-Schleife muss rückwärts zählen: <code>for (int i = 10; i > 0; i--)</code>.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    printf("Countdown startet...\n");
+
+    // Initialisierung: i = 10
+    // Bedingung: Schleife läuft, solange i > 0 ist
+    // Inkrement (hier Dekrement): i wird nach jedem Durchlauf um 1 verringert
+    for (int i = 10; i > 0; i--) {
+        printf("%d\n", i);
+    }
+
+    printf("Start!\n");
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -237,6 +281,47 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Lege eine `int choice;` an. Die Schleifenbedingung ist `while (choice != 3);`. Innerhalb der Schleife fragst du mit `printf` und liest mit `scanf` die Wahl ein.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int choice = 0;
+
+    // Die do-while-Schleife stellt sicher, dass das Menü mindestens einmal angezeigt wird.
+    do {
+        // Menü ausgeben
+        printf("\n--- HAUPTMENÜ ---\n");
+        printf("1: Programm starten\n");
+        printf("2: Optionen anzeigen\n");
+        printf("3: Programm beenden\n");
+        printf("Ihre Wahl: ");
+
+        // Benutzereingabe einlesen
+        scanf("%d", &choice);
+
+        // Optional: Reagiere auf die Auswahl mit einem switch
+        switch (choice) {
+            case 1:
+                printf("...Programm wird gestartet...\n");
+                break;
+            case 2:
+                printf("...Optionen werden angezeigt...\n");
+                break;
+            case 3:
+                printf("Programm wird beendet.\n");
+                break;
+            default:
+                printf("Ungültige Eingabe, bitte versuchen Sie es erneut.\n");
+                break;
+        }
+
+    } while (choice != 3); // Die Schleife wiederholt sich, solange nicht 3 gewählt wurde.
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Kleines Einmaleins</strong><br>
@@ -245,6 +330,26 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die äußere Schleife läuft für `i` von 1 bis 10, die innere für `j` von 1 bis 10. Innerhalb der inneren Schleife berechnest und druckst du <code>i * j</code>. Nutze `printf("\t");` um einen Tabulator für eine saubere Ausrichtung einzufügen.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Äußere Schleife, zuständig für die Zeilen (Multiplikator 1)
+    for (int i = 1; i <= 10; i++) {
+        // Innere Schleife, zuständig für die Spalten (Multiplikator 2)
+        for (int j = 1; j <= 10; j++) {
+            // %4d sorgt für eine feste Breite von 4 Zeichen, was die Tabelle ausrichtet
+            printf("%4d", i * j);
+        }
+        // Nach jeder vollen Zeile (wenn die innere Schleife fertig ist) einen Zeilenumbruch einfügen.
+        printf("\n");
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Rekursive Summe</strong><br>
@@ -252,6 +357,44 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Logik ist: `if (n == 0) { return 0; } else { return n + SumIterativ(n - 1); }`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Deklaration der rekursiven Funktion
+int SumRecursive(int n);
+
+int main(void) {
+    int number = 5;
+    int result = SumRecursive(number);
+    printf("Die Summe der Zahlen von 1 bis %d ist %d.\n", number, result);
+    
+    number = 10;
+    result = SumRecursive(number);
+    printf("Die Summe der Zahlen von 1 bis %d ist %d.\n", number, result);
+
+    return 0;
+}
+
+// Definition der rekursiven Funktion
+int SumRecursive(int n) {
+    // Basisfall / Abbruchkriterium: Wenn n 0 ist, ist die Summe 0.
+    if (n <= 0) {
+        return 0;
+    }
+    // Rekursiver Schritt: Die Summe von n ist n plus die Summe von (n-1).
+    else {
+        return n + SumRecursive(n - 1);
+    }
+}
+// Beispielhafter Ablauf für SumRecursive(3):
+// 1. return 3 + SumRecursive(2)
+// 2.   -> return 2 + SumRecursive(1)
+// 3.     -> return 1 + SumRecursive(0)
+// 4.       -> return 0 (Basisfall)
+// Ergebnis: 3 + 2 + 1 + 0 = 6
+</code></pre>
                     </details>
                 </li>
             </ol>

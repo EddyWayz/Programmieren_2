@@ -6,7 +6,7 @@
     <title>Kapitel 2: Operatoren und I/O</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -230,6 +230,31 @@ int main(void) {
                 <li>
                     <strong>Arithmetische Grundlagen</strong><br>
                     Deklariere zwei <code>int</code>-Variablen `iX = 73` und `iY = 42`. Führe Addition, Subtraktion, Multiplikation, Division und die Modulo-Operation durch und gib die Ergebnisse jeweils in einer eigenen Zeile aus. Ist das Ergebnis der Division korrekt?
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Das Ergebnis von <code>73 / 42</code> wird <code>1</code> sein (Integer-Division). Der Code ist simpel: <code>printf("73 / 42 = %d\n", iX / iY);</code></p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int iX = 73;
+    int iY = 42;
+
+    printf("%d + %d = %d\n", iX, iY, iX + iY);
+    printf("%d - %d = %d\n", iX, iY, iX - iY);
+    printf("%d * %d = %d\n", iX, iY, iX * iY);
+    printf("%d / %d = %d\n", iX, iY, iX / iY); // Ergibt 1, nicht 1.73...
+    printf("%d %% %d = %d\n", iX, iY, iX % iY); // Der Rest von 73 / 42 ist 31
+
+    printf("\nDas Ergebnis der Division ist 1, da bei der Division von zwei\n"
+           "Integern der Nachkommaanteil abgeschnitten wird (Integer-Division).\n");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Vergleichs-Ketten</strong><br>
@@ -237,18 +262,135 @@ int main(void) {
                     a) Ist <code>iX</code> ungleich <code>iY</code>? 
                     b) Ist <code>iX</code> größer als <code>iY</code> UND ist <code>iY</code> größer als 0? 
                     c) Ist <code>iX</code> kleiner als 10 ODER ist <code>iY</code> ungleich 42? 
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Kombiniere die Operatoren. Für b) wäre das: <code>int res = (iX > iY) && (iY > 0); printf("Ergebnis: %d\n", res);</code></p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int iX = 73;
+    int iY = 42;
+
+    // a) iX != iY  (73 != 42) -> wahr (1)
+    int res_a = (iX != iY);
+    printf("a) iX != iY ist %d\n", res_a);
+
+    // b) (iX > iY) && (iY > 0)  ((73 > 42) && (42 > 0)) -> (wahr && wahr) -> wahr (1)
+    int res_b = (iX > iY) && (iY > 0);
+    printf("b) (iX > iY) UND (iY > 0) ist %d\n", res_b);
+
+    // c) (iX < 10) || (iY != 42)  ((73 < 10) || (42 != 42)) -> (falsch || falsch) -> falsch (0)
+    int res_c = (iX < 10) || (iY != 42);
+    printf("c) (iX < 10) ODER (iY != 42) ist %d\n", res_c);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Bit-Magie</strong><br>
                     Definiere zwei <code>unsigned char</code>-Variablen: <code>ucVal1 = 0x5A</code> und <code>ucVal2 = 0xA5</code>. Berechne das bitweise AND, OR und XOR und gib die Ergebnisse hexadezimal aus. Was ergibt die Operation <code>ucVal1 ^ ucVal2 ^ ucVal2</code> und warum? 
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Benutze den <code>%X</code> Format-Spezifizierer in <code>printf</code>. Die XOR-Operation <code>val ^ key ^ key</code> ergibt immer <code>val</code>. Das ist die Basis einfacher Verschlüsselungen.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    unsigned char ucVal1 = 0x5A; // Binär: 0101 1010
+    unsigned char ucVal2 = 0xA5; // Binär: 1010 0101
+
+    // Bitweise Operationen
+    unsigned char res_and = ucVal1 & ucVal2; // -> 0000 0000 -> 0x00
+    unsigned char res_or  = ucVal1 | ucVal2; // -> 1111 1111 -> 0xFF
+    unsigned char res_xor = ucVal1 ^ ucVal2; // -> 1111 1111 -> 0xFF
+
+    printf("0x%X & 0x%X = 0x%X\n", ucVal1, ucVal2, res_and);
+    printf("0x%X | 0x%X = 0x%X\n", ucVal1, ucVal2, res_or);
+    printf("0x%X ^ 0x%X = 0x%X\n", ucVal1, ucVal2, res_xor);
+
+    // Die "doppelte XOR"-Operation
+    unsigned char original_val = ucVal1 ^ ucVal2 ^ ucVal2;
+    printf("\n(0x%X ^ 0x%X) ^ 0x%X = 0x%X\n", ucVal1, ucVal2, ucVal2, original_val);
+    printf("\nErklärung: Eine Zahl mit einer anderen zweimal zu 'XORen' ist eine\n"
+           "Null-Operation. Es kommt immer die ursprüngliche Zahl (ucVal1) wieder heraus.\n"
+           "Das liegt daran, dass (A XOR B) XOR B = A ist. Dieses Prinzip wird\n"
+           "in der Kryptographie und für einfache Datentausch-Algorithmen verwendet.\n");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Persönlicher Steckbrief</strong><br>
                     Schreibe ein interaktives Programm. Frage den Benutzer nacheinander nach seinem Alter (<code>int</code>) und seiner Körpergröße in Metern (<code>double</code>). Gib zum Schluss eine Zusammenfassung aus, bei der die Größe auf zwei Nachkommastellen formatiert ist.
+                    <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Denke an <code>printf</code> zur Aufforderung, <code>scanf</code> zum Einlesen (mit <code>&</code> und <code>%lf</code> für double) und <code>printf</code> zur formatierten Ausgabe (<code>%.2f</code>).</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int alter;
+    double groesse;
+
+    // Eingabe des Alters
+    printf("Bitte gib dein Alter ein: ");
+    scanf("%d", &alter);
+
+    // Eingabe der Körpergröße
+    printf("Bitte gib deine Körpergröße in Metern ein (z.B. 1.85): ");
+    scanf("%lf", &groesse); // %lf für double verwenden!
+
+    // Ausgabe der Zusammenfassung
+    printf("\n--- Dein Steckbrief ---\n");
+    printf("Alter: %d Jahre\n", alter);
+    printf("Größe: %.2f m\n", groesse); // %.2f für Formatierung auf 2 Nachkommastellen
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Der explizite Cast</strong><br>
                     Schreibe ein Programm, das eine Ganzzahl-Variable `punkte = 100` und eine weitere `anzahl = 3` hat. Berechne den Durchschnittswert und speichere ihn in einer `double`-Variable. Gib ihn aus. Sorge mit einem expliziten Cast dafür, dass das Ergebnis korrekt ist (33.333...) und nicht 33.0.
+                     <details>
+                        <summary>Hinweis / Lösungsskizze</summary>
+                        <p>Die falsche Berechnung wäre <code>double avg = punkte / anzahl;</code>. Die korrekte lautet: <code>double avg = (double)punkte / anzahl;</code>.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int punkte = 100;
+    int anzahl = 3;
+    double durchschnitt;
+
+    // Falsche Berechnung durch Integer-Division
+    durchschnitt = punkte / anzahl;
+    printf("Falscher Durchschnitt (Integer-Division): %f\n", durchschnitt);
+
+    // Korrekte Berechnung durch expliziten Cast
+    // (double)punkte wandelt 'punkte' *nur für diese eine Berechnung* in ein double um.
+    // Dadurch wird eine Gleitkomma-Division erzwungen.
+    durchschnitt = (double)punkte / anzahl;
+    printf("Korrekter Durchschnitt (mit Cast): %f\n", durchschnitt);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
             </ol>
         </section>

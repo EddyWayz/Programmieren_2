@@ -6,7 +6,7 @@
     <title>Kapitel 13: Fortgeschrittene Problemlösung</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -179,6 +179,34 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Funktion könnte `int multiply(int a, int b)` heißen. Das Abbruchkriterium ist `if (b == 0) return 0;` oder `if (b == 1) return a;`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+long long multiply(int a, int b) {
+    // Um mit negativen Zahlen umzugehen, machen wir das Problem positiv
+    // und korrigieren am Ende das Vorzeichen.
+    if (b < 0) {
+        return -multiply(a, -b);
+    }
+
+    // Basisfall / Abbruchkriterium: a * 0 = 0
+    if (b == 0) {
+        return 0;
+    }
+    
+    // Rekursiver Schritt: a * b = a + (a * (b-1))
+    return a + multiply(a, b - 1);
+}
+
+int main(void) {
+    printf("5 * 4 = %lld\n", multiply(5, 4));
+    printf("7 * 0 = %lld\n", multiply(7, 0));
+    printf("6 * -3 = %lld\n", multiply(6, -3));
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Rekursiver Bubblesort</strong><br>
@@ -186,6 +214,47 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Das Abbruchkriterium ist `if (uiSize <= 1) return;`. Der rekursive Aufruf lautet: `DoBubbleSortRecursiv(paiA, uiSize - 1);`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+void DoBubbleSortRecursiv(int paiA[], unsigned int uiSize) {
+    // Abbruchkriterium: Ein Array mit 0 oder 1 Elementen ist bereits sortiert.
+    if (uiSize <= 1) {
+        return;
+    }
+
+    // Ein Durchlauf: Das größte Element "blubbert" ans Ende des aktuellen Bereichs.
+    for (unsigned int j = 0; j < uiSize - 1; j++) {
+        if (paiA[j] > paiA[j + 1]) {
+            int temp = paiA[j];
+            paiA[j] = paiA[j + 1];
+            paiA[j + 1] = temp;
+        }
+    }
+
+    // Rekursiver Schritt: Rufe die Funktion für das um 1 verkleinerte Problem auf.
+    DoBubbleSortRecursiv(paiA, uiSize - 1);
+}
+
+int main(void) {
+    int arr[] = {64, 34, 25, 12, 22, 11, 90};
+    int n = sizeof(arr)/sizeof(arr[0]);
+    
+    printf("Unsortiertes Array: ");
+    for(int i=0; i < n; i++) printf("%d ", arr[i]);
+    printf("\n");
+
+    DoBubbleSortRecursiv(arr, n);
+
+    printf("Sortiertes Array:   ");
+    for(int i=0; i < n; i++) printf("%d ", arr[i]);
+    printf("\n");
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -195,6 +264,48 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Abbruchkriterium 1: Wenn `start >= end`, ist es ein Palindrom (return 1). Abbruchkriterium 2: Wenn `str[start] != str[end]`, ist es keins (return 0). Rekursiver Schritt: `return is_palindrome(str, start + 1, end - 1);`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+// Prüft, ob der Teilstring von 'start' bis 'end' ein Palindrom ist.
+int is_palindrome_recursive(const char* str, int start, int end) {
+    // Basisfall 1: Wenn sich die Indizes treffen oder kreuzen,
+    // haben wir alle Zeichen erfolgreich verglichen. Es ist ein Palindrom.
+    if (start >= end) {
+        return 1; // true
+    }
+
+    // Basisfall 2: Wenn die äußeren Zeichen nicht übereinstimmen,
+    // kann es kein Palindrom sein.
+    if (str[start] != str[end]) {
+        return 0; // false
+    }
+
+    // Rekursiver Schritt: Das Problem wird kleiner.
+    // Prüfe den inneren Teil des Strings.
+    return is_palindrome_recursive(str, start + 1, end - 1);
+}
+
+// Hilfsfunktion für einen einfacheren ersten Aufruf.
+void check_palindrome(const char* str) {
+    if (is_palindrome_recursive(str, 0, strlen(str) - 1)) {
+        printf("'%s' ist ein Palindrom.\n", str);
+    } else {
+        printf("'%s' ist kein Palindrom.\n", str);
+    }
+}
+
+int main(void) {
+    check_palindrome("anna");
+    check_palindrome("reliefpfeiler");
+    check_palindrome("hallo");
+    check_palindrome("a");
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Robuster Ja/Nein-Dialog</strong><br>
@@ -202,6 +313,42 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Verwende eine `do-while`-Schleife. Lies mit `scanf_s(" %c", &choice, 1);` (mit Leerzeichen davor, um führende Leerzeichen zu überspringen) und leere danach immer den Puffer. Die Schleife läuft, solange `choice != 'j' && choice != 'n' ist.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Funktion, die eine Ja/Nein-Antwort robust einliest.
+char get_yes_no_answer(void) {
+    char choice = 0;
+    int items_read = 0;
+
+    do {
+        printf("Weiter? (j/n): ");
+        // Das Leerzeichen vor %c ist wichtig, es konsumiert alle
+        // vorherigen Whitespace-Zeichen (wie z.B. das \n vom letzten Enter).
+        items_read = scanf(" %c", &choice);
+
+        // Puffer leeren für den Fall, dass der Benutzer mehr als ein Zeichen
+        // eingegeben hat (z.B. "ja" oder "abc").
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        if (items_read != 1 || (choice != 'j' && choice != 'n')) {
+            printf("Ungültige Eingabe. Bitte nur 'j' oder 'n' eingeben.\n");
+        }
+
+    } while (choice != 'j' && choice != 'n');
+
+    return choice;
+}
+
+int main(void) {
+    char answer = get_yes_no_answer();
+    printf("Ihre gültige Antwort war: '%c'\n", answer);
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

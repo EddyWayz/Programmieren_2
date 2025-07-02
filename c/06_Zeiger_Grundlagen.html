@@ -6,7 +6,7 @@
     <title>Kapitel 6: Zeiger (Teil 1)</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -208,6 +208,25 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die ersten beiden Ausgaben (`&my_age` und `p_age`) sollten identisch sein. Die dritte Ausgabe (`*p_age`) sollte 30 sein.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int my_age = 30;
+    int* p_age = NULL; // Zeiger sicher initialisieren
+
+    // Zeiger auf die Variable 'my_age' zeigen lassen
+    p_age = &my_age;
+
+    printf("1. Die Adresse von my_age ist: %p\n", &my_age);
+    printf("2. Der Wert von p_age ist:      %p\n", p_age);
+    printf("3. Der Wert, auf den p_age zeigt, ist: %d\n", *p_age);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Indirekte Wertänderung</strong><br>
@@ -215,6 +234,26 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Operation lautet: `*p_price = *p_price + 5.0;` oder kurz `*p_price += 5.0;`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    double price = 19.99;
+    double* p_price = &price;
+
+    printf("Ursprünglicher Preis: %.2f\n", price);
+
+    // Wertänderung über den dereferenzierten Zeiger
+    *p_price += 5.00;
+
+    printf("Neuer Preis: %.2f\n", price);
+    printf("Der Wert wurde erfolgreich über den Zeiger geändert.\n");
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -224,6 +263,37 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Innerhalb der Funktion verwendest du den Pfeiloperator: `p->x += dx;` und `p->y += dy;`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+struct Point {
+    int x;
+    int y;
+};
+
+// Die Funktion erhält einen Zeiger auf die Struktur
+void movePoint(struct Point* p, int dx, int dy) {
+    // Mit dem Pfeiloperator -> greifen wir auf die Elemente der Struktur zu,
+    // auf die der Zeiger p zeigt.
+    p->x += dx;
+    p->y += dy;
+}
+
+int main(void) {
+    struct Point my_point = {10, 20};
+
+    printf("Originalpunkt: P(%d, %d)\n", my_point.x, my_point.y);
+
+    // Wir übergeben die Adresse (&) unseres Punktes an die Funktion
+    movePoint(&my_point, 5, -10);
+
+    printf("Neuer Punkt:     P(%d, %d)\n", my_point.x, my_point.y);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Array als Zeiger</strong><br>
@@ -232,6 +302,37 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Innerhalb der Funktion dereferenzierst du den Zeiger, um das erste Element zu ändern: `*p_array = value;`. Da Arrays immer als Referenz übergeben werden, funktioniert dies. </p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Ein Zeiger auf ein int kann auf eine einzelne int-Variable
+// oder auf das erste Element eines int-Arrays zeigen.
+void setFirstElement(int* p_array, int value) {
+    // Der Zugriff auf *p_array ändert das Element, auf das der Zeiger zeigt
+    // - in diesem Fall das erste Element des Arrays.
+    *p_array = value;
+}
+
+int main(void) {
+    int numbers[5] = {0, 1, 2, 3, 4};
+
+    printf("Array vor dem Aufruf: ");
+    for(int i=0; i<5; i++) printf("%d ", numbers[i]);
+    printf("\n");
+
+    // Der Name eines Arrays ist bereits ein Zeiger auf das erste Element.
+    // Man schreibt also nur 'numbers', nicht '&numbers'.
+    setFirstElement(numbers, 99);
+
+    printf("Array nach dem Aufruf:  ");
+    for(int i=0; i<5; i++) printf("%d ", numbers[i]);
+    printf("\n");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Sanity Check implementieren</strong><br>
@@ -239,6 +340,37 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Füge am Anfang der Funktion hinzu: `if (p_array == NULL) { return; /* Frühzeitiger Abbruch */ }`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+void setFirstElementSafe(int* p_array, int value) {
+    // Sanity Check: Prüfen, ob der Zeiger gültig ist (nicht NULL).
+    if (p_array == NULL) {
+        printf("Fehler: Ungültiger Zeiger (NULL) übergeben. Breche ab.\n");
+        return; // Funktion sicher verlassen
+    }
+    
+    // Dieser Code wird nur ausgeführt, wenn der Zeiger gültig ist.
+    *p_array = value;
+    printf("Wert erfolgreich gesetzt.\n");
+}
+
+int main(void) {
+    int numbers[5] = {0, 1, 2, 3, 4};
+
+    printf("--- Aufruf mit gültigem Zeiger ---\n");
+    setFirstElementSafe(numbers, 99);
+    printf("Erstes Element ist jetzt: %d\n", numbers[0]);
+
+    printf("\n--- Aufruf mit NULL-Zeiger ---\n");
+    setFirstElementSafe(NULL, 123);
+    printf("Programm wurde nicht beendet.\n");
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

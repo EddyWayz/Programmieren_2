@@ -6,7 +6,7 @@
     <title>Kapitel 12: Parallele Programmierung</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -211,6 +211,44 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Thread-Funktion benötigt eine einfache `for`-Schleife. In `main` wird der Thread mit `CreateThread` gestartet, das zurückgegebene Handle wird dann an `WaitForSingleObject` übergeben.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;windows.h&gt;
+
+// Die Funktion, die vom neuen Thread ausgeführt wird.
+DWORD WINAPI WorkerThreadFunction(void* pParam) {
+    for (int i = 0; i < 10; i++) {
+        printf("Hallo aus dem Worker-Thread! (%d/10)\n", i + 1);
+        Sleep(500); // Pausiere für 500ms
+    }
+    printf("Worker-Thread beendet seine Arbeit.\n");
+    return 0;
+}
+
+int main(void) {
+    HANDLE hWorkerThread;
+
+    printf("Haupt-Thread: Starte den Worker-Thread.\n");
+    hWorkerThread = CreateThread(NULL, 0, WorkerThreadFunction, NULL, 0, NULL);
+
+    if (hWorkerThread == NULL) {
+        printf("Fehler beim Erstellen des Threads.\n");
+        return 1;
+    }
+
+    // Warte hier, bis der Worker-Thread seine Arbeit beendet hat.
+    WaitForSingleObject(hWorkerThread, INFINITE);
+
+    printf("Haupt-Thread: Worker-Thread wurde beendet. Schließe das Programm.\n");
+
+    // Handle freigeben
+    CloseHandle(hWorkerThread);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Parameterübergabe an einen Thread</strong><br>
@@ -218,6 +256,56 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>In der Thread-Funktion musst du den `void*`-Parameter zurück auf `struct Message*` casten: `struct Message* msg = (struct Message*)pParam;`. Greife dann mit `msg->text` und `msg->count` auf die Daten zu.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;windows.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct {
+    char text[100];
+    int count;
+} Message;
+
+DWORD WINAPI PrintMessageThread(void* pParam) {
+    // Parameter zurück auf den korrekten Typ casten
+    Message* msg = (Message*)pParam;
+
+    for (int i = 0; i < msg->count; i++) {
+        printf("Thread %lu sagt: %s\n", GetCurrentThreadId(), msg->text);
+        Sleep(100);
+    }
+    return 0;
+}
+
+int main(void) {
+    HANDLE hThreads[2];
+    Message messages[2];
+
+    // Daten für den ersten Thread vorbereiten
+    strcpy_s(messages[0].text, 100, "Ich bin Thread A.");
+    messages[0].count = 5;
+
+    // Daten für den zweiten Thread vorbereiten
+    strcpy_s(messages[1].text, 100, "Ich bin Thread B!");
+    messages[1].count = 3;
+
+    // Threads starten und ihnen ihre jeweilige Datenstruktur übergeben
+    hThreads[0] = CreateThread(NULL, 0, PrintMessageThread, &messages[0], 0, NULL);
+    hThreads[1] = CreateThread(NULL, 0, PrintMessageThread, &messages[1], 0, NULL);
+
+    // Auf beide Threads warten
+    WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+
+    printf("Alle Threads beendet.\n");
+
+    CloseHandle(hThreads[0]);
+    CloseHandle(hThreads[1]);
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -227,6 +315,52 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Bei der nicht-sicheren Variante werden sich die Threads gegenseitig den internen Zustand von `strtok` überschreiben. Bei `strtok_s` übergibt jeder Thread seinen eigenen `context`-Zeiger, wodurch sie sich nicht mehr stören.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;windows.h&gt;
+#include &lt;string.h&gt;
+
+// Die Thread-Funktion, die strtok_s (sicher) verwendet
+DWORD WINAPI SafeTokenizerThread(void* pParam) {
+    char* str = (char*)pParam;
+    char* context = NULL; // Jeder Thread hat seinen eigenen Kontext-Zeiger
+    char* token;
+
+    printf("Thread %lu startet mit String: %s\n", GetCurrentThreadId(), str);
+    token = strtok_s(str, ";", &context);
+    while (token != NULL) {
+        printf("Thread %lu fand Token: %s\n", GetCurrentThreadId(), token);
+        Sleep(100); // Kurze Pause, um die Parallelität zu verdeutlichen
+        token = strtok_s(NULL, ";", &context);
+    }
+    return 0;
+}
+
+int main(void) {
+    HANDLE hThreads[2];
+    // Wichtig: Wir brauchen modifizierbare Kopien der Strings
+    char string1[] = "A;B;C;D;E";
+    char string2[] = "X;Y;Z";
+
+    printf("--- Starte Threads mit strtok_s (thread-sicher) ---\n");
+    hThreads[0] = CreateThread(NULL, 0, SafeTokenizerThread, string1, 0, NULL);
+    hThreads[1] = CreateThread(NULL, 0, SafeTokenizerThread, string2, 0, NULL);
+
+    WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+    printf("--- Threads beendet. Das Ergebnis ist korrekt. ---\n");
+
+    CloseHandle(hThreads[0]);
+    CloseHandle(hThreads[1]);
+    
+    // HINWEIS: Die nichtsichere Variante `strtok` würde hier zu einem chaotischen
+    // und falschen Ergebnis führen, da sich die Threads gegenseitig den internen
+    // globalen Zustand der Funktion überschreiben würden.
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Mehrere Threads synchronisieren</strong><br>
@@ -235,6 +369,50 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Fülle das `HANDLE`-Array mit den Rückgabewerten von `CreateThread`. Übergib dieses Array und die Anzahl 3 an `WaitForMultipleObjects`. Setze den `bWaitAll`-Parameter auf `TRUE`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;windows.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+DWORD WINAPI RandomSleepThread(void* pParam) {
+    DWORD threadId = GetCurrentThreadId();
+    int sleep_time = 1000 + (rand() % 2000); // Zufallszeit 1000-2999 ms
+    
+    printf("Thread %lu startet und schläft für %.1f Sekunden.\n", threadId, sleep_time / 1000.0);
+    Sleep(sleep_time);
+    printf("Thread %lu ist wieder aufgewacht.\n", threadId);
+    
+    return 0;
+}
+
+int main(void) {
+    const int NUM_THREADS = 3;
+    HANDLE hThreads[NUM_THREADS];
+
+    srand((unsigned int)time(NULL)); // Zufallsgenerator initialisieren
+
+    // Threads starten und Handles im Array speichern
+    for (int i = 0; i < NUM_THREADS; i++) {
+        hThreads[i] = CreateThread(NULL, 0, RandomSleepThread, NULL, 0, NULL);
+    }
+
+    printf("Haupt-Thread wartet, bis ALLE Worker-Threads beendet sind...\n");
+    // Der TRUE-Parameter sorgt dafür, dass auf ALLE gewartet wird.
+    WaitForMultipleObjects(NUM_THREADS, hThreads, TRUE, INFINITE);
+
+    printf("\nAlle Aufgaben erledigt.\n");
+
+    // Handles schließen
+    for (int i = 0; i < NUM_THREADS; i++) {
+        CloseHandle(hThreads[i]);
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Konzeptfrage: Kritischer Abschnitt</strong><br>
@@ -242,6 +420,49 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Nein, sie ist nicht threadsicher, da `+=` wie `++` eine nicht-atomare Load-Modify-Store-Operation ist. Schutz: `WaitForSingleObject(hMutex, INFINITE); g_balance += amount; ReleaseMutex(hMutex);`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;windows.h&gt;
+
+// Globale, geteilte Ressourcen
+double g_balance = 1000.0;
+HANDLE g_hBalanceMutex;
+
+void deposit(double amount) {
+    /*
+     * FRAGE: Ist `g_balance += amount;` threadsicher?
+     *
+     * ANTWORT:
+     * Nein, diese Operation ist NICHT threadsicher.
+     * Der `+=` Operator ist "syntaktischer Zucker" für `g_balance = g_balance + amount;`.
+     * Dies ist keine atomare Operation, sondern besteht aus drei Schritten:
+     * 1. LESEN: Der aktuelle Wert von `g_balance` wird aus dem Speicher in ein
+     *    CPU-Register geladen.
+     * 2. MODIFIZIEREN: Der `amount` wird im Register zum Wert addiert.
+     * 3. SCHREIBEN: Der neue Wert aus dem Register wird zurück in den Speicher
+     *    an die Adresse von `g_balance` geschrieben.
+     *
+     * Eine Race Condition entsteht, wenn Thread A nach Schritt 1 vom Betriebssystem
+     * unterbrochen wird und Thread B alle drei Schritte ausführt. Wenn Thread A
+     * dann fortgesetzt wird, arbeitet er mit seinem alten, veralteten Wert aus
+     * Schritt 1 weiter und überschreibt das Ergebnis von Thread B. Die Einzahlung
+     * von Thread B geht verloren.
+    */
+
+    // LÖSUNG: Den gesamten Lese-Modifiziere-Schreibe-Vorgang mit einem Mutex schützen.
+    
+    // 1. Sperre anfordern. Blockiert, falls ein anderer Thread sie schon hat.
+    WaitForSingleObject(g_hBalanceMutex, INFINITE);
+
+    // --- Beginn des kritischen Abschnitts ---
+    g_balance += amount;
+    // --- Ende des kritischen Abschnitts ---
+
+    // 2. Sperre freigeben, damit andere Threads weitermachen können.
+    ReleaseMutex(g_hBalanceMutex);
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

@@ -6,7 +6,7 @@
     <title>Kapitel 3: Funktionen</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -239,6 +239,25 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Funktion hat leere Klammern <code>(void)</code> und den Rückgabetyp <code>void</code>. Ihr einziger Inhalt ist ein <code>printf</code>-Aufruf.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// 1. Deklaration (Prototyp)
+void PrintGreeting(void);
+
+int main(void) {
+    // 3. Aufruf
+    PrintGreeting();
+    return 0;
+}
+
+// 2. Definition
+void PrintGreeting(void) {
+    printf("Hallo aus meiner ersten Funktion!\n");
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Rechteck-Rechner</strong><br>
@@ -246,6 +265,36 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Funktion benötigt zwei <code>double</code>-Parameter. Die Definition ist kurz: <code>return width * height;</code>. In <code>main</code> brauchst du <code>scanf</code> und <code>printf</code>.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Deklaration
+double CalcRectangleArea(double width, double height);
+
+int main(void) {
+    double w, h, area;
+
+    printf("Geben Sie die Breite des Rechtecks ein: ");
+    scanf("%lf", &w);
+    printf("Geben Sie die Höhe des Rechtecks ein: ");
+    scanf("%lf", &h);
+
+    // Aufruf der Funktion mit den Benutzereingaben als Argumente
+    area = CalcRectangleArea(w, h);
+
+    printf("Die Fläche des Rechtecks beträgt: %.2f\n", area);
+
+    return 0;
+}
+
+// Definition
+double CalcRectangleArea(double width, double height) {
+    // Die Berechnung wird direkt im return-Statement ausgeführt
+    return width * height;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -255,6 +304,29 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Es wird `200` ausgegeben. Die lokale Variable in `main` "überschattet" die globale Variable. Der Compiler wählt immer den nächstgelegenen, gültigen Scope. </p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Globale Variable
+int myVar = 100;
+
+int main(void) {
+    // Lokale Variable mit demselben Namen
+    int myVar = 200;
+
+    // Der Zugriff erfolgt auf die lokale Variable, da sie die globale "überschattet".
+    printf("Der Wert von myVar in main ist: %d\n", myVar);
+
+    printf("\nErklärung: Innerhalb von main() hat die lokale Variable 'myVar' Vorrang.\n"
+           "Der Compiler sucht immer zuerst im aktuellen (lokalen) Scope nach einer\n"
+           "Variablendefinition. Nur wenn er dort nicht fündig wird, schaut er im\n"
+           "globalen Scope nach.\n");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Statischer Zähler</strong><br>
@@ -263,6 +335,31 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Code innerhalb der Funktion: <code>static int counter = 0; counter++; printf("Aufruf Nummer: %d\n", counter);</code>. Die Ausgabe sollte "Aufruf Nummer: 1", "... 2", "... 3" sein.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+void CountMyCalls(void);
+
+int main(void) {
+    printf("Rufe die Zähler-Funktion mehrmals auf:\n");
+    CountMyCalls();
+    CountMyCalls();
+    CountMyCalls();
+    return 0;
+}
+
+void CountMyCalls(void) {
+    // Diese Variable wird nur beim allerersten Aufruf der Funktion initialisiert.
+    // Ihr Wert bleibt zwischen den Aufrufen erhalten.
+    static int callCounter = 0;
+    
+    callCounter++;
+    
+    printf("Dies ist Aufruf Nummer: %d\n", callCounter);
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Finde das Maximum</strong><br>
@@ -270,6 +367,34 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Innerhalb der Funktion kannst du eine einfache if-else-Struktur verwenden: <code>if (a > b) { return a; } else { return b; }</code>.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int GetMax(int a, int b);
+
+int main(void) {
+    int val1 = 10, val2 = 20;
+    int val3 = -5, val4 = -1;
+    int val5 = 100, val6 = 100;
+
+    printf("Das Maximum von %d und %d ist %d\n", val1, val2, GetMax(val1, val2));
+    printf("Das Maximum von %d und %d ist %d\n", val3, val4, GetMax(val3, val4));
+    printf("Das Maximum von %d und %d ist %d\n", val5, val6, GetMax(val5, val6));
+
+    return 0;
+}
+
+int GetMax(int a, int b) {
+    if (a > b) {
+        return a;
+    } else {
+        // Dies deckt die Fälle (b > a) und (b == a) ab.
+        return b;
+    }
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

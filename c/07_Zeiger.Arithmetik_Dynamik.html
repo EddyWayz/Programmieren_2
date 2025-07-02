@@ -6,7 +6,7 @@
     <title>Kapitel 7: Zeiger (Teil 2)</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -244,6 +244,29 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Initialisierung: `int* p = &my_array[2];`. Ausgabe: `*p`. Dekrement: `p--;`. Neue Ausgabe: `*p`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int my_array[] = {10, 20, 30, 40, 50};
+    int* p = NULL;
+
+    // Zeiger auf das dritte Element (Index 2) zeigen lassen
+    p = &my_array[2];
+    printf("Der Zeiger zeigt auf die Adresse %p\n", p);
+    printf("Der Wert an dieser Adresse ist: %d\n", *p);
+
+    // Zeiger dekrementieren. Er zeigt jetzt auf das Element davor (Index 1).
+    p--;
+    printf("\nNach dem Dekrementieren:\n");
+    printf("Der Zeiger zeigt jetzt auf die Adresse %p\n", p);
+    printf("Der Wert an dieser neuen Adresse ist: %d\n", *p);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Array durchlaufen (nur mit Zeiger)</strong><br>
@@ -251,6 +274,27 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Schleifenbedingung lautet `while (*p != '\0')`. Innerhalb der Schleife: `printf("%c", *p); p++;`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    char text[] = "Hallo";
+    char* p = text; // Zeiger auf das erste Zeichen 'H'
+
+    printf("Gebe den String Zeichen für Zeichen aus:\n");
+
+    // Die Schleife läuft, solange das Zeichen, auf das p zeigt, nicht das Nullzeichen ist.
+    while (*p != '\0') {
+        printf("%c ", *p); // Gib das aktuelle Zeichen aus
+        p++;              // Bewege den Zeiger zum nächsten Zeichen im Speicher
+    }
+    printf("\nSchleife beendet.\n");
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -260,6 +304,49 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Lies den Namen zuerst in einen großen, statischen Puffer ein (z.B. `char buffer[100];`). Benutze `strlen(buffer)` um die Länge zu ermitteln. Allokiere `strlen(buffer) + 1` Bytes. Kopiere mit `strcpy_s` und gib am Ende den Speicher mit `free` frei.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int main(void) {
+    char buffer[100]; // Statischer Puffer für die Eingabe
+    char* dynamic_name = NULL;
+    size_t name_len;
+
+    // 1. Namen in den Puffer einlesen
+    printf("Bitte gib deinen Vornamen ein: ");
+    scanf("%99s", buffer);
+
+    // 2. Benötigte Länge ermitteln
+    name_len = strlen(buffer);
+
+    // 3. Speicher dynamisch allokieren (+1 für das Nullzeichen!)
+    dynamic_name = (char*)malloc(name_len + 1);
+
+    // 4. Prüfen, ob die Allokation erfolgreich war
+    if (dynamic_name == NULL) {
+        printf("Fehler bei der Speicherallokation!\n");
+        return 1;
+    }
+
+    // 5. String in den neuen Speicher kopieren
+    strcpy(dynamic_name, buffer);
+
+    // 6. Kopie ausgeben
+    printf("Die dynamisch gespeicherte Kopie lautet: %s\n", dynamic_name);
+
+    // 7. Speicher freigeben
+    free(dynamic_name);
+    dynamic_name = NULL;
+
+    printf("Speicher wurde wieder freigegeben.\n");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>`calloc` für sauberen Speicher</strong><br>
@@ -268,6 +355,49 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Der Speicher von `malloc` wird zufällige "Müll"-Werte enthalten. Der Speicher von `calloc` wird sauber mit `0.0` initialisiert sein. </p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define SIZE 10
+
+int main(void) {
+    double* p_malloc = NULL;
+    double* p_calloc = NULL;
+
+    // --- MALLOC ---
+    p_malloc = (double*)malloc(SIZE * sizeof(double));
+    if (p_malloc != NULL) {
+        printf("--- Speicher von malloc ---\n");
+        for (int i = 0; i < SIZE; i++) {
+            printf("%f ", p_malloc[i]); // Gibt wahrscheinlich "Müll" aus
+        }
+        printf("\n");
+        free(p_malloc);
+        p_malloc = NULL;
+    }
+
+    // --- CALLOC ---
+    p_calloc = (double*)calloc(SIZE, sizeof(double));
+    if (p_calloc != NULL) {
+        printf("\n--- Speicher von calloc ---\n");
+        for (int i = 0; i < SIZE; i++) {
+            printf("%f ", p_calloc[i]); // Gibt garantiert 0.000000 aus
+        }
+        printf("\n");
+        free(p_calloc);
+        p_calloc = NULL;
+    }
+    
+    printf("\nUnterschied: calloc initialisiert den Speicherblock mit Nullen,\n"
+           "während malloc dies nicht tut. Der Inhalt von malloc-Speicher ist\n"
+           "daher anfangs undefiniert (Speichermüll).\n");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Speicherleck provozieren</strong><br>
@@ -275,6 +405,36 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Der Zeiger, der die Adresse des allokierten Speichers hält, ist eine lokale Variable der Funktion. Sobald die Funktion endet, ist dieser Zeiger weg. Der Speicher auf dem Heap bleibt aber reserviert und ist nun für immer verloren, da es keine Referenz mehr auf ihn gibt.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+void memory_leak_creator(void) {
+    int* p_leak = NULL;
+    p_leak = (int*)malloc(1000 * sizeof(int));
+
+    // Hier fehlt das free(p_leak);
+    
+    // Wenn die Funktion endet, wird die lokale Variable 'p_leak' zerstört.
+    // Der Zeiger, der die einzige Referenz auf den allokierten Speicherblock
+    // auf dem Heap war, ist nun verloren.
+    // Der Speicherblock selbst bleibt aber reserviert und kann vom Programm
+    // nie wieder erreicht oder freigegeben werden. Das ist ein Speicherleck.
+}
+
+int main(void) {
+    printf("Rufe die Funktion auf, die ein Speicherleck erzeugt...\n");
+    memory_leak_creator();
+    printf("Funktion wurde beendet. Das Leck ist jetzt permanent.\n");
+    
+    // In einem echten, großen Programm würde das wiederholte Aufrufen
+    // dieser Funktion den verfügbaren Speicher des Systems langsam aufbrauchen.
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

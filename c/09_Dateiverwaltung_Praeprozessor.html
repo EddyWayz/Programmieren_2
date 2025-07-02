@@ -6,7 +6,7 @@
     <title>Kapitel 9: Dateiverarbeitung und Präprozessor</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -227,6 +227,47 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Verwende eine `while`-Schleife und `fgets`, um die Datei Zeile für Zeile zu lesen, bis `fgets` `NULL` zurückgibt.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+#define MAX_LEN 100
+
+int main() {
+    char filename[MAX_LEN];
+    char line_buffer[MAX_LEN];
+    FILE* p_file = NULL;
+
+    // Manuelle Erstellung der info.txt für das Beispiel
+    p_file = fopen("info.txt", "w");
+    if (p_file != NULL) {
+        fprintf(p_file, "Dies ist die erste Zeile.\n");
+        fprintf(p_file, "C macht Spass.\n");
+        fprintf(p_file, "Ende der Datei.\n");
+        fclose(p_file);
+    }
+
+    printf("Welche Datei soll geöffnet werden? ");
+    scanf("%s", filename);
+
+    // Datei im Lesemodus ("r") öffnen
+    if (fopen(filename, "r") != NULL) {
+        printf("\n--- Inhalt von %s ---\n", filename);
+        // Lese Zeile für Zeile, bis das Ende der Datei erreicht ist
+        while (fgets(line_buffer, sizeof(line_buffer), p_file) != NULL) {
+            // Gib die gelesene Zeile auf der Konsole aus
+            printf("%s", line_buffer);
+        }
+        printf("--- Ende des Inhalts ---\n");
+        fclose(p_file);
+    } else {
+        printf("Fehler: Datei '%s' konnte nicht geöffnet werden.\n", filename);
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>In eine Log-Datei schreiben</strong><br>
@@ -234,6 +275,31 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Der Kern ist der `fopen_s`-Aufruf mit dem Modus `"a"`, gefolgt von drei `fprintf`-Aufrufen und einem `fclose`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main() {
+    FILE* p_log_file = NULL;
+
+    // Öffnen im "Append"-Modus. Erstellt die Datei, falls sie nicht existiert.
+    // Fügt neue Inhalte am Ende an, ohne alte zu löschen.
+    if (fopen("log.txt", "a") != NULL) {
+        fprintf(p_log_file, "Programm gestartet.\n");
+        fprintf(p_log_file, "Daten verarbeitet.\n");
+        fprintf(p_log_file, "Programm beendet.\n\n"); // Leerzeile für bessere Lesbarkeit
+
+        fclose(p_log_file);
+        printf("Drei Zeilen wurden zu 'log.txt' hinzugefügt.\n");
+    } else {
+        printf("Fehler beim Öffnen der Log-Datei.\n");
+        return 1;
+    }
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -243,6 +309,50 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Nachdem du eine Zeile mit `fgets` gelesen hast, kannst du die Funktion `strtok_s` verwenden, um die Zeile am Semikolon zu trennen. Dies ist eine fortgeschrittene Funktion, eine Recherche dazu ist Teil der Übung.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+#define MAX_LINE 100
+
+int main() {
+    FILE* p_csv = NULL;
+    char line[MAX_LINE];
+    char* token;
+    char* context = NULL;
+
+    // Manuelle Erstellung der data.csv für das Beispiel
+    p_csv = fopen("data.csv", "w");
+    if (p_csv != NULL) {
+        fprintf(p_csv, "Max;Mustermann;25\n");
+        fprintf(p_csv, "Erika;Musterfrau;30\n");
+        fclose(p_csv);
+    }
+
+    if (fopen("data.csv", "r") != NULL) {
+        while (fgets(line, sizeof(line), p_csv)) {
+            // Nachname
+            token = strtok(line, ";\n");
+            if(token) printf("Nachname: %s, ", token);
+
+            // Vorname
+            token = strtok(NULL, ";\n");
+            if(token) printf("Vorname: %s, ", token);
+
+            // Alter
+            token = strtok(NULL, ";\n");
+            if(token) printf("Alter: %s\n", token);
+        }
+        fclose(p_csv);
+    } else {
+        printf("Fehler: data.csv konnte nicht geöffnet werden.\n");
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Funktionsmakro für das Minimum</strong><br>
@@ -251,13 +361,52 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Das Makro sollte so aussehen: `#define MIN(a, b) (((a) < (b)) ? (a) : (b))`. Der ternäre Operator `?:` eignet sich hierfür hervorragend.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Das Makro ist sorgfältig geklammert, um Fehler bei der Textersetzung zu vermeiden.
+// ((a) < (b)) ? (a) : (b)
+// - Die äußeren Klammern schützen vor Operator-Rangfolge-Problemen (z.B. bei 10 * MIN(...)).
+// - Die inneren Klammern um a und b schützen vor Problemen, wenn Ausdrücke
+//   übergeben werden (z.B. MIN(x+1, y+2)).
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
+int main() {
+    printf("MIN(10, 20) = %d\n", MIN(10, 20));
+    
+    // Ohne korrekte Klammerung würde 10 * MIN(2, 3) falsch berechnet werden.
+    // Falsch: 10 * 2 < 3 ? 2 : 3 -> 20 < 3 ? 2 : 3 -> 3
+    // Richtig: 10 * (((2) < (3)) ? (2) : (3)) -> 10 * 2 -> 20
+    printf("10 * MIN(2, 3) = %d\n", 10 * MIN(2, 3));
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Include-Guard manuell erstellen</strong><br>
                     Erstelle eine Headerdatei `my_math.h`. Schreibe einen "Include-Guard" um den gesamten Inhalt, um eine Mehrfacheinbindung zu verhindern. Deklariere innerhalb des Guards eine einfache Funktion, z.B. `int add(int a, int b);`.
                      <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
-                        <p>Der Guard sieht so aus: `#ifndef MY_MATH_H_` am Anfang, `#define MY_MATH_H_` direkt danach, und `#endif` ganz am Ende. Der Name `MY_MATH_H_` ist dabei frei wählbar, sollte aber einzigartig sein.</p>
+                        <summary>Lösung</summary>
+                        <p>Der Inhalt der Datei `my_math.h` würde wie folgt aussehen:</p>
+                        <pre><code>// Der "Include Guard" beginnt. 
+// Der Name MY_MATH_H_ ist eine Konvention (Großbuchstaben, _ am Ende).
+#ifndef MY_MATH_H_
+#define MY_MATH_H_
+
+// --- HIER KOMMT DER EIGENTLICHE INHALT DES HEADERS ---
+
+// Funktionsdeklaration
+int add(int a, int b);
+
+// --- ENDE DES INHALTS ---
+
+// Der Guard endet hier.
+#endif // MY_MATH_H_
+</code></pre>
+                        <p>Wenn diese Datei das erste Mal inkludiert wird, ist `MY_MATH_H_` noch nicht definiert. `#ifndef` ist also wahr, der Code wird inkludiert und `MY_MATH_H_` wird definiert. Bei jedem weitere Versuch, die Datei im selben Kompiliervorgang zu inkludieren, ist `#ifndef` falsch und der Präprozessor überspringt den gesamten Inhalt.</p>
                     </details>
                 </li>
             </ol>

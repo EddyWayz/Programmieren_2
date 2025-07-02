@@ -6,7 +6,7 @@
     <title>Kapitel 8: Zeiger (Teil 3)</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -211,6 +211,27 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Zuweisung lautet: `**ppi = 99;`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int i = 10;
+    int* pi = &i;
+    int** ppi = &pi;
+
+    printf("Ursprünglicher Wert von i: %d\n", i);
+
+    // **ppi dereferenziert ppi (ergibt pi) und dereferenziert dann pi (ergibt i).
+    // Die Zuweisung landet also direkt bei der Variable i.
+    **ppi = 99;
+
+    printf("Neuer Wert von i: %d\n", i);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Einfacher Funktionszeiger</strong><br>
@@ -219,13 +240,74 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Definition des Zeigers: `void (*p_print_func)(char*);`. Der Aufruf: `p_print_func("DeinName");`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Die Originalfunktion
+void printName(char* name) {
+    printf("Der übergebene Name ist: %s\n", name);
+}
+
+int main(void) {
+    // Deklaration des Funktionszeigers.
+    // Der Name ist 'p_print_func'.
+    // Er zeigt auf eine Funktion, die (char*) als Parameter nimmt und void zurückgibt.
+    void (*p_print_func)(char*);
+
+    // Zuweisung der Funktion zum Zeiger. Das '&' ist optional.
+    p_print_func = printName;
+
+    // Aufruf der Funktion über den Zeiger.
+    printf("Rufe Funktion über Zeiger auf...\n");
+    p_print_func("Max Mustermann");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Mini-Rechner mit Funktionszeiger-Array</strong><br>
                     Implementiere zwei Funktionen: `int add(int, int)` und `int subtract(int, int)`. Erstelle ein Array von zwei Funktionszeigern, das auf diese beiden Funktionen zeigt. Frage den Benutzer nach zwei Zahlen und ob er addieren (0) oder subtrahieren (1) möchte. Rufe dann die passende Funktion über das Array auf und gib das Ergebnis aus.
                     <details>
-                        <summary>Hinweis / Lösungsskizze</summary>
+                        <summary>Hinweis / L��sungsskizze</summary>
                         <p>Das Array: `int (*p_ops[2])(int, int) = {add, subtract};`. Der Aufruf: `result = p_ops[choice](num1, num2);`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+// Die zwei möglichen Operationen
+int add(int a, int b) { return a + b; }
+int subtract(int a, int b) { return a - b; }
+
+int main(void) {
+    int num1, num2, choice, result;
+
+    // Array von 2 Funktionszeigern, die (int, int) nehmen und int zurückgeben.
+    // Direkte Initialisierung mit den Funktionsnamen.
+    int (*operations[2])(int, int) = {add, subtract};
+
+    printf("Geben Sie die erste Zahl ein: ");
+    scanf("%d", &num1);
+    printf("Geben Sie die zweite Zahl ein: ");
+    scanf("%d", &num2);
+    printf("Wählen Sie die Operation (0 für Addition, 1 für Subtraktion): ");
+    scanf("%d", &choice);
+
+    // Prüfen, ob die Wahl gültig ist
+    if (choice == 0 || choice == 1) {
+        // Die passende Funktion über den Array-Index aufrufen
+        result = operations[choice](num1, num2);
+        printf("Das Ergebnis ist: %d\n", result);
+    } else {
+        printf("Ungültige Auswahl!\n");
+    }
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -235,6 +317,53 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>In der `compare`-Funktion musst du die `void*`-Zeiger auf `const struct Employee*` casten. Greife dann mit dem Pfeiloperator `->` auf das Gehalt zu: `float salary_a = p_emp_a->salary;`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct {
+    char name[50];
+    float salary;
+} Employee;
+
+// Callback-Funktion zum Vergleichen von zwei Mitarbeitern nach Gehalt
+int compareBySalary(const void* a, const void* b) {
+    // Cast der void-Zeiger auf den korrekten Struktur-Zeiger-Typ
+    const Employee* emp_a = (const Employee*)a;
+    const Employee* emp_b = (const Employee*)b;
+
+    // Vergleichslogik
+    if (emp_a->salary < emp_b->salary) return -1;
+    if (emp_a->salary > emp_b->salary) return 1;
+    return 0;
+}
+
+int main(void) {
+    Employee staff[] = {
+        {"Maier", 45000.0f},
+        {"Schulze", 62000.0f},
+        {"Huber", 38000.0f}
+    };
+    int n = sizeof(staff) / sizeof(Employee);
+
+    printf("Unsortiert:\n");
+    for (int i = 0; i < n; i++) {
+        printf("%s, %.2f\n", staff[i].name, staff[i].salary);
+    }
+
+    // qsort aufrufen
+    qsort(staff, n, sizeof(Employee), compareBySalary);
+
+    printf("\nSortiert nach Gehalt:\n");
+    for (int i = 0; i < n; i++) {
+        printf("%s, %.2f\n", staff[i].name, staff[i].salary);
+    }
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Konzeptfrage zu verketteten Listen</strong><br>
@@ -242,6 +371,41 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Beim Einfügen am Anfang muss der Anker-Zeiger selbst geändert werden, damit er auf das neue erste Element zeigt. Um eine Variable (hier: den Anker-Zeiger) in einer Funktion zu ändern, muss man ihre Adresse übergeben. Beim Einfügen am Ende wird der Anker-Zeiger selbst nie geändert; man hangelt sich nur an den `next`-Zeigern entlang.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>/*
+ * FRAGE:
+ * Warum benötigt `insertAtFront` einen Zeiger-auf-Zeiger (`Node**`), 
+ * während `insertAtEnd` mit einem einfachen Zeiger (`Node*`) auskommt?
+ *
+ * ANTWORT:
+ *
+ * 1. `insertAtFront(Node** pp_anchor, ...)`
+ *    Beim Einfügen eines neuen Elements ganz am Anfang der Liste muss der
+ *    Startpunkt der Liste, der Anker-Zeiger (in `main` oder einer anderen
+ *    aufrufenden Funktion), selbst verändert werden. Er muss nach der Operation
+ *    auf das NEUE erste Element zeigen.
+ *    In C werden Argumente "by value" übergeben. Würden wir nur einen einfachen
+ *    Zeiger (`Node* p_anchor`) übergeben, würde die Funktion nur eine KOPIE
+ *    dieses Zeigers erhalten. Jede Änderung an `p_anchor` innerhalb der Funktion
+ *    (z.B. `p_anchor = newNode;`) würde nur die lokale Kopie ändern, nicht aber
+ *    den originalen Anker-Zeiger im aufrufenden Code.
+ *    Indem wir einen Zeiger-auf-Zeiger (`Node** pp_anchor`) übergeben, geben wir
+ *    der Funktion die ADRESSE des originalen Anker-Zeigers. Mit `*pp_anchor` kann
+ *    die Funktion nun den originalen Zeiger dereferenzieren und seinen Wert
+ *    permanent ändern.
+ *
+ * 2. `insertAtEnd(Node* p_anchor, ...)`
+ *    Beim Einfügen am Ende wird der Anker-Zeiger, der auf das erste Element
+ *    zeigt, niemals geändert. Er bleibt immer derselbe. Die Funktion nimmt
+ *    diesen Zeiger (bzw. eine Kopie davon, was hier ausreicht) und hangelt
+ *    sich damit durch die Liste (`current = current->next;`), bis sie das
+ *    letzte Element findet. Dort ändert sie dann den `next`-Zeiger des letzten
+ *    Elements, damit dieser auf den neuen Knoten zeigt. Der Wert des Anker-Zeigers
+ *    selbst wird also nie modifiziert.
+ */
+</code></pre>
                     </details>
                 </li>
             </ol>

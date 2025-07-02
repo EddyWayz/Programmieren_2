@@ -6,7 +6,7 @@
     <title>Kapitel 1: Einführung in C</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="c_style.css">
 </head>
 <body>
 <nav id="main-nav">
@@ -358,6 +358,19 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Das Grundgerüst mit <code>#include &lt;stdio.h&gt;</code> und <code>int main(void)</code> ist dein Startpunkt. Die Funktion, die du brauchst, ist <code>printf("Dein Text hier\n");</code>.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Gibt den Text "Hello World!" gefolgt von einem Zeilenumbruch auf der Konsole aus.
+    printf("Hello World!\n");
+
+    // Signalisiert dem Betriebssystem, dass das Programm erfolgreich beendet wurde.
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Der Datentyp-Inspektor</strong><br>
@@ -365,6 +378,33 @@ int main(void) {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Verwende für jeden Datentyp eine Zeile wie: <code>printf("Größe von short int: %zu Bytes\n", sizeof(short int));</code>. Vergiss nicht die <code>unsigned</code>-Varianten.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    printf("--- Ganzzahltypen ---\n");
+    // %zu ist der korrekte Format-Platzhalter für den Rückgabewert von sizeof (Typ size_t)
+    printf("Größe von char: \t\t%zu Byte\n", sizeof(char));
+    printf("Größe von unsigned char: \t%zu Byte\n", sizeof(unsigned char));
+    printf("Größe von short int: \t\t%zu Bytes\n", sizeof(short int));
+    printf("Größe von unsigned short int: \t%zu Bytes\n", sizeof(unsigned short int));
+    printf("Größe von int: \t\t\t%zu Bytes\n", sizeof(int));
+    printf("Größe von unsigned int: \t%zu Bytes\n", sizeof(unsigned int));
+    printf("Größe von long int: \t\t%zu Bytes\n", sizeof(long int));
+    printf("Größe von unsigned long int: \t%zu Bytes\n", sizeof(unsigned long int));
+    printf("Größe von long long int: \t\t%zu Bytes\n", sizeof(long long int));
+    printf("Größe von unsigned long long int: %zu Bytes\n", sizeof(unsigned long long int));
+
+    printf("\n--- Gleitkommatypen ---\n");
+    printf("Größe von float: \t\t%zu Bytes\n", sizeof(float));
+    printf("Größe von double: \t\t%zu Bytes\n", sizeof(double));
+    printf("Größe von long double: \t\t%zu Bytes\n", sizeof(long double));
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -374,6 +414,32 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Wähle die passenden Datentypen (<code>int</code>, <code>char</code>, <code>double</code>, <code>unsigned long</code>, <code>float</code>). Du kannst mehrere Variablen an <code>printf</code> übergeben: <code>printf("Alter: %d, Buchstabe: %c ...", alter, buchstabe, ...);</code></p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Definition und Initialisierung der Variablen
+    int alter = 25;
+    char lieblingsbuchstabe = 'C';
+    double koerpergroesse = 1.82;
+    // unsigned long für potenziell sehr große, nicht-negative Zahlen
+    unsigned long einwohnerzahl = 1234567; 
+    float kaffee_preis = 3.49F;
+
+    // Ausgabe aller Werte in einem einzigen, formatierten printf-Aufruf
+    printf("Hier sind die gesammelten Daten:\n"
+           "- Alter: %d Jahre\n"
+           "- Lieblingsbuchstabe: %c\n"
+           "- Körpergröße: %.2f m\n" // .2f formatiert auf 2 Nachkommastellen
+           "- Einwohnerzahl: %lu\n" // %lu für unsigned long
+           "- Preis für einen Kaffee: %.2f Euro\n",
+           alter, lieblingsbuchstabe, koerpergroesse, einwohnerzahl, kaffee_preis);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Der unantastbare Wert</strong><br>
@@ -382,6 +448,31 @@ int main(void) {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Der Compiler wird sich beschweren, dass eine Konstante initialisiert werden muss. Nachdem du das behoben hast (z.B. <code>const int MEINE_KONSTANTE = 100;</code>), wird er einen weiteren Fehler melden, wenn du versuchst, ihr einen neuen Wert zuzuweisen (z.B. <code>MEINE_KONSTANTE = 200;</code>), da sie "read-only" ist.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // --- SCHRITT 1: Fehler provozieren ---
+    // const int FEHLERHAFTE_KONSTANTE; 
+    // Dies erzeugt einen Compiler-Fehler wie:
+    // "error: uninitialized 'const FEHLERHAFTE_KONSTANTE'"
+    // Eine Konstante muss bei ihrer Definition einen Wert erhalten.
+
+    // --- SCHRITT 2: Fehler beheben ---
+    const int KORREKTE_KONSTANTE = 42;
+    printf("Der Wert der Konstante ist: %d\n", KORREKTE_KONSTANTE);
+
+    // --- SCHRITT 3: Neuen Fehler provozieren ---
+    // KORREKTE_KONSTANTE = 100;
+    // Dies erzeugt einen weiteren Compiler-Fehler wie:
+    // "error: assignment of read-only variable 'KORREKTE_KONSTANTE'"
+    // Der Wert einer Konstante kann nach der Initialisierung nicht mehr geändert werden.
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Mini-Taschenrechner</strong><br>
@@ -389,6 +480,33 @@ int main(void) {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Berechnungen sind einfach: <code>summe = a + b;</code> etc. Für die Ausgabe kannst du die Variablen mehrfach verwenden: <code>printf("%d + %d = %d\n", a, b, summe);</code>.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    // Deklaration und Initialisierung der Ausgangswerte
+    int a = 15;
+    int b = 4;
+
+    // Deklaration der Ergebnisvariablen
+    int summe, differenz, produkt;
+
+    // Berechnungen durchführen
+    summe = a + b;
+    differenz = a - b;
+    produkt = a * b;
+
+    // Ergebnisse formatiert ausgeben
+    printf("Berechnungen mit a = %d und b = %d:\n", a, b);
+    printf("%d + %d = %d\n", a, b, summe);
+    printf("%d - %d = %d\n", a, b, differenz);
+    printf("%d * %d = %d\n", a, b, produkt);
+
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>
