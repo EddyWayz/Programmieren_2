@@ -161,12 +161,138 @@ delete b; // Ruft ~Derived() und DANACH ~Base() auf. Alles korrekt.
             <ol>
                 <li>
                     <strong>CAD-Programm:</strong> Implementieren Sie die Klassenhierarchie aus Übung 1. Erstellen Sie eine abstrakte Basisklasse `Shape` mit einer rein virtuellen Methode `vDraw()`. Leiten Sie davon `Point`, `Circle` und `Rectangle` ab. Erstellen Sie eine Klasse `CAD_Drawing`, die in einem `std::set` eine Sammlung von `Shape*` verwalten kann. Die `vDrawIt()`-Methode von `CAD_Drawing` soll dann über alle Formen iterieren und deren jeweilige `vDraw()`-Methode aufrufen.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Shapes.h</strong></p>
+                        <pre><code>#ifndef SHAPES_H
+#define SHAPES_H
+
+#include &lt;iostream&gt;
+
+// Abstrakte Basisklasse
+class Shape {
+public:
+    virtual void vDraw() const = 0; // Rein virtuelle Funktion
+    virtual ~Shape() = default; // Wichtig: Virtueller Destruktor!
+};
+
+class Point : public Shape {
+public:
+    void vDraw() const override { std::cout << "Zeichne Punkt." << std::endl; }
+};
+
+class Circle : public Shape {
+public:
+    void vDraw() const override { std::cout << "Zeichne Kreis." << std::endl; }
+};
+
+class Rectangle : public Shape {
+public:
+    void vDraw() const override { std::cout << "Zeichne Rechteck." << std::endl; }
+};
+
+#endif // SHAPES_H
+</code></pre>
+                        <p><strong>CAD_Drawing.h</strong></p>
+                        <pre><code>#ifndef CAD_DRAWING_H
+#define CAD_DRAWING_H
+
+#include "Shapes.h"
+#include &lt;set&gt;
+#include &lt;memory&gt; // Für std::unique_ptr
+
+class CAD_Drawing {
+private:
+    // Besser: Smart Pointer verwenden, um Speicherlecks zu vermeiden
+    std::set&lt;std::unique_ptr&lt;Shape&gt;&gt; shapes_;
+public:
+    // Hinweis: Das Hinzufügen erfordert nun std::move, da unique_ptr nicht kopierbar ist
+    void addShape(std::unique_ptr&lt;Shape&gt; shape) {
+        shapes_.insert(std::move(shape));
+    }
+    void vDrawIt() const;
+};
+
+#endif // CAD_DRAWING_H
+</code></pre>
+                        <p><strong>CAD_Drawing.cpp</strong></p>
+                        <pre><code>#include "CAD_Drawing.h"
+
+void CAD_Drawing::vDrawIt() const {
+    for (const auto& shape_ptr : shapes_) {
+        shape_ptr->vDraw(); // Polymorpher Aufruf
+    }
+}
+</code></pre>
+                        <p><strong>main.cpp</strong></p>
+                        <pre><code>#include "CAD_Drawing.h"
+
+int main() {
+    CAD_Drawing drawing;
+    drawing.addShape(std::make_unique&lt;Circle&gt;());
+    drawing.addShape(std::make_unique&lt;Rectangle&gt;());
+    drawing.addShape(std::make_unique&lt;Point&gt;());
+
+    drawing.vDrawIt();
+    
+    return 0; // Speicher wird automatisch von unique_ptr freigegeben
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Speicherleck finden:</strong> Analysieren Sie ein Codebeispiel, das ein Speicherleck aufgrund eines fehlenden virtuellen Destruktors enthält. Erklären Sie genau, warum der Speicher nicht freigegeben wird. Korrigieren Sie den Code.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Problem-Code:</strong></p>
+                        <pre><code>class Base { public: ~Base() { std::cout << "Base Dtor\n"; } };
+class Derived : public Base; {
+private: int* data;
+public:
+    Derived() { data = new int[100]; std::cout << "Derived Ctor\n"; }
+    ~Derived() { delete[] data; std::cout << "Derived Dtor\n"; }
+};
+
+int main() {
+    Base* b = new Derived();
+    delete b; // <-- HIER IST DAS PROBLEM
+    return 0;
+}</code></pre>
+                        <p><strong>Erklärung:</strong> Weil `b` ein Zeiger vom Typ `Base*` ist und der Destruktor von `Base` <strong>nicht virtuell</strong> ist, wird die `delete`-Anweisung statisch gebunden. Das bedeutet, der Compiler ruft nur den Destruktor auf, den er vom Typ des Zeigers kennt: `~Base()`. Der Destruktor von `Derived` (`~Derived()`) wird niemals aufgerufen. Dadurch wird das mit `new int[100]` allokierte Speicher-Array niemals mit `delete[] data` freigegeben, was zu einem Speicherleck führt.</p>
+                        <p><strong>Korrektur:</strong></p>
+                        <pre><code>class Base { public: virtual ~Base() { std::cout << "Base Dtor\n"; } };
+// Der Rest bleibt gleich...</code></pre>
+                        <p>Durch das Hinzufügen von `virtual` zum Destruktor der Basisklasse wird der Aufruf dynamisch gebunden. `delete b` weiß nun zur Laufzeit, dass `b` tatsächlich auf ein `Derived`-Objekt zeigt. Es wird zuerst der `~Derived()`-Destruktor aufgerufen (der den Speicher freigibt) und danach der `~Base()`-Destruktor. Das Speicherleck ist behoben.</p>
+                    </details>
                 </li>
                  <li>
                     <strong>Liskovsches Substitutionsprinzip:</strong> Erklären Sie anhand eines Beispiels, warum eine Funktion, die eine Referenz auf eine Basisklasse erwartet (z.B. <code>void process(Base& b)</code>), problemlos mit einem Objekt einer abgeleiteten Klasse aufgerufen werden kann. Warum funktioniert der umgekehrte Weg nicht?
+                    <details>
+                        <summary>Lösung</summary>
+                        <p>Das Liskovsche Substitutionsprinzip (LSP) besagt, dass Objekte einer abgeleiteten Klasse an jeder Stelle verwendet werden können, an der Objekte ihrer Basisklasse erwartet werden, ohne das Programm zu beeinträchtigen.</p>
+                        <p><strong>Beispiel:</strong></p>
+                        <pre><code>class Bird { public: virtual void move() { std::cout << "Bird moves\n"; } };
+class Duck : public Bird { public: void move() override { std::cout << "Duck swims\n"; } };
+
+void makeItMove(Bird& b) {
+    b.move(); // Erwartet irgendeinen Vogel
+}
+
+int main() {
+    Duck donald;
+    makeItMove(donald); // OK! Eine Ente IST ein Vogel.
+}</code></pre>
+                        <p>Das funktioniert, weil `Duck` eine "ist-ein"-Beziehung zu `Bird` hat. `Duck` erbt die öffentliche Schnittstelle von `Bird` (die `move`-Methode). Die Funktion `makeItMove` kann sich darauf verlassen, dass jedes `Bird`-Objekt (und damit auch jedes `Duck`-Objekt) eine `move`-Methode hat. Dies wird als <strong>Upcasting</strong> bezeichnet und ist immer sicher.</p>
+                        <p><strong>Der umgekehrte Weg funktioniert nicht:</strong></p>
+                        <pre><code>void makeItSwim(Duck& d) { /* ... */ }
+
+int main() {
+    Bird genericBird;
+    // makeItSwim(genericBird); // FEHLER!
+}
+</code></pre>
+                        <p>Ein allgemeiner `Bird` ist nicht notwendigerweise eine `Duck`. Er könnte ein Pinguin oder ein Adler sein. Die Klasse `Bird` hat nicht die spezifischen Eigenschaften oder Methoden einer `Duck`. Ein Objekt der Basisklasse an eine Funktion zu übergeben, die ein Objekt der abgeleiteten Klasse erwartet, würde die "ist-ein"-Beziehung verletzen und ist daher nicht erlaubt (<strong>Downcasting</strong> ist unsicher und erfordert explizite Casts).</p>
+                    </details>
                 </li>
             </ol>
         </section>

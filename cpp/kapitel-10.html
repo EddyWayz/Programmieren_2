@@ -152,12 +152,107 @@ int main() {
             <ol>
                 <li>
                     <strong>Code refaktorisieren:</strong> Nehmen Sie ein älteres Programm (z.B. die CAD-Anwendung aus KE06), das rohe Zeiger (<code>new</code>/<code>delete</code>) verwendet, und schreiben Sie es um, sodass es stattdessen `std::unique_ptr` oder `std::shared_ptr` verwendet. Erklären Sie Ihre Wahl des jeweiligen Smart Pointers.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p>Für die CAD-Anwendung ist <code>std::unique_ptr</code> die beste Wahl. Die <code>CAD_Drawing</code>-Klasse ist der alleinige Besitzer der <code>Shape</code>-Objekte. Es gibt keinen Grund, den Besitz zu teilen. Wenn die Zeichnung gelöscht wird, sollen auch alle enthaltenen Formen gelöscht werden. Dies entspricht exakt der Semantik von <code>unique_ptr</code>.</p>
+                        <p><strong>CAD_Drawing.h (refaktorisert)</strong></p>
+                        <pre><code>#include &lt;set&gt;
+#include &lt;memory&gt; // Für Smart Pointer
+#include "Shapes.h"
+
+// Eigener Comparator, da unique_ptr nicht direkt vergleichbar ist
+struct ShapePtrCompare {
+    bool operator()(const std::unique_ptr&lt;Shape&gt;& a, const std::unique_ptr&lt;Shape&gt;& b) const {
+        return a.get() < b.get(); // Vergleiche die rohen Zeigeradressen
+    }
+};
+
+class CAD_Drawing {
+private:
+    std::set&lt;std::unique_ptr&lt;Shape&gt;, ShapePtrCompare&gt; shapes_;
+public:
+    void addShape(std::unique_ptr&lt;Shape&gt; shape) {
+        shapes_.insert(std::move(shape));
+    }
+    void vDrawIt() const;
+    // Kein manueller Destruktor mehr nötig!
+};
+</code></pre>
+                        <p><code>std::shared_ptr</code> wäre hier Overkill und würde eine falsche Besitz-Semantik suggerieren. Man würde es verwenden, wenn z.B. mehrere Zeichnungen sich dasselbe Shape-Objekt teilen könnten.</p>
+                    </details>
                 </li>
                 <li>
                     <strong>Lambda für Sortierung:</strong> Erstellen Sie einen `std::vector` mit Objekten einer `Person`-Klasse (mit Attributen `name` und `alter`). Verwenden Sie `std::sort` und einen Lambda-Ausdruck, um den Vektor einmal nach Namen und einmal nach Alter (absteigend) zu sortieren.
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;algorithm&gt;
+
+struct Person {
+    std::string name;
+    int alter;
+};
+
+void printPersons(const std::vector&lt;Person&gt;& persons) {
+    for (const auto& p : persons) {
+        std::cout << p.name << " (" << p.alter << ")\n";
+    }
+    std::cout << "-----------------\n";
+}
+
+int main() {
+    std::vector&lt;Person&gt; people = {{"Bob", 30}, {"Alice", 25}, {"Charlie", 35}};
+
+    // Nach Namen sortieren (alphabetisch)
+    std::sort(people.begin(), people.end(), 
+        [](const Person& a, const Person& b) {
+            return a.name < b.name;
+        }
+    );
+    printPersons(people);
+
+    // Nach Alter sortieren (absteigend)
+    std::sort(people.begin(), people.end(),
+        [](const Person& a, const Person& b) {
+            return a.alter > b.alter;
+        }
+    );
+    printPersons(people);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Capture-Methoden:</strong> Schreiben Sie eine Funktion, die einen `int threshold` entgegennimmt und einen Lambda-Ausdruck zurückgibt. Dieser Lambda soll ein `int` als Argument nehmen und `true` zurückgeben, wenn dieses Argument größer als der ursprüngliche `threshold` ist. Welche Capture-Methode (`[=]` oder `[&]`) ist hierfür sinnvoll und warum?
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;functional&gt; // für std::function
+
+// Die Funktion gibt ein "Callable" zurück, das einen int nimmt und bool zurückgibt
+std::function&lt;bool(int)&gt; createGreaterThanFilter(int threshold) {
+    // Capture by copy [=] ist hier die richtige Wahl
+    return [=](int value) {
+        return value > threshold;
+    };
+}
+
+int main() {
+    auto filter10 = createGreaterThanFilter(10);
+    auto filter20 = createGreaterThanFilter(20);
+
+    std::cout << "15 > 10? " << std::boolalpha << filter10(15) << std::endl; // true
+    std::cout << "15 > 20? " << std::boolalpha << filter20(15) << std::endl; // false
+
+    return 0;
+}
+</code></pre>
+                        <p><strong>Begründung:</strong> Capture-by-copy <code>[=]</code> ist hier die richtige Wahl. Die Variable <code>threshold</code> ist ein lokaler Parameter der Funktion <code>createGreaterThanFilter</code>. Ihre Lebensdauer endet, wenn die Funktion verlassen wird. Wenn wir sie per Referenz <code>[&]</code> einfangen würden, würde der zurückgegebene Lambda eine Referenz auf eine nicht mehr existierende Variable enthalten (eine "dangling reference"). Dies würde zu undefiniertem Verhalten führen. Durch das Einfangen per Kopie <code>[=]</code> erstellt der Lambda eine eigene, interne Kopie des `threshold`-Wertes, die so lange lebt wie der Lambda selbst.</p>
+                    </details>
                 </li>
             </ol>
         </section>

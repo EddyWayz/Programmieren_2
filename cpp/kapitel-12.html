@@ -152,12 +152,133 @@ int main() {
             <ol>
                 <li>
                     <strong>Eigene Ausnahmeklasse:</strong> Erstellen Sie eine eigene Ausnahmeklasse, die von `std::exception` erbt. Schreiben Sie eine Funktion (z.B. zum Berechnen einer Quadratwurzel), die diese Ausnahme wirft, wenn sie mit einer negativen Zahl aufgerufen wird. Fangen Sie die Ausnahme in `main` ab.
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+
+// Eigene Ausnahmeklasse
+class MathError : public std::runtime_error {
+public:
+    MathError(const std::string& message) : std::runtime_error(message) {}
+};
+
+double square_root(double x) {
+    if (x < 0) {
+        throw MathError("Kann keine Wurzel aus einer negativen Zahl ziehen.");
+    }
+    return std::sqrt(x);
+}
+
+int main() {
+    try {
+        std::cout << "Wurzel aus 9: " << square_root(9) << std::endl;
+        std::cout << "Wurzel aus -9: " << square_root(-9) << std::endl;
+    }
+    catch (const MathError& e) {
+        std::cerr << "Fehler: " << e.what() << std::endl;
+    }
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Cast-Operatoren anwenden:</strong> Erstellen Sie eine Klassenhierarchie. Demonstrieren Sie in einem Beispielprogramm den sinnvollen Einsatz von `static_cast` für einen Upcast und `dynamic_cast` für einen sicheren Downcast. Versuchen Sie auch einen `dynamic_cast` auf einen Typ, der nicht zum tatsächlichen Objekt passt, und werten Sie das `nullptr`-Ergebnis aus.
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+
+class Animal { public: virtual void speak() const { std::cout << "Tier-Laut\n"; } virtual ~Animal() = default; };
+class Dog : public Animal { public: void speak() const override { std::cout << "Wuff\n"; } void fetch() { std::cout << "Holt den Stock\n"; } };
+class Cat : public Animal { public: void speak() const override { std::cout << "Miau\n"; } };
+
+int main() {
+    Dog* myDog = new Dog();
+    
+    // 1. Sicherer Upcast (von abgeleiteter Klasse zu Basisklasse)
+    Animal* myAnimal = static_cast&lt;Animal*&gt;(myDog);
+    myAnimal->speak(); // Polymorpher Aufruf -> "Wuff"
+
+    // 2. Sicherer Downcast mit dynamic_cast
+    Dog* dogAgain = dynamic_cast&lt;Dog*&gt;(myAnimal);
+    if (dogAgain) {
+        std::cout << "Cast zu Dog erfolgreich.\n";
+        dogAgain->fetch();
+    }
+
+    // 3. Fehlgeschlagener Downcast
+    Animal* anotherAnimal = new Cat();
+    Dog* notADog = dynamic_cast&lt;Dog*&gt;(anotherAnimal);
+    if (notADog == nullptr) {
+        std::cout << "Cast zu Dog fehlgeschlagen, weil es eine Katze ist.\n";
+    }
+
+    delete myDog;
+    delete anotherAnimal;
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Bibliothek in Namensraum:</strong> Fassen Sie eine Ihrer früher erstellten Klassen (z.B. eine `Vector2D`-Klasse mit überladenen Operatoren) in einem eigenen Namensraum namens `MyGeometry` zusammen. Verwenden Sie die Klasse dann aus der `main`-Funktion heraus mit voll qualifizierten Namen (z.B. <code>MyGeometry::Vector2D v;</code>).
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Vector2D.h</strong></p>
+                        <pre><code>#ifndef VECTOR2D_H
+#define VECTOR2D_H
+
+namespace MyGeometry { // Start des Namensraums
+
+class Vector2D {
+public:
+    double x, y;
+    Vector2D(double x = 0, double y = 0);
+    void print() const;
+};
+
+} // Ende des Namensraums
+
+#endif // VECTOR2D_H
+</code></pre>
+                        <p><strong>Vector2D.cpp</strong></p>
+                        <pre><code>#include "Vector2D.h"
+#include &lt;iostream&gt;
+
+namespace MyGeometry { // Erneut öffnen
+
+Vector2D::Vector2D(double x, double y) : x(x), y(y) {}
+
+void Vector2D::print() const {
+    std::cout << "(" << x << ", " << y << ")" << std::endl;
+}
+
+} // Ende des Namensraums
+</code></pre>
+                        <p><strong>main.cpp</strong></p>
+                        <pre><code>#include "Vector2D.h"
+#include &lt;iostream&gt;
+
+int main() {
+    // Voll qualifizierter Name
+    MyGeometry::Vector2D v1(10, 20);
+    
+    std::cout << "Vektor v1: ";
+    v1.print();
+
+    // using-Deklaration
+    using MyGeometry::Vector2D;
+    Vector2D v2(30, 40);
+    std::cout << "Vektor v2: ";
+    v2.print();
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
             </ol>
         </section>

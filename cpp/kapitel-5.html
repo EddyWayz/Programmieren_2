@@ -172,12 +172,104 @@ int main() {
             <ol>
                 <li>
                     <strong>Sichtbarkeiten:</strong> Erstellen Sie eine Klassenhierarchie mit den Klassen A, B, C, D, E wie in Übung 1.1 beschrieben. Implementieren Sie die verschiedenen Vererbungsarten (<code>public, private, protected</code>) und testen Sie in <code>main</code>, auf welche Member der Basisklasse A Sie über ein Objekt der jeweiligen abgeleiteten Klasse zugreifen können.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p>Das Ergebnis hängt von der genauen Struktur der Klassen ab, aber die allgemeinen Regeln sind:</p>
+                        <ul>
+                            <li><strong>Public Vererbung (<code>class B : public A</code>):</strong> <code>public</code> Member von A sind <code>public</code> in B. <code>protected</code> Member von A sind <code>protected</code> in B. <code>private</code> Member von A sind in B nicht zugänglich.</li>
+                            <li><strong>Protected Vererbung (<code>class C : protected A</code>):</strong> <code>public</code> und <code>protected</code> Member von A werden <code>protected</code> in C.</li>
+                            <li><strong>Private Vererbung (<code>class D : private A</code>):</strong> <code>public</code> und <code>protected</code> Member von A werden <code>private</code> in D.</li>
+                        </ul>
+                        <p>In <code>main</code> kann man nur auf <code>public</code> Member eines Objekts zugreifen. Daher wird man bei <code>protected</code> und <code>private</code> Vererbung von außen nicht auf die geerbten Member von A zugreifen können.</p>
+                    </details>
                 </li>
                 <li>
                     <strong>Konstruktoraufrufe:</strong> Definieren Sie eine Basisklasse und eine davon abgeleitete Klasse. Geben Sie in den jeweiligen Konstruktoren und Destruktoren eine Textmeldung aus. Erzeugen Sie in <code>main</code> ein Objekt der abgeleiteten Klasse und beobachten Sie die Reihenfolge der Ausgaben. Was passiert, wenn Sie ein Array von Objekten der abgeleiteten Klasse erzeugen?
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+
+class Basis {
+public:
+    Basis() { std::cout << "Basis-Konstruktor" << std::endl; }
+    ~Basis() { std::cout << "Basis-Destruktor" << std::endl; }
+};
+
+class Abgeleitet : public Basis {
+public:
+    Abgeleitet() { std::cout << "Abgeleitet-Konstruktor" << std::endl; }
+    ~Abgeleitet() { std::cout << "Abgeleitet-Destruktor" << std::endl; }
+};
+
+int main() {
+    std::cout << "--- Erzeuge einzelnes Objekt ---" << std::endl;
+    Abgeleitet obj;
+    std::cout << "--- Zerstöre einzelnes Objekt ---" << std::endl;
+    
+    std::cout << "\n--- Erzeuge Array ---" << std::endl;
+    Abgeleitet arr[2];
+    std::cout << "--- Zerstöre Array ---" << std::endl;
+    
+    return 0;
+}
+</code></pre>
+                        <p><strong>Ausgabe:</strong></p>
+                        <pre>--- Erzeuge einzelnes Objekt ---
+Basis-Konstruktor
+Abgeleitet-Konstruktor
+--- Zerstöre einzelnes Objekt ---
+Abgeleitet-Destruktor
+Basis-Destruktor
+
+--- Erzeuge Array ---
+Basis-Konstruktor
+Abgeleitet-Konstruktor
+Basis-Konstruktor
+Abgeleitet-Konstruktor
+--- Zerstöre Array ---
+Abgeleitet-Destruktor
+Basis-Destruktor
+Abgeleitet-Destruktor
+Basis-Destruktor
+</pre>
+                        <p>Man sieht, dass für jedes Objekt im Array zuerst der Basis-Konstruktor und dann der Abgeleitet-Konstruktor aufgerufen wird. Die Zerstörung erfolgt in umgekehrter Reihenfolge.</p>
+                    </details>
                 </li>
                  <li>
                     <strong>Geometrische Formen:</strong> Erstellen Sie eine Basisklasse <code>ZweidimensionaleForm</code> mit <code>protected</code> Attributen für die Position (x, y). Leiten Sie davon eine Klasse <code>Kreis</code> mit einem zusätzlichen Attribut für den Radius und eine Klasse <code>Rechteck</code> mit Attributen für Breite und Höhe ab. Implementieren Sie die Konstruktoren so, dass die Position an die Basisklasse weitergegeben wird.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Form.h</strong></p>
+                        <pre><code>#ifndef FORM_H
+#define FORM_H
+
+class ZweidimensionaleForm {
+protected:
+    double x_, y_;
+public:
+    ZweidimensionaleForm(double x, double y) : x_(x), y_(y) {}
+};
+
+class Kreis : public ZweidimensionaleForm {
+private:
+    double radius_;
+public:
+    Kreis(double x, double y, double r) 
+        : ZweidimensionaleForm(x, y), radius_(r) {}
+};
+
+class Rechteck : public ZweidimensionaleForm {
+private:
+    double breite_, hoehe_;
+public:
+    Rechteck(double x, double y, double b, double h)
+        : ZweidimensionaleForm(x, y), breite_(b), hoehe_(h) {}
+};
+
+#endif // FORM_H
+</code></pre>
+                        <p>Im Konstruktor von `Kreis` und `Rechteck` wird der Konstruktor der Basisklasse `ZweidimensionaleForm` über die Initialisiererliste aufgerufen, um die x- und y-Koordinaten zu initialisieren.</p>
+                    </details>
                 </li>
             </ol>
         </section>

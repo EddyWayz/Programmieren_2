@@ -168,12 +168,164 @@ public:
             <ol>
                 <li>
                     <strong>Logging-Singleton:</strong> Implementieren Sie eine `FileLogger`-Klasse als Singleton. Die `log`-Methode soll die Nachrichten nicht auf der Konsole ausgeben, sondern in eine Datei namens `log.txt` schreiben. Stellen Sie sicher, dass Ihr Singleton threadsicher ist (Hinweis: `static`-Variablen in Funktionen sind in modernen C++-Compilern threadsicher).
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+#include &lt;mutex&gt; // Für Threadsicherheit, obwohl static oft reicht
+
+class FileLogger {
+private:
+    std::ofstream log_file_;
+    static std::mutex mtx_;
+
+    FileLogger() {
+        log_file_.open("log.txt", std::ios::out | std::ios::app);
+    }
+    ~FileLogger() {
+        if (log_file_.is_open()) {
+            log_file_.close();
+        }
+    }
+
+public:
+    FileLogger(const FileLogger&) = delete;
+    FileLogger& operator=(const FileLogger&) = delete;
+
+    static FileLogger& getInstance() {
+        static FileLogger instance; // C++11+ garantiert threadsichere Initialisierung
+        return instance;
+    }
+
+    void log(const std::string& message) {
+        std::lock_guard&lt;std::mutex&gt; lock(mtx_); // Sperren für den Schreibzugriff
+        if (log_file_.is_open()) {
+            log_file_ << message << std::endl;
+        }
+    }
+};
+
+std::mutex FileLogger::mtx_; // Statische Member initialisieren
+
+int main() {
+    FileLogger::getInstance().log("Anwendung gestartet.");
+    FileLogger::getInstance().log("Ein wichtiger Prozess wurde ausgeführt.");
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Figuren-Fabrik:</strong> Sie haben eine abstrakte Klasse `Shape` (wie in KE06) und konkrete Ableitungen wie `Circle`, `Rectangle`. Schreiben Sie eine `ShapeFactory`-Klasse mit einer statischen Methode `createShape(std::string type)`. Diese Methode soll je nach übergebenem String (z.B. "circle" oder "rectangle") ein `std::unique_ptr&lt;Shape&gt;` des entsprechenden Typs zurückgeben.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p>Wir nehmen die `Shape`-Klassen aus der Lösung zu KE06 an.</p>
+                        <pre><code>#include &lt;memory&gt;
+#include &lt;string&gt;
+#include "Shapes.h" // Annahme: Enthält Shape, Circle, Rectangle
+
+class ShapeFactory {
+public:
+    static std::unique_ptr&lt;Shape&gt; createShape(const std::string& type) {
+        if (type == "circle") {
+            return std::make_unique&lt;Circle&gt;();
+        } else if (type == "rectangle") {
+            return std::make_unique&lt;Rectangle&gt;();
+        } else if (type == "point") {
+            return std::make_unique&lt;Point&gt;();
+        }
+        return nullptr; // oder eine Ausnahme werfen
+    }
+};
+
+int main() {
+    auto shape1 = ShapeFactory::createShape("circle");
+    auto shape2 = ShapeFactory::createShape("rectangle");
+
+    if (shape1) shape1->vDraw();
+    if (shape2) shape2->vDraw();
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Nachrichten-Ticker (Observer):</strong> Implementieren Sie das Observer-Pattern. Ein `NewsPublisher` (das Subjekt) soll eine `publish(string news)`-Methode haben. Mehrere `NewsSubscriber` (die Observer) können den Publisher abonnieren. Wenn eine neue Nachricht publiziert wird, sollen alle Subscriber die Nachricht auf der Konsole ausgeben, z.B. "Subscriber [Name] received news: [Nachricht]".
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;algorithm&gt;
+
+class IObserver {
+public:
+    virtual ~IObserver() = default;
+    virtual void update(const std::string& news) = 0;
+};
+
+class ISubject {
+public:
+    virtual ~ISubject() = default;
+    virtual void attach(IObserver* observer) = 0;
+    virtual void detach(IObserver* observer) = 0;
+    virtual void notify(const std::string& news) = 0;
+};
+
+class NewsPublisher : public ISubject {
+private:
+    std::vector&lt;IObserver*&gt; observers_;
+public:
+    void attach(IObserver* observer) override {
+        observers_.push_back(observer);
+    }
+    void detach(IObserver* observer) override {
+        observers_.erase(std::remove(observers_.begin(), observers_.end(), observer), observers_.end());
+    }
+    void notify(const std::string& news) override {
+        for (auto* obs : observers_) {
+            obs->update(news);
+        }
+    }
+    void publish(const std::string& news) {
+        std::cout << "\n[PUBLISHER] Neue Nachricht: " << news << std::endl;
+        notify(news);
+    }
+};
+
+class NewsSubscriber : public IObserver {
+private:
+    std::string name_;
+public:
+    NewsSubscriber(const std::string& name) : name_(name) {}
+    void update(const std::string& news) override {
+        std::cout << "[" << name_ << "] hat die Nachricht erhalten: " << news << std::endl;
+    }
+};
+
+int main() {
+    NewsPublisher publisher;
+    
+    NewsSubscriber sub1("Alice");
+    NewsSubscriber sub2("Bob");
+    NewsSubscriber sub3("Charlie");
+
+    publisher.attach(&sub1);
+    publisher.attach(&sub2);
+    
+    publisher.publish("Breaking News: C++ ist super!");
+
+    publisher.attach(&sub3);
+    publisher.detach(&sub1);
+
+    publisher.publish("Wetter-Update: Sonnig.");
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
             </ol>
         </section>

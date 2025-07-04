@@ -218,6 +218,36 @@ int main() {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Deklaration in der `.h`-Datei, die Implementierung in der `.cpp`. Der Konstruktor sieht so aus: `Rectangle::Rectangle(double w, double h)`. `getArea` gibt einfach `width_ * height_` zurück.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Rectangle.h</strong></p>
+                        <pre><code>#ifndef RECTANGLE_H
+#define RECTANGLE_H
+
+class Rectangle {
+private:
+    double width_;
+    double height_;
+
+public:
+    Rectangle(double w, double h);
+    double getArea() const;
+};
+
+#endif // RECTANGLE_H
+</code></pre>
+                        <p><strong>Rectangle.cpp</strong></p>
+                        <pre><code>#include "Rectangle.h"
+
+Rectangle::Rectangle(double w, double h) : width_(w), height_(h) {
+    // Initialisierungsliste wird bevorzugt
+}
+
+double Rectangle::getArea() const {
+    return width_ * height_;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Getter und Setter</strong><br>
@@ -225,6 +255,43 @@ int main() {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>In `setWidth(double w)`: `if (w > 0) { width_ = w; } else { width_ = 0; }`.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Rectangle.h (Ergänzung)</strong></p>
+                        <pre><code>// ... in public section of Rectangle class
+double getWidth() const;
+double getHeight() const;
+void setWidth(double w);
+void setHeight(double h);
+</code></pre>
+                        <p><strong>Rectangle.cpp (Ergänzung)</strong></p>
+                        <pre><code>#include "Rectangle.h"
+
+double Rectangle::getWidth() const {
+    return width_;
+}
+
+double Rectangle::getHeight() const {
+    return height_;
+}
+
+void Rectangle::setWidth(double w) {
+    if (w >= 0) {
+        width_ = w;
+    } else {
+        width_ = 0; // Oder eine andere Fehlerbehandlung
+    }
+}
+
+void Rectangle::setHeight(double h) {
+    if (h >= 0) {
+        height_ = h;
+    } else {
+        height_ = 0;
+    }
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -234,6 +301,25 @@ int main() {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>`Rectangle* p_rect = new Rectangle(10.0, 5.0);`. Der Aufruf erfolgt mit dem Pfeiloperator: `p_rect->getArea();`. Am Ende `delete p_rect;`.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>main.cpp</strong></p>
+                        <pre><code>#include &lt;iostream&gt;
+#include "Rectangle.h"
+
+int main() {
+    Rectangle* p_rect = new Rectangle(10.0, 5.0);
+
+    std::cout << "Die Fläche des dynamischen Rechtecks ist: "
+              << p_rect->getArea() << std::endl;
+
+    delete p_rect; // Speicher freigeben
+    p_rect = nullptr; // Gute Praxis: Zeiger auf nullptr setzen
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>`const`-Korrektheit</strong><br>
@@ -242,6 +328,26 @@ int main() {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Ein `const`-Objekt kann nur `const`-Methoden aufrufen. Da `setWidth` das Objekt verändern würde, kann es nicht `const` sein und darf daher nicht aufgerufen werden.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>main.cpp</strong></p>
+                        <pre><code>#include &lt;iostream&gt;
+#include "Rectangle.h"
+
+int main() {
+    const Rectangle const_rect(8.0, 8.0);
+
+    // OK: getArea() und getWidth() sind als const deklariert
+    std::cout << "Fläche: " << const_rect.getArea() << std::endl;
+    std::cout << "Breite: " << const_rect.getWidth() << std::endl;
+
+    // FEHLER: setWidth() ist nicht const und würde das Objekt verändern
+    // const_rect.setWidth(10.0); // <-- Dies führt zu einem Compiler-Fehler
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Ringbuffer-Klasse</strong><br>
@@ -249,6 +355,53 @@ int main() {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Der Konstruktor benötigt eine `for`-Schleife, um das interne Array `as32Elements_` zu initialisieren.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Ringbuffer.h</strong></p>
+                        <pre><code>#ifndef RINGBUFFER_H
+#define RINGBUFFER_H
+
+#include &lt;cstdint&gt; // Für int32_t, uint32_t
+
+const uint32_t BUFFER_SIZE = 10;
+
+class Ringbuffer {
+public:
+    Ringbuffer();
+    int32_t s32ReadElement(int32_t* ps32Element);
+    int32_t s32WriteElement(int32_t s32Element);
+
+private:
+    int32_t as32Elements_[BUFFER_SIZE];
+    uint32_t u32ReadPos_;
+    uint32_t u32WritePos_;
+    uint32_t u32NumElements_;
+};
+
+#endif // RINGBUFFER_H
+</code></pre>
+                        <p><strong>Ringbuffer.cpp</strong></p>
+                        <pre><code>#include "Ringbuffer.h"
+
+Ringbuffer::Ringbuffer() 
+    : u32ReadPos_(0), u32WritePos_(0), u32NumElements_(0) {
+    for (uint32_t i = 0; i < BUFFER_SIZE; ++i) {
+        as32Elements_[i] = 0;
+    }
+}
+
+// Implementierung der anderen Methoden würde hier folgen...
+int32_t Ringbuffer::s32ReadElement(int32_t* ps32Element) {
+    // ...
+    return 0;
+}
+
+int32_t Ringbuffer::s32WriteElement(int32_t s32Element) {
+    // ...
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

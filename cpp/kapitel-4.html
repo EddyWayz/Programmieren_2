@@ -165,12 +165,144 @@ int main() {
             <ol>
                 <li>
                     <strong>`const`-Fehler finden:</strong> Analysieren Sie ein gegebenes Code-Beispiel (ähnlich Aufgabe 1) und identifizieren Sie, welche Methodenaufrufe zu Compiler-Fehlern führen, weil sie die `const`-Korrektheit verletzen. Begründen Sie Ihre Entscheidung.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p>Angenommen, wir haben die Klasse `Book`:</p>
+                        <pre><code>class Book {
+    std::string title_;
+public:
+    Book(const std::string& title) : title_(title) {}
+    const std::string& getTitle() const { return title_; } // const-Methode
+    void setTitle(const std::string& title) { title_ = title; } // nicht-const
+};
+
+int main() {
+    const Book myBook("Der Herr der Ringe");
+    myBook.getTitle(); // OK, getTitle ist const
+    // myBook.setTitle("Neuer Titel"); // FEHLER!
+}</code></pre>
+                        <p>Der Aufruf `myBook.setTitle(...)` schlägt fehl, weil `myBook` ein konstantes Objekt ist. Auf konstanten Objekten dürfen nur `const`-Methoden aufgerufen werden. `setTitle` ist nicht als `const` deklariert, da es das Objekt verändert, und kann daher nicht aufgerufen werden.</p>
+                    </details>
                 </li>
                 <li>
                     <strong>Statischen Zähler implementieren:</strong> Erweitern Sie eine einfache Klasse `Auto` um einen statischen `int`-Member, der zählt, wie viele `Auto`-Objekte aktuell existieren. Implementieren Sie eine statische `public`-Methode, die diesen Zähler zurückgibt. Testen Sie Ihre Implementierung in `main`.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Auto.h</strong></p>
+                        <pre><code>#ifndef AUTO_H
+#define AUTO_H
+
+#include &lt;string&gt;
+
+class Auto {
+public:
+    Auto(const std::string& marke);
+    ~Auto();
+    static int getAnzahlAutos();
+private:
+    std::string marke_;
+    static int anzahlAutos_; // Deklaration des statischen Members
+};
+
+#endif // AUTO_H
+</code></pre>
+                        <p><strong>Auto.cpp</strong></p>
+                        <pre><code>#include "Auto.h"
+#include &lt;iostream&gt;
+
+// Definition und Initialisierung des statischen Members
+int Auto::anzahlAutos_ = 0;
+
+Auto::Auto(const std::string& marke) : marke_(marke) {
+    anzahlAutos_++;
+    std::cout << "Auto erstellt. Gesamtanzahl: " << anzahlAutos_ << std::endl;
+}
+
+Auto::~Auto() {
+    anzahlAutos_--;
+    std::cout << "Auto zerstoert. Gesamtanzahl: " << anzahlAutos_ << std::endl;
+}
+
+int Auto::getAnzahlAutos() {
+    return anzahlAutos_;
+}
+</code></pre>
+                        <p><strong>main.cpp</strong></p>
+                        <pre><code>#include "Auto.h"
+#include &lt;iostream&gt;
+
+int main() {
+    std::cout << "Start: " << Auto::getAnzahlAutos() << " Autos." << std::endl;
+    Auto a1("VW");
+    Auto a2("BMW");
+    {
+        Auto a3("Audi");
+        std::cout << "Im Block: " << Auto::getAnzahlAutos() << " Autos." << std::endl;
+    }
+    std::cout << "Nach Block: " << Auto::getAnzahlAutos() << " Autos." << std::endl;
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>`friend`-Funktion:</strong> Schreiben Sie eine Klasse `Vector3D` mit drei privaten `double`-Attributen (x, y, z). Schreiben Sie eine externe `friend`-Funktion `addVectors`, die zwei `Vector3D`-Objekte entgegennimmt und einen neuen `Vector3D` als deren Summe zurückgibt. Da die Funktion ein `friend` ist, kann sie direkt auf `v1.x` und `v2.x` etc. zugreifen.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Vector3D.h</strong></p>
+                        <pre><code>#ifndef VECTOR3D_H
+#define VECTOR3D_H
+
+class Vector3D {
+private:
+    double x_, y_, z_;
+public:
+    Vector3D(double x = 0, double y = 0, double z = 0);
+    void print() const;
+
+    // Deklariert die externe Funktion als Freund
+    friend Vector3D addVectors(const Vector3D& v1, const Vector3D& v2);
+};
+
+#endif // VECTOR3D_H
+</code></pre>
+                        <p><strong>Vector3D.cpp</strong></p>
+                        <pre><code>#include "Vector3D.h"
+#include &lt;iostream&gt;
+
+Vector3D::Vector3D(double x, double y, double z) : x_(x), y_(y), z_(z) {}
+
+void Vector3D::print() const {
+    std::cout << "(" << x_ << ", " << y_ << ", " << z_ << ")" << std::endl;
+}
+
+// Implementierung der friend-Funktion
+Vector3D addVectors(const Vector3D& v1, const Vector3D& v2) {
+    // Direkter Zugriff auf private Member, da 'friend'
+    double newX = v1.x_ + v2.x_;
+    double newY = v1.y_ + v2.y_;
+    double newZ = v1.z_ + v2.z_;
+    return Vector3D(newX, newY, newZ);
+}
+</code></pre>
+                        <p><strong>main.cpp</strong></p>
+                        <pre><code>#include "Vector3D.h"
+#include &lt;iostream&gt;
+
+int main() {
+    Vector3D vec1(1, 2, 3);
+    Vector3D vec2(4, 5, 6);
+    
+    Vector3D sum = addVectors(vec1, vec2);
+    
+    std::cout << "Vektor 1: "; vec1.print();
+    std::cout << "Vektor 2: "; vec2.print();
+    std::cout << "Summe:    "; sum.print();
+    
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
             </ol>
         </section>

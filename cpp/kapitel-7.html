@@ -149,12 +149,95 @@ public:
             <ol>
                 <li>
                     <strong>Vektor-Klasse:</strong> Implementieren Sie eine Klasse `Vector2D` mit x- und y-Koordinaten. Überladen Sie die Operatoren <code>+</code> und <code>-</code> zur Vektoraddition/-subtraktion. Überladen Sie den Operator <code>*</code> mit einem `double` als rechtem Operanden für die Skalarmultiplikation.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Vector2D.h</strong></p>
+                        <pre><code>#ifndef VECTOR2D_H
+#define VECTOR2D_H
+
+class Vector2D {
+public:
+    double x, y;
+    Vector2D(double x = 0, double y = 0) : x(x), y(y) {}
+
+    Vector2D operator+(const Vector2D& rhs) const;
+    Vector2D operator-(const Vector2D& rhs) const;
+    Vector2D operator*(double scalar) const;
+};
+
+#endif // VECTOR2D_H
+</code></pre>
+                        <p><strong>Vector2D.cpp</strong></p>
+                        <pre><code>#include "Vector2D.h"
+
+Vector2D Vector2D::operator+(const Vector2D& rhs) const {
+    return Vector2D(x + rhs.x, y + rhs.y);
+}
+
+Vector2D Vector2D::operator-(const Vector2D& rhs) const {
+    return Vector2D(x - rhs.x, y - rhs.y);
+}
+
+Vector2D Vector2D::operator*(double scalar) const {
+    return Vector2D(x * scalar, y * scalar);
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Vergleichsoperatoren:</strong> Erweitern Sie Ihre `Vector2D`-Klasse, indem Sie die Operatoren <code>==</code> und <code>!=</code> überladen. Zwei Vektoren sollen als gleich gelten, wenn ihre x- und y-Koordinaten jeweils übereinstimmen.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Vector2D.h (Ergänzung)</strong></p>
+                        <pre><code>bool operator==(const Vector2D& rhs) const;
+bool operator!=(const Vector2D& rhs) const;
+</code></pre>
+                        <p><strong>Vector2D.cpp (Ergänzung)</strong></p>
+                        <pre><code>#include &lt;cmath&gt; // für fabs
+
+bool Vector2D::operator==(const Vector2D& rhs) const {
+    // Vorsicht bei double-Vergleichen, eine Toleranz ist oft besser
+    const double epsilon = 1e-9;
+    return std::fabs(x - rhs.x) < epsilon && std::fabs(y - rhs.y) < epsilon;
+}
+
+bool Vector2D::operator!=(const Vector2D& rhs) const {
+    return !(*this == rhs); // != als Gegenteil von == implementieren
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Input-Stream-Operator:</strong> Überladen Sie den Operator <code>&gt;&gt;</code> für Ihre `Vector2D`-Klasse, sodass Sie einen Vektor direkt von der Konsole (<code>std::cin</code>) einlesen können. Das Format könnte sein, dass der Benutzer nacheinander die x- und die y-Koordinate eingibt.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Vector2D.h (Ergänzung)</strong></p>
+                        <pre><code>#include &lt;iostream&gt;
+// ...
+friend std::istream& operator>>(std::istream& is, Vector2D& vec);
+</code></pre>
+                        <p><strong>Vector2D.cpp (Ergänzung)</strong></p>
+                        <pre><code>#include &lt;iostream&gt;
+
+std::istream& operator>>(std::istream& is, Vector2D& vec) {
+    // Annahme: Benutzer gibt zwei Zahlen getrennt durch Leerzeichen ein
+    is >> vec.x >> vec.y;
+    return is;
+}
+</code></pre>
+                        <p><strong>main.cpp (Beispielverwendung)</strong></p>
+                        <pre><code>#include &lt;iostream&gt;
+#include "Vector2D.h"
+
+int main() {
+    Vector2D v;
+    std::cout << "Bitte geben Sie die x- und y-Koordinate ein: ";
+    std::cin >> v;
+    std::cout << "Sie haben eingegeben: (" << v.x << ", " << v.y << ")" << std::endl;
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
             </ol>
         </section>

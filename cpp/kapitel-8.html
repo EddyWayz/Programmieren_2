@@ -147,12 +147,118 @@ int main() {
             <ol>
                 <li>
                     <strong>Generische `max()`-Funktion:</strong> Schreiben Sie ein Funktions-Template für eine Funktion `max`, die zwei Argumente eines beliebigen Typs entgegennimmt und das größere der beiden zurückgibt. Testen Sie Ihre Funktion mit <code>int</code>, <code>double</code> und <code>std::string</code>. Welche Voraussetzung muss der Datentyp <code>T</code> erfüllen, damit der Code kompiliert? (Antwort: Der `>`-Operator muss für den Typ definiert sein).
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+template &lt;typename T&gt;
+T max(const T& a, const T& b) {
+    return (a > b) ? a : b;
+}
+
+int main() {
+    std::cout << "Max(5, 10): " << max(5, 10) << std::endl;
+    std::cout << "Max(3.14, 2.71): " << max(3.14, 2.71) << std::endl;
+    std::string s1 = "Apple", s2 = "Orange";
+    std::cout << "Max(Apple, Orange): " << max(s1, s2) << std::endl;
+    return 0;
+}
+</code></pre>
+                        <p><strong>Voraussetzung:</strong> Der für <code>T</code> eingesetzte Datentyp muss den Größer-als-Operator (<code>></code>) unterstützen, damit der Vergleich <code>a > b</code> gültig ist. Dies ist für alle fundamentalen numerischen Typen und für `std::string` der Fall.</p>
+                    </details>
                 </li>
                 <li>
                     <strong>Generischer Stack:</strong> Implementieren Sie ein Klassen-Template für eine `Stack`-Klasse. Der Stack soll intern ein Array zur Speicherung der Elemente nutzen. Verwenden Sie einen Nicht-Typ-Parameter für die Größe des Arrays (z.B. <code>template &lt;typename T, int MAX_SIZE&gt; class Stack</code>). Die Klasse soll Methoden wie `push()`, `pop()`, `top()` und `isEmpty()` haben.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Stack.h (komplette Implementierung im Header)</strong></p>
+                        <pre><code>#ifndef STACK_H
+#define STACK_H
+
+#include &lt;stdexcept&gt;
+
+template &lt;typename T, int MAX_SIZE&gt;
+class Stack {
+private:
+    T data_[MAX_SIZE];
+    int top_;
+
+public:
+    Stack() : top_(-1) {}
+
+    bool isEmpty() const {
+        return top_ == -1;
+    }
+
+    bool isFull() const {
+        return top_ == MAX_SIZE - 1;
+    }
+
+    void push(const T& value) {
+        if (isFull()) {
+            throw std::overflow_error("Stack is full");
+        }
+        data_[++top_] = value;
+    }
+
+    void pop() {
+        if (isEmpty()) {
+            throw std::underflow_error("Stack is empty");
+        }
+        --top_;
+    }
+
+    T& top() {
+        if (isEmpty()) {
+            throw std::underflow_error("Stack is empty");
+        }
+        return data_[top_];
+    }
+};
+
+#endif // STACK_H
+</code></pre>
+                        <p><strong>main.cpp (Beispielverwendung)</strong></p>
+                        <pre><code>#include &lt;iostream&gt;
+#include "Stack.h"
+
+int main() {
+    Stack&lt;int, 5&gt; intStack;
+    intStack.push(10);
+    intStack.push(20);
+    std::cout << "Top element: " << intStack.top() << std::endl; // 20
+    intStack.pop();
+    std::cout << "Top element: " << intStack.top() << std::endl; // 10
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Typen explizit angeben:</strong> Schreiben Sie ein Funktions-Template, das einen Wert eines Typs `T` entgegennimmt und ihn in einen Typ `U` umwandelt und zurückgibt. (<code>template &lt;typename U, typename T&gt; U convert(const T& value)</code>). Warum muss man beim Aufruf dieser Funktion die Typ-Parameter explizit angeben (z.B. <code>convert&lt;int, double&gt;(5.5)</code>), während es bei der `swap_values`-Funktion nicht nötig war?
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+
+template &lt;typename U, typename T&gt;
+U convert(const T& value) {
+    return static_cast&lt;U&gt;(value);
+}
+
+int main() {
+    double d = 9.7;
+    int i = convert&lt;int&gt;(d); // T kann abgeleitet werden, U nicht
+    std::cout << "Converted " << d << " to " << i << std::endl;
+
+    // Alternativ beide explizit angeben
+    int j = convert&lt;int, double&gt;(5.5);
+    std::cout << "Converted 5.5 to " << j << std::endl;
+    return 0;
+}
+</code></pre>
+                        <p><strong>Erklärung:</strong> Bei der `swap_values(a, b)`-Funktion kann der Compiler den Typ `T` direkt aus den Typen der übergebenen Argumente `a` und `b` ableiten (Template Argument Deduction). Beim `convert`-Template kann der Compiler zwar den Typ des Eingabeparameters `T` aus dem Argument `value` ableiten, aber er hat keine Möglichkeit, den Rückgabetyp `U` zu erraten. Der Rückgabetyp ist nicht Teil der Funktionssignatur, die für die Argumentableitung verwendet wird. Daher müssen wir dem Compiler den gewünschten Zieltyp `U` explizit in den spitzen Klammern mitteilen: `convert&lt;int&gt;(d)`. </p>
+                    </details>
                 </li>
             </ol>
         </section>

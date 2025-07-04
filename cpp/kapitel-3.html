@@ -158,10 +158,119 @@ z3.vPrint(); // Gibt "4 + j(2)" aus
         <section>
             <h2>6. Übungsaufgaben</h2>
             <ol>
-                <li><strong>`Complex`-Subtraktion:</strong> Überlade den `-`-Operator für deine `Complex`-Klasse als Member-Funktion.</li>
-                <li><strong>`Complex`-Ausgabe:</strong> Implementiere den `<<`-Operator für `std::cout` für deine `Complex`-Klasse als `friend`-Funktion, wie oben im Beispiel gezeigt.</li>
-                <li><strong>Pre-Inkrement für `Counter`:</strong> Nimm die `Counter`-Klasse aus dem letzten Kapitel. Überlade den Pre-Inkrement-Operator (`++c`), sodass er den internen Wert erhöht und eine Referenz auf das Objekt zurückgibt. Die Signatur lautet: `Counter& operator++();`.</li>
-                <li><strong>Deep Copy für eine `Playlist`:</strong> Erstelle eine Klasse `Playlist`, die als privates Attribut einen dynamisch allokierten Zeiger auf ein Array von `std::string`s enthält (`std::string* tracks_;`). Implementiere die "Regel der Drei" (Destruktor, Kopierkonstruktor, Zuweisungsoperator), um eine korrekte tiefe Kopie zu gewährleisten.</li>
+                <li><strong>`Complex`-Subtraktion:</strong> Überlade den `-`-Operator für deine `Complex`-Klasse als Member-Funktion.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Complex.h (Ergänzung in der Klassendefinition)</strong></p>
+                        <pre><code>Complex operator-(const Complex& other) const;</code></pre>
+                        <p><strong>Complex.cpp (Implementierung)</strong></p>
+                        <pre><code>Complex Complex::operator-(const Complex& other) const {
+    return Complex(f64Real_ - other.f64Real_, f64Img_ - other.f64Img_);
+}</code></pre>
+                    </details>
+                </li>
+                <li><strong>`Complex`-Ausgabe:</strong> Implementiere den `<<`-Operator für `std::cout` für deine `Complex`-Klasse als `friend`-Funktion, wie oben im Beispiel gezeigt.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Complex.h (Ergänzung in der Klassendefinition)</strong></p>
+                        <pre><code>friend std::ostream& operator<<(std::ostream& os, const Complex& c);</code></pre>
+                        <p><strong>Complex.cpp (Implementierung als freie Funktion)</strong></p>
+                        <pre><code>#include &lt;iostream&gt; // Nötig für std::ostream
+
+std::ostream& operator<<(std::ostream& os, const Complex& c) {
+    os << c.f64Real_ << " + j(" << c.f64Img_ << ")";
+    return os;
+}</code></pre>
+                    </details>
+                </li>
+                <li><strong>Pre-Inkrement für `Counter`:</strong> Nimm die `Counter`-Klasse aus dem letzten Kapitel. Überlade den Pre-Inkrement-Operator (`++c`), sodass er den internen Wert erhöht und eine Referenz auf das Objekt zurückgibt. Die Signatur lautet: `Counter& operator++();`.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Counter.h (Ergänzung in der Klassendefinition)</strong></p>
+                        <pre><code>Counter& operator++();</code></pre>
+                        <p><strong>Counter.cpp (Implementierung)</strong></p>
+                        <pre><code>Counter& Counter::operator++() {
+    ++value_; // Internen Wert erhöhen
+    return *this; // Referenz auf das modifizierte Objekt zurückgeben
+}</code></pre>
+                    </details>
+                </li>
+                <li><strong>Deep Copy für eine `Playlist`:</strong> Erstelle eine Klasse `Playlist`, die als privates Attribut einen dynamisch allokierten Zeiger auf ein Array von `std::string`s enthält (`std::string* tracks_`). Implementiere die "Regel der Drei" (Destruktor, Kopierkonstruktor, Zuweisungsoperator), um eine korrekte tiefe Kopie zu gewährleisten.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Playlist.h</strong></p>
+                        <pre><code>#ifndef PLAYLIST_H
+#define PLAYLIST_H
+
+#include &lt;string&gt;
+#include &lt;cstddef&gt; // für size_t
+
+class Playlist {
+public:
+    Playlist(size_t capacity);
+    ~Playlist(); // 1. Destruktor
+    Playlist(const Playlist& other); // 2. Kopierkonstruktor
+    Playlist& operator=(const Playlist& other); // 3. Zuweisungsoperator
+
+    void addTrack(const std::string& track);
+    void print() const;
+
+private:
+    std::string* tracks_;
+    size_t capacity_;
+    size_t count_;
+};
+
+#endif // PLAYLIST_H
+</code></pre>
+                        <p><strong>Playlist.cpp</strong></p>
+                        <pre><code>#include "Playlist.h"
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt; // für std::copy
+
+Playlist::Playlist(size_t capacity) : capacity_(capacity), count_(0) {
+    tracks_ = new std::string[capacity_];
+}
+
+// 1. Destruktor
+Playlist::~Playlist() {
+    delete[] tracks_;
+}
+
+// 2. Kopierkonstruktor (Deep Copy)
+Playlist::Playlist(const Playlist& other) 
+    : capacity_(other.capacity_), count_(other.count_) {
+    tracks_ = new std::string[capacity_];
+    std::copy(other.tracks_, other.tracks_ + count_, tracks_);
+}
+
+// 3. Zuweisungsoperator (Copy-and-Swap Idiom ist eine robuste Alternative)
+Playlist& Playlist::operator=(const Playlist& other) {
+    if (this != &other) { // Selbstzuweisungsschutz
+        delete[] tracks_; // Alten Speicher freigeben
+
+        capacity_ = other.capacity_;
+        count_ = other.count_;
+        tracks_ = new std::string[capacity_];
+        std::copy(other.tracks_, other.tracks_ + count_, tracks_);
+    }
+    return *this;
+}
+
+void Playlist::addTrack(const std::string& track) {
+    if (count_ < capacity_) {
+        tracks_[count_++] = track;
+    }
+}
+
+void Playlist::print() const {
+    for (size_t i = 0; i < count_; ++i) {
+        std::cout << i + 1 << ". " << tracks_[i] << std::endl;
+    }
+}
+</code></pre>
+                    </details>
+                </li>
             </ol>
         </section>
         <section>

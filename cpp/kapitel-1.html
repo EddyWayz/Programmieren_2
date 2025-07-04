@@ -206,6 +206,28 @@ int main() {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Benutze `std::cout <<` für die Aufforderung und `std::cin >>` um die Werte in eine `std::string`- und eine `int`-Variable einzulesen.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+int main() {
+    std::string lieblingsessen;
+    int glueckszahl;
+
+    std::cout << "Was ist dein Lieblingsessen? ";
+    std::getline(std::cin, lieblingsessen); // std::getline für mehrwortige Eingaben
+
+    std::cout << "Was ist deine Lieblingszahl? ";
+    std::cin >> glueckszahl;
+
+    std::cout << "Dein Lieblingsessen ist " << lieblingsessen
+              << " und deine Lieblingszahl ist " << glueckszahl << "." << std::endl;
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Pass-by-Reference</strong><br>
@@ -213,6 +235,23 @@ int main() {
                     <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>In `main` deklariere `int x = 100;`. Rufe `reset(x);` auf und gib `x` danach aus – es sollte `0` sein.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+
+void reset(int& value) {
+    value = 0;
+}
+
+int main() {
+    int x = 100;
+    std::cout << "x vor dem Reset: " << x << std::endl;
+    reset(x);
+    std::cout << "x nach dem Reset: " << x << std::endl;
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
                  <li>
@@ -222,6 +261,35 @@ int main() {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Du benötigst zwei Funktionen: `void print_array(int arr[], int size)` und `void print_array(double arr[], int size)`. Der Funktionskörper mit der `for`-Schleife ist bei beiden fast identisch.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+
+void print_array(int arr[], int size) {
+    std::cout << "Integer Array: ";
+    for (int i = 0; i < size; ++i) {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
+void print_array(double arr[], int size) {
+    std::cout << "Double Array: ";
+    for (int i = 0; i < size; ++i) {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
+int main() {
+    int int_arr[] = {1, 2, 3, 4, 5};
+    double double_arr[] = {1.1, 2.2, 3.3};
+    print_array(int_arr, 5);
+    print_array(double_arr, 3);
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Maximum-Template</strong><br>
@@ -230,6 +298,25 @@ int main() {
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>Die Logik innerhalb der Funktion ist ein einfacher `if (a > b)`-Vergleich. C++ weiß, wie man Zahlen und auch `std::string`s vergleicht.</p>
                     </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+template &lt;class T&gt;
+T get_max(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+int main() {
+    std::cout << "Max von 5 und 10 ist " << get_max(5, 10) << std::endl;
+    std::cout << "Max von 3.14 und 2.71 ist " << get_max(3.14, 2.71) << std::endl;
+    std::string s1 = "Apfel", s2 = "Birne";
+    std::cout << "Max von " << s1 << " und " << s2 << " ist " << get_max(s1, s2) << std::endl;
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                 <li>
                     <strong>Default-Parameter für Begrüßung</strong><br>
@@ -237,6 +324,22 @@ int main() {
                      <details>
                         <summary>Hinweis / Lösungsskizze</summary>
                         <p>`greet("Max");` wird "Hallo Max" ausgeben. `greet("Dr. Schmidt", "Guten Tag");` wird "Guten Tag Dr. Schmidt" ausgeben.</p>
+                    </details>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+void greet(const std::string& name, const std::string& greeting = "Hallo") {
+    std::cout << greeting << " " << name << "!" << std::endl;
+}
+
+int main() {
+    greet("Max");
+    greet("Dr. Schmidt", "Guten Tag");
+    return 0;
+}
+</code></pre>
                     </details>
                 </li>
             </ol>

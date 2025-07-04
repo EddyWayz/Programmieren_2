@@ -155,9 +155,65 @@ int main() {
             <ol>
                 <li>
                     <strong>`vector` vs. `list`:</strong> Erstellen Sie einen `std::vector` und eine `std::list` mit 1 Million Zufallszahlen. Messen Sie die Zeit, die benötigt wird, um 1000 Zahlen in der Mitte des Containers einzufügen. Messen Sie danach die Zeit, um 1000-mal auf ein zufälliges Element zuzugreifen. Vergleichen und erklären Sie die Ergebnisse.
+                    <details>
+                        <summary>Lösung</summary>
+                        <p><strong>Erklärung:</strong> Man wird feststellen, dass das Einfügen in der Mitte einer <strong>`std::list` dramatisch schneller</strong> ist als bei einem `std::vector`. Das liegt daran, dass bei der Liste nur zwei Zeiger umgebogen werden müssen. Beim Vektor müssen alle Elemente rechts von der Einfügeposition um eine Stelle nach hinten verschoben werden, was sehr aufwändig ist.</p>
+                        <p>Umgekehrt ist der <strong>zufällige Zugriff bei einem `std::vector` extrem schnell</strong> (konstante Zeit, O(1)), da die Position direkt berechnet werden kann (`basis_addresse + index * element_groesse`). Bei einer `std::list` muss man vom Anfang oder Ende Element für Element durchhangeln, bis man die gewünschte Position erreicht hat (lineare Zeit, O(n)).</p>
+                    </details>
                 </li>
                 <li>
                     <strong>Telefonbuch mit `map`:</strong> Implementieren Sie ein einfaches Telefonbuch-Programm mit einer `std::map&lt;std::string, std::string&gt;`. Das Programm soll es dem Benutzer ermöglichen, neue Einträge hinzuzufügen, eine Nummer zu einem gegebenen Namen zu suchen und alle Einträge auszugeben.
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+
+void printMenu() {
+    std::cout << "\n--- Telefonbuch ---\n";
+    std::cout << "1. Eintrag hinzufügen\n";
+    std::cout << "2. Nummer suchen\n";
+    std::cout << "3. Alle anzeigen\n";
+    std::cout << "4. Beenden\n";
+    std::cout << "Ihre Wahl: ";
+}
+
+int main() {
+    std::map&lt;std::string, std::string&gt; phonebook;
+    int choice;
+
+    do {
+        printMenu();
+        std::cin >> choice;
+        std::cin.ignore(); // Wichtig, um den Zeilenumbruch aus dem Puffer zu entfernen
+
+        if (choice == 1) {
+            std::string name, number;
+            std::cout << "Name: ";
+            std::getline(std::cin, name);
+            std::cout << "Nummer: ";
+            std::getline(std::cin, number);
+            phonebook[name] = number;
+        } else if (choice == 2) {
+            std::string name;
+            std::cout << "Name zum Suchen: ";
+            std::getline(std::cin, name);
+            if (phonebook.count(name)) {
+                std::cout << "Nummer: " << phonebook[name] << std::endl;
+            } else {
+                std::cout << "Eintrag nicht gefunden.\n";
+            }
+        } else if (choice == 3) {
+            for (const auto& entry : phonebook) {
+                std::cout << entry.first << " -> " << entry.second << std::endl;
+            }
+        }
+    } while (choice != 4);
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
                  <li>
                     <strong>Algorithmen anwenden:</strong> Erstellen Sie einen `std::vector` mit Objekten einer eigenen Klasse (z.B. `Student` mit Name und Matrikelnummer).
@@ -166,6 +222,56 @@ int main() {
                         <li>Verwenden Sie <code>std::find_if</code>, um den ersten Studenten mit einer bestimmten Eigenschaft zu finden.</li>
                         <li>Verwenden Sie <code>std::count_if</code>, um zu zählen, wie viele Studenten eine Bedingung erfüllen (z.B. eine bessere Note als 2.0 haben).</li>
                     </ul>
+                    <details>
+                        <summary>Lösung</summary>
+                        <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;algorithm&gt;
+
+class Student {
+public:
+    std::string name;
+    int matrikelnummer;
+    double note;
+};
+
+int main() {
+    std::vector&lt;Student&gt; students = {
+        {"Anna", 12345, 1.7},
+        {"Bernd", 10001, 2.3},
+        {"Carla", 11223, 1.0}
+    };
+
+    // Nach Matrikelnummer sortieren
+    std::sort(students.begin(), students.end(), 
+        [](const Student& a, const Student& b) {
+            return a.matrikelnummer < b.matrikelnummer;
+        }
+    );
+
+    // Ersten Studenten mit Note 1.0 finden
+    auto it = std::find_if(students.begin(), students.end(),
+        [](const Student& s) {
+            return s.note == 1.0;
+        }
+    );
+    if (it != students.end()) {
+        std::cout << "Student mit Note 1.0 gefunden: " << it->name << std::endl;
+    }
+
+    // Anzahl der Studenten mit Note besser als 2.0 zählen
+    int count = std::count_if(students.begin(), students.end(),
+        [](const Student& s) {
+            return s.note < 2.0;
+        }
+    );
+    std::cout << "Anzahl Studenten mit Note < 2.0: " << count << std::endl;
+
+    return 0;
+}
+</code></pre>
+                    </details>
                 </li>
             </ol>
         </section>
