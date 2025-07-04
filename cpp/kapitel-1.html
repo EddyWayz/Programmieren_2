@@ -90,6 +90,9 @@ int main() {
     return 0;
 }
 </code></pre>
+            <pre class="console-output"><code>Bitte gib deinen Vornamen ein: Bjarne
+Bitte gib dein Alter ein: 74
+Hallo Bjarne, du bist 74 Jahre alt.</code></pre>
 
             <h3>2. Namespaces: Ordnung im globalen Chaos</h3>
             <p>Alle Elemente der C++-Standardbibliothek (wie `cout`, `cin`, `string`) liegen im Namespace `std`. Es gibt drei Wege, sie zu nutzen:</p>
@@ -104,10 +107,15 @@ cout << "Auch eine gute Option."; // std:: wird nicht mehr benötigt
 using namespace std;
 cout << "Bequem, aber birgt die Gefahr von Namenskonflikten.";
 </code></pre>
+            <pre class="console-output"><code>Sicher und eindeutig.
+Auch eine gute Option.
+Bequem, aber birgt die Gefahr von Namenskonflikten.</code></pre>
             
             <h3>3. Referenzen: Die sicherere Alternative zu Zeigern</h3>
             <p>Für "Call by Reference" sind Referenzen in C++ oft die bessere Wahl als Zeiger.</p>
-            <pre><code>// C-Stil mit Zeiger
+            <pre><code>#include &lt;iostream&gt;
+
+// C-Stil mit Zeiger
 void add_one_ptr(int* p_num) {
     if (p_num != NULL) { // Sanity-Check nötig
         (*p_num)++;      // Umständliche Dereferenzierung
@@ -122,27 +130,47 @@ void add_one_ref(int& r_num) { // '&' in der Deklaration macht es zur Referenz
 
 int main() {
     int x = 5;
-    add_one_ptr(&x); // Muss Adresse übergeben
-    add_one_ref(x);  // Übergebe Variable direkt, Syntax wie bei Call by Value
+    std::cout << "x am Anfang: " << x << std::endl;
+    add_one_ptr(&x);
+    std::cout << "x nach add_one_ptr: " << x << std::endl;
+    add_one_ref(x);
+    std::cout << "x nach add_one_ref: " << x << std::endl;
 }
 </code></pre>
+            <pre class="console-output"><code>x am Anfang: 5
+x nach add_one_ptr: 6
+x nach add_one_ref: 7</code></pre>
 
             <h3>4. Flexiblere Funktionen</h3>
             <p><strong>Überladung:</strong> Derselbe Funktionsname für unterschiedliche Datentypen.</p>
-            <pre><code>void print(int val) { std::cout << "Integer: " << val << std::endl; }
+            <pre><code>#include &lt;iostream&gt;
+
+void print(int val) { std::cout << "Integer: " << val << std::endl; }
 void print(double val) { std::cout << "Double: " << val << std::endl; }
-// Der Compiler wählt automatisch die richtige Funktion.
-print(10);    // Ruft die int-Version auf
-print(3.14);  // Ruft die double-Version auf
+
+int main() {
+    print(10);    // Ruft die int-Version auf
+    print(3.14);  // Ruft die double-Version auf
+}
 </code></pre>
+            <pre class="console-output"><code>Integer: 10
+Double: 3.14</code></pre>
             <p><strong>Default-Werte:</strong> Parameter am Ende können optionale Werte erhalten.</p>
-            <pre><code>// Der Parameter 'prefix' hat einen Default-Wert
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+// Der Parameter 'prefix' hat einen Default-Wert
 void log(const std::string& message, const std::string& prefix = "LOG: ") {
     std::cout << prefix << message << std::endl;
 }
-log("Programm gestartet.");       // Gibt "LOG: Programm gestartet." aus
-log("Fehler!", "ERROR: ");     // Gibt "ERROR: Fehler!" aus
+
+int main() {
+    log("Programm gestartet.");       // Gibt "LOG: Programm gestartet." aus
+    log("Fehler!", "ERROR: ");     // Gibt "ERROR: Fehler!" aus
+}
 </code></pre>
+            <pre class="console-output"><code>LOG: Programm gestartet.
+ERROR: Fehler!</code></pre>
         </section>
 
         <section>
@@ -166,6 +194,8 @@ int main() {
     return 0;
 }
 </code></pre>
+            <pre class="console-output"><code>Flaeche Kreis (Radius 5): 78.5397
+Flaeche Rechteck (4x5): 20</code></pre>
 
             <h2>Beispielprogramm 2: Generischer Tausch mit Templates</h2>
             <p>Dieses Beispiel zeigt ein Funktionstemplate, das zwei Variablen beliebigen Typs mittels Referenzen vertauschen kann, und demonstriert die sicherere `std::string`-Klasse.</p>
@@ -194,6 +224,10 @@ int main() {
     return 0;
 }
 </code></pre>
+            <pre class="console-output"><code>Vorher: x=10, y=20
+Nachher: x=20, y=10
+Vorher: s1=Hello, s2=World
+Nachher: s1=World, s2=Hello</code></pre>
         </section>
 
         <section>

@@ -95,12 +95,22 @@ int main() {
     // Ausgabe zeigt, dass der Destruktor aufgerufen wurde.
 }
 </code></pre>
+            <pre class="console-output"><code>MyData erstellt
+Arbeite...
+MyData zerstoert</code></pre>
 
             <h3>2. Geteilten Besitz mit `std::shared_ptr` modellieren</h3>
             <p>Wenn mehrere Teile des Codes die Verantwortung für ein Objekt teilen müssen, ist `shared_ptr` die richtige Wahl. Er wird mit `std::make_shared` erzeugt.</p>
             <pre><code class="language-cpp">#include &lt;memory&gt;
 #include &lt;vector&gt;
 #include &lt;iostream&gt;
+
+class MyData {
+public:
+    MyData() { std::cout << "MyData erstellt\n"; }
+    ~MyData() { std::cout << "MyData zerstoert\n"; }
+    void doWork() { std::cout << "Arbeite...\n"; }
+};
 
 void processData(std::shared_ptr&lt;MyData&gt; p) {
     std::cout << "Use count in function: " << p.use_count() << std::endl;
@@ -121,6 +131,13 @@ int main() {
     std::cout << "Use count before main ends: " << p1.use_count() << std::endl; // = 1
 } // p1 wird hier zerstört, Zähler sinkt auf 0, MyData-Objekt wird gelöscht.
 </code></pre>
+            <pre class="console-output"><code>MyData erstellt
+Use count after creation: 1
+Use count after copy: 2
+Use count in function: 3
+Arbeite...
+Use count before main ends: 1
+MyData zerstoert</code></pre>
             
             <h3>3. Lambda-Ausdrücke mit STL-Algorithmen verwenden</h3>
             <p>Lambdas vereinfachen die Nutzung von Algorithmen, die ein "Callable" (etwas Aufrufbares) als Argument erwarten.</p>
@@ -145,6 +162,7 @@ int main() {
     std::cout << "Anzahl gerader Zahlen: " << even_count << std::endl;
 }
 </code></pre>
+            <pre class="console-output"><code>Anzahl gerader Zahlen: 4</code></pre>
         </section>
 
         <section>

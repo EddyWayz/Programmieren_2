@@ -69,65 +69,89 @@ MyClass operator++(int); // Postfix obj++</code></pre>
             
             <h3>1. Binären Operator als Member-Funktion überladen (z.B. `+`)</h3>
             <p>Der linke Operand ist <code>*this</code>, der rechte wird als Parameter übergeben. Das Ergebnis wird typischerweise als neues Objekt zurückgegeben.</p>
-            <pre><code class="language-cpp">class Complex {
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class Complex {
 private:
     double real, imag;
 public:
-    Complex(double r, double i) : real(r), imag(i) {}
+    Complex(double r = 0, double i = 0) : real(r), imag(i) {}
 
-    // this->real + rhs.real
     Complex operator+(const Complex& rhs) const {
-        // Gibt ein neues Complex-Objekt zurück, das die Summe ist
         return Complex(this->real + rhs.real, this->imag + rhs.imag);
     }
+    void print() const { std::cout << "(" << real << ", " << imag << "i)\n"; }
 };
 
-// Anwendung
-Complex c1(1, 2), c2(3, 4);
-Complex c3 = c1 + c2; // Ruft c1.operator+(c2) auf
+int main() {
+    Complex c1(1, 2), c2(3, 4);
+    Complex c3 = c1 + c2; // Ruft c1.operator+(c2) auf
+    c3.print();
+}
 </code></pre>
+            <pre class="console-output"><code>(4, 6i)</code></pre>
 
             <h3>2. Vergleichsoperator als Member-Funktion überladen (z.B. `==`)</h3>
             <p>Gibt typischerweise einen <code>bool</code>-Wert zurück.</p>
-            <pre><code class="language-cpp">class Complex {
-    // ...
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+
+class Complex {
+public:
+    double real, imag;
+    Complex(double r = 0, double i = 0) : real(r), imag(i) {}
     bool operator==(const Complex& rhs) const {
-        return (this->real == rhs.real) && (this->imag == rhs.imag);
+        const double epsilon = 1e-9;
+        return (std::fabs(this->real - rhs.real) < epsilon) && 
+               (std::fabs(this->imag - rhs.imag) < epsilon);
     }
 };
 
-// Anwendung
-if (c1 == c2) { /* ... */ } // Ruft c1.operator==(c2) auf
+int main() {
+    Complex c1(1, 2), c2(1, 2), c3(1, 3);
+    std::cout << std::boolalpha; // bool als true/false ausgeben
+    std::cout << "c1 == c2: " << (c1 == c2) << std::endl;
+    std::cout << "c1 == c3: " << (c1 == c3) << std::endl;
+}
 </code></pre>
+            <pre class="console-output"><code>c1 == c2: true
+c1 == c3: false</code></pre>
 
             <h3>3. Stream-Operator `<<` als freie `friend`-Funktion überladen</h3>
             <p>Dies ist der Standardweg, um Objekte auf `std::cout` auszugeben. Die Funktion muss eine Referenz auf den `ostream` zurückgeben, um Verkettungen (<code>cout << a << b;</code>) zu ermöglichen.</p>
             <pre><code class="language-cpp">#include &lt;iostream&gt;
 
 class Complex {
-    // ...
-    // Deklariert die externe Funktion als Freund, damit sie auf private Member zugreifen kann
+private:
+    double real, imag;
+public:
+    Complex(double r = 0, double i = 0) : real(r), imag(i) {}
     friend std::ostream& operator&lt;&lt;(std::ostream& os, const Complex& c);
 };
 
-// Implementierung als freie Funktion
 std::ostream& operator&lt;&lt;(std::ostream& os, const Complex& c) {
     os << "(" << c.real << ", " << c.imag << "i)";
     return os;
 }
 
-// Anwendung
-Complex c(5, -2);
-std::cout << "Die komplexe Zahl ist: " << c << std::endl;
+int main() {
+    Complex c(5, -2);
+    std::cout << "Die komplexe Zahl ist: " << c << std::endl;
+}
 </code></pre>
+            <pre class="console-output"><code>Die komplexe Zahl ist: (5, -2i)</code></pre>
 
              <h3>4. Präfix- und Postfix-Operatoren überladen</h3>
             <p>Die Präfix-Version gibt eine Referenz auf das modifizierte Objekt zurück. Die Postfix-Version muss den alten Zustand sichern, das Objekt verändern und dann den alten Zustand als Kopie zurückgeben.</p>
-             <pre><code class="language-cpp">class Counter {
+             <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class Counter {
 private:
     int value_;
 public:
-    // ...
+    Counter(int v = 0) : value_(v) {}
+    int getValue() const { return value_; }
+
     // Präfix: Zuerst erhöhen, dann zurückgeben
     Counter& operator++() {
         ++value_;
@@ -141,7 +165,23 @@ public:
         return temp; // Gibt die Kopie zurück
     }
 };
+
+int main() {
+    Counter c1(10);
+    std::cout << "Startwert c1: " << c1.getValue() << std::endl;
+    Counter c2 = ++c1; // Präfix
+    std::cout << "Nach ++c1: c1=" << c1.getValue() << ", c2=" << c2.getValue() << std::endl;
+
+    Counter c3(20);
+    std::cout << "Startwert c3: " << c3.getValue() << std::endl;
+    Counter c4 = c3++; // Postfix
+    std::cout << "Nach c3++: c3=" << c3.getValue() << ", c4=" << c4.getValue() << std::endl;
+}
 </code></pre>
+             <pre class="console-output"><code>Startwert c1: 10
+Nach ++c1: c1=11, c2=11
+Startwert c3: 20
+Nach c3++: c3=21, c4=20</code></pre>
         </section>
         
         <section>
@@ -198,7 +238,7 @@ bool operator!=(const Vector2D& rhs) const;
 bool Vector2D::operator==(const Vector2D& rhs) const {
     // Vorsicht bei double-Vergleichen, eine Toleranz ist oft besser
     const double epsilon = 1e-9;
-    return std::fabs(x - rhs.x) < epsilon && std::fabs(y - rhs.y) < epsilon;
+    return std::fabs(x - rhs.x) < epsilon && std::fabs(y - rhs) < epsilon;
 }
 
 bool Vector2D::operator!=(const Vector2D& rhs) const {

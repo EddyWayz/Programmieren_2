@@ -74,7 +74,9 @@
             
             <h3>1. Polymorphismus ermöglichen: `virtual`</h3>
             <p>Um die dynamische Bindung zu aktivieren, muss die Methode in der Basisklasse als <code>virtual</code> gekennzeichnet sein. Alle abgeleiteten Klassen, die diese Methode neu implementieren, überschreiben sie dann.</p>
-            <pre><code class="language-cpp">class Tier {
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class Tier {
 public:
     // virtual aktiviert den Polymorphismus für diese Funktion
     virtual void lautGeben() const { 
@@ -95,21 +97,35 @@ public:
 
             <h3>2. Polymorphie anwenden</h3>
             <p>Polymorphismus funktioniert nur über <strong>Zeiger oder Referenzen</strong> auf die Basisklasse.</p>
-            <pre><code class="language-cpp">Tier* pTier1 = new Hund();
-Tier* pTier2 = new Katze(); // Angenommen, Katze existiert auch
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
 
-pTier1->lautGeben(); // Gibt "Wuff!" aus
-pTier2->lautGeben(); // Gibt "Miau!" aus
+// Annahme: Klassen Tier, Hund und Katze sind wie oben definiert
+class Katze : public Tier {
+public:
+    void lautGeben() const override {
+        std::cout << "Miau!" << std::endl;
+    }
+};
 
-// Wichtig: Speicher freigeben!
-delete pTier1; 
-delete pTier2;
+int main() {
+    std::unique_ptr&lt;Tier&gt; pTier1 = std::make_unique&lt;Hund&gt;();
+    std::unique_ptr&lt;Tier&gt; pTier2 = std::make_unique&lt;Katze&gt;();
+
+    pTier1->lautGeben();
+    pTier2->lautGeben();
+}
 </code></pre>
-            <p>Ohne <code>virtual</code> in `Tier::lautGeben()` würden beide Aufrufe die Methode der Basisklasse (`Tier`) ausführen, da die Entscheidung statisch zur Compile-Zeit getroffen würde.</p>
+            <pre class="console-output"><code>Wuff!
+Miau!</code></pre>
+            <p>Ohne <code>virtual</code> in `Tier::lautGeben()` würden beide Aufrufe die Methode der Basisklasse (`Tier`) ausführen, da die Entscheidung statisch zur Compile-Zeit getroffen w��rde.</p>
             
             <h3>3. Abstrakte Klassen als "Verträge" nutzen</h3>
             <p>Oft will man gar kein Objekt der Basisklasse (z.B. `Form`) erstellen, sondern sie nur als Schablone ("Interface") nutzen. Dies erreicht man durch rein virtuelle Funktionen.</p>
-            <pre><code class="language-cpp">// Eine abstrakte Klasse "Form"
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+// Eine abstrakte Klasse "Form"
 class Form {
 public:
     // Rein virtuelle Funktion: Jede konkrete Form MUSS dies implementieren.
@@ -131,11 +147,11 @@ public:
 
 int main() {
     // Form f; // FEHLER: Form ist eine abstrakte Klasse.
-    Form* pForm = new Kreis(10.0); // OK
+    std::unique_ptr&lt;Form&gt; pForm = std::make_unique&lt;Kreis&gt;(10.0);
     std::cout << "Flaeche: " << pForm->berechneFlaeche() << std::endl;
-    delete pForm;
 }
 </code></pre>
+            <pre class="console-output"><code>Flaeche: 314.159</code></pre>
         </section>
 
         <section>
@@ -248,7 +264,7 @@ int main() {
                         <pre><code>class Base { public: ~Base() { std::cout << "Base Dtor\n"; } };
 class Derived : public Base; {
 private: int* data;
-public:
+public: 
     Derived() { data = new int[100]; std::cout << "Derived Ctor\n"; }
     ~Derived() { delete[] data; std::cout << "Derived Dtor\n"; }
 };
@@ -281,7 +297,8 @@ void makeItMove(Bird& b) {
 int main() {
     Duck donald;
     makeItMove(donald); // OK! Eine Ente IST ein Vogel.
-}</code></pre>
+}
+</code></pre>
                         <p>Das funktioniert, weil `Duck` eine "ist-ein"-Beziehung zu `Bird` hat. `Duck` erbt die öffentliche Schnittstelle von `Bird` (die `move`-Methode). Die Funktion `makeItMove` kann sich darauf verlassen, dass jedes `Bird`-Objekt (und damit auch jedes `Duck`-Objekt) eine `move`-Methode hat. Dies wird als <strong>Upcasting</strong> bezeichnet und ist immer sicher.</p>
                         <p><strong>Der umgekehrte Weg funktioniert nicht:</strong></p>
                         <pre><code>void makeItSwim(Duck& d) { /* ... */ }

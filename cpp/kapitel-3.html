@@ -137,22 +137,35 @@ std::ostream& operator<<(std::ostream& os, const Complex& c) {
         <section>
              <h2>5. Beispielprogramm 1: Komplexe Zahlen addieren</h2>
              <p>Wir erweitern die `Complex`-Klasse aus dem letzten Kapitel um einen überladenen `+`-Operator, um `z3 = z1 + z2;` zu ermöglichen.</p>
-            <pre><code>// In Complex.h (innerhalb der Klassendeklaration)
-public:
-    Complex operator+(const Complex& other) const;
+            <pre><code>// In Complex.h (innerhalb der Klassendefinition)
+#include &lt;iostream&gt;
+
+namespace MyMath {
+    class Complex {
+    public:
+        double f64Real_, f64Img_;
+        Complex(double r, double i) : f64Real_(r), f64Img_(i) {}
+        void vPrint() const { std::cout << f64Real_ << " + j(" << f64Img_ << ")" << std::endl; }
+        Complex operator+(const Complex& other) const;
+    };
+}
 
 // In Complex.cpp
-Complex Complex::operator+(const Complex& other) const {
+MyMath::Complex MyMath::Complex::operator+(const MyMath::Complex& other) const {
     // Erzeuge ein neues Complex-Objekt mit den summierten Werten
     return Complex(this->f64Real_ + other.f64Real_, this->f64Img_ + other.f64Img_);
 }
 
 // In main.cpp
-MyMath::Complex z1(3.0, 4.0);
-MyMath::Complex z2(1.0, -2.0);
-MyMath::Complex z3 = z1 + z2; // Ruft z1.operator+(z2) auf
-z3.vPrint(); // Gibt "4 + j(2)" aus
+int main() {
+    MyMath::Complex z1(3.0, 4.0);
+    MyMath::Complex z2(1.0, -2.0);
+    MyMath::Complex z3 = z1 + z2; // Ruft z1.operator+(z2) auf
+    std::cout << "z1 + z2 = ";
+    z3.vPrint(); 
+}
 </code></pre>
+            <pre class="console-output"><code>z1 + z2 = 4 + j(2)</code></pre>
         </section>
 
         <section>
@@ -177,7 +190,7 @@ z3.vPrint(); // Gibt "4 + j(2)" aus
                         <p><strong>Complex.cpp (Implementierung als freie Funktion)</strong></p>
                         <pre><code>#include &lt;iostream&gt; // Nötig für std::ostream
 
-std::ostream& operator<<(std::ostream& os, const Complex& c) {
+std::ostream& operator<<(std::ostream& os, const MyMath::Complex& c) {
     os << c.f64Real_ << " + j(" << c.f64Img_ << ")";
     return os;
 }</code></pre>

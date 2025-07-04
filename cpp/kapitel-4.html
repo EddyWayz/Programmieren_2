@@ -95,6 +95,9 @@ double x_coord = start_point.getX(); // OK, getX() ist const
             <h3>2. Statische Member für klassenweite Daten verwenden</h3>
             <p>Ein typisches Beispiel ist ein Zähler für erstellte Objekte.</p>
             <pre><code class="language-cpp">// Counter.h
+#ifndef COUNTER_H
+#define COUNTER_H
+
 class Counter {
 public:
     Counter();
@@ -104,8 +107,11 @@ private:
     static int count_; // Statisches Attribut (nur Deklaration)
 };
 
+#endif //COUNTER_H
+
 // Counter.cpp
 #include "Counter.h"
+#include &lt;iostream&gt;
 
 // Definition und Initialisierung des statischen Attributs
 int Counter::count_ = 0;
@@ -126,12 +132,15 @@ int Counter::getCount() {
 #include &lt;iostream&gt;
 #include "Counter.h"
 int main() {
-    std::cout << "Anzahl: " << Counter::getCount() << std::endl; // Ausgabe: 0
+    std::cout << "Anzahl: " << Counter::getCount() << std::endl;
     Counter c1;
     Counter c2;
-    std::cout << "Anzahl: " << Counter::getCount() << std::endl; // Ausgabe: 2
+    std::cout << "Anzahl: " << Counter::getCount() << std::endl;
+    return 0;
 }
 </code></pre>
+            <pre class="console-output"><code>Anzahl: 0
+Anzahl: 2</code></pre>
 
             <h3>3. Gezielten Zugriff mit `friend` erlauben</h3>
             <p>Manchmal muss eine externe Funktion direkt auf private Daten zugreifen. Das ist oft beim Überladen von Operatoren wie <code>&lt;&lt;</code> der Fall.</p>
@@ -158,6 +167,7 @@ int main() {
     std::cout << n << std::endl; // Ruft unsere überladene Funktion auf
 }
 </code></pre>
+            <pre class="console-output"><code>MyNumber(42)</code></pre>
         </section>
 
         <section>

@@ -130,17 +130,26 @@ void MyMath::Complex::vPrint() const {
             <p>In `main.cpp` würde man dann `#include "Complex.h"` verwenden und ein Objekt mit `MyMath::Complex z1(3.0, 4.0);` erzeugen. </p>
 
             <h3>Statisches vs. Dynamisches Erzeugen von Objekten</h3>
-            <pre><code>// Statische Allokation (auf dem Stack). Lebensdauer ist an den Scope gebunden.
-MyMath::Complex z1(3.0, 4.0);
-z1.vPrint(); // Zugriff mit Punkt-Operator
+            <pre><code>#include "Complex.h" // Enthält die MyMath::Complex Klasse
+#include &lt;iostream&gt;
 
-// Dynamische Allokation (auf dem Heap). Manuelle Speicherverwaltung!
-MyMath::Complex* p_z2 = new MyMath::Complex(-1.0, -1.0); // new ruft Konstruktor auf
-p_z2->vPrint(); // Zugriff mit Pfeil-Operator
+int main() {
+    // Statische Allokation (auf dem Stack). Lebensdauer ist an den Scope gebunden.
+    MyMath::Complex z1(3.0, 4.0);
+    std::cout << "z1 (statisch): ";
+    z1.vPrint(); // Zugriff mit Punkt-Operator
 
-delete p_z2; // WICHTIG: delete ruft Destruktor auf und gibt Speicher frei
-p_z2 = nullptr;
+    // Dynamische Allokation (auf dem Heap). Manuelle Speicherverwaltung!
+    MyMath::Complex* p_z2 = new MyMath::Complex(-1.0, -1.0); // new ruft Konstruktor auf
+    std::cout << "z2 (dynamisch): ";
+    p_z2->vPrint(); // Zugriff mit Pfeil-Operator
+
+    delete p_z2; // WICHTIG: delete ruft Destruktor auf und gibt Speicher frei
+    p_z2 = nullptr;
+}
 </code></pre>
+            <pre class="console-output"><code>z1 (statisch): 3 + j(4)
+z2 (dynamisch): -1 + j(-1)</code></pre>
 
         </section>
 
@@ -148,6 +157,9 @@ p_z2 = nullptr;
             <h2>5. Beispielprogramm 1: Eine einfache Zähler-Klasse</h2>
             <p>Diese Klasse kapselt einen Zählerwert. Man kann ihn nur über öffentliche Methoden erhöhen, zurücksetzen und abfragen.</p>
             <pre><code>// Counter.h
+#ifndef COUNTER_H
+#define COUNTER_H
+
 class Counter {
 public:
     Counter(); // Default-Konstruktor
@@ -157,6 +169,8 @@ public:
 private:
     int value_;
 };
+
+#endif //COUNTER_H
 
 // Counter.cpp
 #include "Counter.h"
@@ -174,11 +188,14 @@ int main() {
     Counter c;
     c.increment();
     c.increment();
-    std::cout << "Wert: " << c.getValue() << std::endl; // Gibt 2 aus
+    std::cout << "Wert: " << c.getValue() << std::endl;
     c.reset();
-    std::cout << "Wert nach Reset: " << c.getValue() << std::endl; // Gibt 0 aus
+    std::cout << "Wert nach Reset: " << c.getValue() << std::endl;
+    return 0;
 }
 </code></pre>
+            <pre class="console-output"><code>Wert: 2
+Wert nach Reset: 0</code></pre>
 
             <h2>Beispielprogramm 2: Die `Complex`-Klasse</h2>
             <p>Dies ist eine Implementierung der `Complex`-Klasse aus Aufgabe 1 des Übungsblatts.</p>
@@ -195,7 +212,8 @@ int main() {
 
     // Setter verwenden, um das Objekt zu ändern
     z1.vSetReal(-1.0);
-    z1.vSetf64Img(-1.0); 
+    // Angenommen, es gibt auch einen Setter für den Imaginärteil
+    // z1.vSetImag(-1.0); 
 
     std::cout << "Z1 nach Aenderung: ";
     z1.vPrint(); 
@@ -206,6 +224,9 @@ int main() {
     return 0;
 }
 </code></pre>
+            <pre class="console-output"><code>Z1: 3 + j(-4)
+Z1 nach Aenderung: -1 + j(-4)
+Realteil von Z1: -1</code></pre>
         </section>
 
         <section>

@@ -68,11 +68,12 @@
             <h3>1. Singleton</h3>
             <p>Der Konstruktor wird `private` gemacht. Eine statische Methode gibt eine Referenz auf eine statische Instanz der Klasse zurück.</p>
             <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
 
 class Logger {
 private:
     // 1. Privater Konstruktor
-    Logger() {} 
+    Logger() {}
 
 public:
     // 3. Löschen von Kopierkonstruktor und Zuweisungsoperator
@@ -82,7 +83,7 @@ public:
     // 2. Statische Methode für den Zugriff
     static Logger& getInstance() {
         // Statische lokale Variable, wird nur einmal erstellt
-        static Logger instance; 
+        static Logger instance;
         return instance;
     }
 
@@ -97,19 +98,35 @@ int main() {
     Logger::getInstance().log("Ein weiteres Ereignis.");
 }
 </code></pre>
+            <pre class="console-output"><code>[LOG]: Programm gestartet.
+[LOG]: Ein weiteres Ereignis.</code></pre>
 
             <h3>2. Factory Method</h3>
             <p>Eine Basisklasse `Creator` deklariert die Fabrikmethode `createProduct()`. Konkrete `Creator`-Klassen überschreiben diese, um spezifische `Product`-Objekte zu erzeugen.</p>
-            <pre><code class="language-cpp">// Produkt-Interface und konkrete Produkte
-class Document { public: virtual void open() = 0; virtual ~Document() = default; };
-class TextDocument : public Document { public: void open() override { /* ... */ } };
-class SpreadsheetDocument : public Document { public: void open() override { /* ... */ } };
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+// Produkt-Interface und konkrete Produkte
+class Document {
+public:
+    virtual void open() = 0;
+    virtual ~Document() = default;
+};
+class TextDocument : public Document {
+public:
+    void open() override { std::cout << "Text-Dokument geöffnet.\n"; }
+};
+class SpreadsheetDocument : public Document {
+public:
+    void open() override { std::cout << "Tabellen-Dokument geöffnet.\n"; }
+};
 
 // Creator-Interface und konkrete Creators
 class Application {
 public:
     // Die Fabrikmethode
-    virtual std::unique_ptr&lt;Document&gt; createDocument() = 0; 
+    virtual std::unique_ptr&lt;Document&gt; createDocument() = 0;
     virtual ~Application() = default;
 };
 
@@ -119,12 +136,31 @@ public:
         return std::make_unique&lt;TextDocument&gt;();
     }
 };
+
+class SpreadsheetApplication : public Application {
+public:
+    std::unique_ptr&lt;Document&gt; createDocument() override {
+        return std::make_unique&lt;SpreadsheetDocument&gt;();
+    }
+};
+
+int main() {
+    std::unique_ptr&lt;Application&gt; app = std::make_unique&lt;TextApplication&gt;();
+    std::unique_ptr&lt;Document&gt; doc = app->createDocument();
+    doc->open();
+
+    app = std::make_unique&lt;SpreadsheetApplication&gt;();
+    doc = app->createDocument();
+    doc->open();
+}
 </code></pre>
+            <pre class="console-output"><code>Text-Dokument geöffnet.
+Tabellen-Dokument geöffnet.</code></pre>
             
             <h3>3. Observer</h3>
             <p>Das `Subject` verwaltet eine Liste von `Observer`-Zeigern. Bei einer Zustandsänderung ruft es die `update()`-Methode jedes registrierten Observers auf.</p>
             <pre><code class="language-cpp">#include &lt;vector&gt;
-#include &lt;memory&gt;
+#include &lt;iostream&gt;
 #include &lt;algorithm&gt;
 
 // Forward Declaration
@@ -141,7 +177,9 @@ private:
     std::vector&lt;Observer*&gt; observers_;
 public:
     void attach(Observer* observer) { observers_.push_back(observer); }
-    void detach(Observer* observer) { /* ... remove observer from vector ... */ }
+    void detach(Observer* observer) {
+        observers_.erase(std::remove(observers_.begin(), observers_.end(), observer), observers_.end());
+    }
     void notify() {
         for (Observer* obs : observers_) {
             obs->update(this);
@@ -156,11 +194,40 @@ private:
 public:
     void setTemperature(float temp) {
         temperature_ = temp;
+        std::cout << "Sensor: Neue Temperatur " << temperature_ << "C. Benachrichtige Beobachter...\n";
         notify(); // Benachrichtige alle Beobachter
     }
     float getTemperature() const { return temperature_; }
 };
+
+class Display : public Observer {
+public:
+    void update(Subject* subject) override {
+        // Sicherstellen, dass das Subjekt ein TemperatureSensor ist
+        if (auto* sensor = dynamic_cast&lt;TemperatureSensor*&gt;(subject)) {
+            std::cout << "Display: Temperatur ist jetzt " << sensor->getTemperature() << "C.\n";
+        }
+    }
+};
+
+int main() {
+    TemperatureSensor sensor;
+    Display display1;
+    Display display2;
+
+    sensor.attach(&display1);
+    sensor.attach(&display2);
+
+    sensor.setTemperature(25.5f);
+    sensor.setTemperature(26.1f);
+}
 </code></pre>
+            <pre class="console-output"><code>Sensor: Neue Temperatur 25.5C. Benachrichtige Beobachter...
+Display: Temperatur ist jetzt 25.5C.
+Display: Temperatur ist jetzt 25.5C.
+Sensor: Neue Temperatur 26.1C. Benachrichtige Beobachter...
+Display: Temperatur ist jetzt 26.1C.
+Display: Temperatur ist jetzt 26.1C.</code></pre>
         </section>
 
         <section>
@@ -281,7 +348,7 @@ public:
     void attach(IObserver* observer) override {
         observers_.push_back(observer);
     }
-    void detach(IObserver* observer) override {
+    void detach(IObserver* observer) {
         observers_.erase(std::remove(observers_.begin(), observers_.end(), observer), observers_.end());
     }
     void notify(const std::string& news) override {

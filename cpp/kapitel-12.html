@@ -98,12 +98,16 @@ int main() {
     std::cout << "Programm wird normal fortgesetzt." << std::endl;
 }
 </code></pre>
+            <pre class="console-output"><code>Eine Ausnahme wurde abgefangen: Fehler: Division durch Null!
+Programm wird normal fortgesetzt.</code></pre>
 
             <h3>2. Sicheres Downcasting mit `dynamic_cast`</h3>
             <p>Wir haben einen Zeiger auf die Basisklasse `Shape` und wollen sicher prüfen, ob er *tatsächlich* auf ein `Circle`-Objekt zeigt, um eine `Circle`-spezifische Methode aufzurufen.</p>
-            <pre><code class="language-cpp">class Shape { public: virtual ~Shape() = default; /* ... */ };
-class Circle : public Shape { public: void roll() { /* ... */ } };
-class Rectangle : public Shape { /* ... */ };
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+class Shape { public: virtual ~Shape() = default; };
+class Circle : public Shape { public: void roll() { std::cout << "Kreis rollt.\n"; } };
+class Rectangle : public Shape { };
 
 void processShape(Shape* shape) {
     // Sicher prüfen, ob shape auf ein Circle-Objekt zeigt
@@ -117,7 +121,16 @@ void processShape(Shape* shape) {
         std::cout << "Dies ist kein Kreis und kann nicht rollen." << std::endl;
     }
 }
+
+int main() {
+    Circle c;
+    Rectangle r;
+    processShape(&c);
+    processShape(&r);
+}
 </code></pre>
+            <pre class="console-output"><code>Kreis rollt.
+Dies ist kein Kreis und kann nicht rollen.</code></pre>
             
             <h3>3. Namensräume zur Strukturierung</h3>
             <p>Wir definieren eigene Bibliotheken in getrennten Namensräumen, um Kollisionen zu vermeiden.</p>
@@ -137,6 +150,7 @@ namespace GraphicsLib {
 int main() {
     // Voll qualifizierter Zugriff
     double sum = MathLib::add(5.0, 3.0);
+    std::cout << "Summe: " << sum << std::endl;
     std::cout << "PI: " << MathLib::PI << std::endl;
     std::cout << "Graphics Version: " << GraphicsLib::VERSION << std::endl;
 
@@ -145,6 +159,10 @@ int main() {
     std::cout << "PI mit using: " << PI << std::endl;
 }
 </code></pre>
+            <pre class="console-output"><code>Summe: 8
+PI: 3.14159
+Graphics Version: 2
+PI mit using: 3.14159</code></pre>
         </section>
 
         <section>

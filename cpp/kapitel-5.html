@@ -70,6 +70,8 @@
             <h3>1. Eine Klasse ableiten</h3>
             <p>Die Syntax zur Ableitung einer Klasse verwendet einen Doppelpunkt nach dem Namen der abgeleiteten Klasse, gefolgt vom Zugriffsspezifizierer für die Vererbung und dem Namen der Basisklasse.</p>
             <pre><code class="language-cpp">// Basisklasse "Fahrzeug"
+#include &lt;iostream&gt;
+
 class Fahrzeug {
 protected: // protected, damit abgeleitete Klassen darauf zugreifen können
     int anzahlRaeder;
@@ -163,8 +165,12 @@ int main() {
     m.printInfo();
     return 0;
 }
-// Konsolenausgabe zeigt die Konstruktor/Destruktor-Reihenfolge
 </code></pre>
+            <pre class="console-output"><code>Mitarbeiter-Konstruktor fuer Max Mustermann
+Manager-Konstruktor fuer Max Mustermann
+ID: 101, Name: Max Mustermann, Bonus: 5000 EUR
+Manager-Destruktor fuer Max Mustermann
+Mitarbeiter-Destruktor fuer Max Mustermann</code></pre>
         </section>
 
         <section>

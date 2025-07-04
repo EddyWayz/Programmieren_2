@@ -94,6 +94,8 @@ int main() {
     std::cout << "x: " << x << ", y: " << y << std::endl;
 }
 </code></pre>
+            <pre class="console-output"><code>i: 10, j: 5
+x: 2.71, y: 3.14</code></pre>
 
             <h3>2. Ein Klassen-Template erstellen</h3>
             <p>Analog zu Funktions-Templates wird die Klassendefinition mit <code>template &lt;...&gt;</code> eingeleitet. Wichtig: Bei der Definition von Methoden außerhalb der Klassendeklaration muss die Template-Signatur wiederholt werden.</p>
@@ -126,6 +128,7 @@ T1 Pair&lt;T1, T2&gt;::getFirst() const {
             <h3>3. Ein Klassen-Template verwenden</h3>
             <p>Bei der Instanziierung eines Klassen-Templates müssen die konkreten Typen in spitzen Klammern angegeben werden.</p>
             <pre><code class="language-cpp">#include "Pair.h"
+#include &lt;iostream&gt;
 #include &lt;string&gt;
 
 int main() {
@@ -139,6 +142,8 @@ int main() {
     std::cout << p2.getFirst() << std::endl;
 }
 </code></pre>
+            <pre class="console-output"><code>1
+Test</code></pre>
             <p><strong>Wichtiger Hinweis:</strong> Die Implementierung von Templates (sowohl Deklaration als auch Definition) gehört in der Regel komplett in die Header-Datei. Da der Compiler zur Instanziierung den gesamten Code der Schablone benötigt, würde ein traditionelles Trennen in .h und .cpp zu Linker-Fehlern führen.</p>
         </section>
 
